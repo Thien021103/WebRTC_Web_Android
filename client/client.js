@@ -116,7 +116,7 @@ function createPeerConnection() {
         document.getElementById('media').style.display = 'block';
         const video = document.getElementById('remote-video');
         video.srcObject = manualStream;
-        if(receivedOffer){
+        if(currentState === "Active"){
             console.log('Playing stream', manualStream);
             video.play();
         }

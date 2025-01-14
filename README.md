@@ -1,4 +1,3 @@
-![WebRTC in Jetpack Compose-1200x630](https://user-images.githubusercontent.com/24237865/211961074-8e01056c-a820-468b-bdca-3ab2570f783a.jpg)
 
 <h1 align="center">WebRTC in Jetpack Compose</h1></br>
 
@@ -107,3 +106,30 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
+
+
+
+# I. Clone từ link Github:
+
+# II. Chạy signaling server:
+- Trên 1 máy trong mạng LAN, vào thư mục `/signaling-server` 
+- Chạy:
+  - `npm install`
+  - `npm start`
+
+# III. Chạy web client:
+- Trên 1 máy trong mạng LAN, vào thư mục `/client` 
+- Vào file `/client/client.js`, sửa địa chỉ IP trong dòng lệnh dưới đây về địa chỉ IP của máy chạy signaling server:
+```
+const websocket = new WebSocket('ws://127.0.0.1:8000/');
+```
+- Chạy: `python -m http.server --bind 127.0.0.1 8080`
+- Vào `http://127.0.0.1:8080/` trên browser
+
+# IV. Chạy chương trình Android:
+- Vào Android Studio, mở thư mục `/webrtc-android`
+- Sửa địa chỉ IP trong file `local.properties`, ở lệnh dưới đây về địa chỉ IP của máy chạy signaling server:
+```
+SIGNALING_SERVER_IP_ADDRESS="ws://192.168.1.123:8000"
+```
+- Cài đặt và chạy chương trình trên điện thoại. Bấm vào `Ready to start session`
