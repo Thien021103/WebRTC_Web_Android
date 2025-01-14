@@ -18,11 +18,19 @@ package io.getstream.webrtc.sample.compose
 
 import android.Manifest
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,6 +38,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import io.getstream.webrtc.sample.compose.ui.screens.stage.StageScreen
 import io.getstream.webrtc.sample.compose.ui.screens.video.VideoCallScreen
 import io.getstream.webrtc.sample.compose.ui.theme.WebrtcSampleComposeTheme
@@ -45,27 +54,62 @@ class MainActivity : ComponentActivity() {
 
     requestPermissions(arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO), 0)
 
-    val sessionManager: WebRtcSessionManager = WebRtcSessionManagerImpl(
-      context = this,
-      signalingClient = SignalingClient(),
-      peerConnectionFactory = StreamPeerConnectionFactory(this)
-    )
-
     setContent {
       WebrtcSampleComposeTheme {
-        CompositionLocalProvider(LocalWebRtcSessionManager provides sessionManager) {
-          // A surface container using the 'background' color from the theme
-          Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colors.background
+        Surface(
+          modifier = Modifier.fillMaxSize(),
+          color = MaterialTheme.colors.background
+        ) {
+          // UI Layout for IP input and call screen
+          Column(
+            modifier = Modifier
+              .fillMaxSize()
+              .padding(16.dp),
+            verticalArrangement = Arrangement.Center
           ) {
-            var onCallScreen by remember { mutableStateOf(false) }
-            val state by sessionManager.signalingClient.sessionStateFlow.collectAsState()
+            // Initialize with default values null (will be updated after user input)
+            var signalingServerIp by remember { mutableStateOf("") }
+            var startedSignalling by remember { mutableStateOf(false) }
+            var sessionManager by remember { mutableStateOf<WebRtcSessionManager?>(null) }
 
-            if (!onCallScreen) {
-              StageScreen(state = state) { onCallScreen = true }
-            } else {
-              VideoCallScreen()
+            TextField(
+              value = signalingServerIp,
+              onValueChange = { signalingServerIp = it },
+              label = { Text("Signaling Server IP, do not enter wrong!") },
+              modifier = Modifier.fillMaxWidth()
+            )
+
+            Button(
+              onClick = {
+                try {
+                  // Initialize sessionManager with the user-provided IP
+                  sessionManager = WebRtcSessionManagerImpl(
+                    context = this@MainActivity,
+                    signalingClient = SignalingClient(signalingServerIp),
+                    peerConnectionFactory = StreamPeerConnectionFactory(this@MainActivity)
+                  )
+                  // Allow StageScreen and VideoCallScreen
+                  startedSignalling = true
+                } catch(e: Exception) {
+                  // Handle any exceptions and notify the user
+                  Toast.makeText(this@MainActivity, "Error starting signaling: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+              },
+              modifier = Modifier.fillMaxWidth()
+            ) {
+              Text("Start Signalling")
+            }
+            if(startedSignalling) {
+              CompositionLocalProvider(LocalWebRtcSessionManager provides sessionManager!!) {
+                var onCallScreen by remember { mutableStateOf(false) }
+                val state by sessionManager!!.signalingClient.sessionStateFlow.collectAsState()
+
+                if (!onCallScreen) {
+                  StageScreen(state = state) { onCallScreen = true }
+                } else {
+                  VideoCallScreen()
+                }
+              }
             }
           }
         }
