@@ -22,8 +22,12 @@
 #define RSA_KEY_LENGTH 1024
 #endif
 
+#ifndef CONFIG_DTLS_USE_ECDSA
+#define CONFIG_DTLS_USE_ECDSA 0
+#endif
+
 #ifndef CONFIG_USE_USRSCTP
-#define CONFIG_USE_USRSCTP 0
+#define CONFIG_USE_USRSCTP 1
 #endif
 
 #ifndef CONFIG_VIDEO_BUFFER_SIZE
@@ -50,8 +54,18 @@
 #define CONFIG_HTTP_BUFFER_SIZE 4096
 #endif
 
-#define AUDIO_LATENCY 20  // ms
-#define KEEPALIVE_CONNCHECK 10000
+#ifndef CONFIG_TLS_READ_TIMEOUT
+#define CONFIG_TLS_READ_TIMEOUT 3000
+#endif
+
+#ifndef CONFIG_KEEPALIVE_TIMEOUT
+#define CONFIG_KEEPALIVE_TIMEOUT 10000
+#endif
+
+#ifndef CONFIG_AUDIO_DURATION
+#define CONFIG_AUDIO_DURATION 20
+#endif
+
 #define CONFIG_IPV6 0
 // empty will use first active interface
 #define CONFIG_IFACE_PREFIX ""

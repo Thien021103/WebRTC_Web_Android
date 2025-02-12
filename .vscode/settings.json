@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "*.html": "html",
+        "agent.h": "c",
+        "peer.h": "c",
+        "ports.h": "c",
+        "ssl.h": "c",
+        "address.h": "c",
+        "utils.h": "c"
+    }
+}
