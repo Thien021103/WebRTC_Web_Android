@@ -1,0 +1,7 @@
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/dist/include/cjson/cJSON.h
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/dist/lib/pkgconfig/libcjson.pc
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/dist/lib/libcjson.a
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/dist/lib/cmake/cJSON/cjson.cmake
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/dist/lib/cmake/cJSON/cjson-noconfig.cmake
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/dist/lib/cmake/cJSON/cJSONConfig.cmake
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/dist/lib/cmake/cJSON/cJSONConfigVersion.cmake

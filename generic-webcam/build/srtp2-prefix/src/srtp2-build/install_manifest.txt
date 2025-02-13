@@ -1,0 +1,5 @@
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/dist/lib/libsrtp2.a
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/dist/include/srtp2/srtp.h
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/dist/include/srtp2/auth.h
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/dist/include/srtp2/cipher.h
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/dist/include/srtp2/crypto_types.h

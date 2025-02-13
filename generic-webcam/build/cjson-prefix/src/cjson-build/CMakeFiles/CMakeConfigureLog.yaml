@@ -1,0 +1,1192 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineSystem.cmake:233 (message)"
+      - "CMakeLists.txt:4 (project)"
+    message: |
+      The system is: Linux - 6.8.0-51-generic - x86_64
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCCompiler.cmake:123 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:4 (project)"
+    message: |
+      Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+      Compiler: /usr/bin/cc 
+      Build flags: -fPIC
+      Id flags:  
+      
+      The output was:
+      0
+      
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.out"
+      
+      The C compiler identification is GNU, found in:
+        /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/3.28.3/CompilerIdC/a.out
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerABI.cmake:57 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:4 (project)"
+    checks:
+      - "Detecting C compiler ABI info"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-PpivKU"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-PpivKU"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\""
+    buildResult:
+      variable: "CMAKE_C_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-PpivKU'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_ebead/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-PpivKU'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_ebead.dir/build.make CMakeFiles/cmTC_ebead.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-PpivKU'
+        Building C object CMakeFiles/cmTC_ebead.dir/CMakeCCompilerABI.c.o
+        /usr/bin/cc   "-fPIC"    -v -o CMakeFiles/cmTC_ebead.dir/CMakeCCompilerABI.c.o -c /usr/share/cmake-3.28/Modules/CMakeCCompilerABI.c
+        Using built-in specs.
+        COLLECT_GCC=/usr/bin/cc
+        OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa
+        OFFLOAD_TARGET_DEFAULT=1
+        Target: x86_64-linux-gnu
+        Configured with: ../src/configure -v --with-pkgversion='Ubuntu 13.3.0-6ubuntu2~24.04' --with-bugurl=file:///usr/share/doc/gcc-13/README.Bugs --enable-languages=c,ada,c++,go,d,fortran,objc,obj-c++,m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-13 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/libexec --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-libstdcxx-backtrace --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --disable-werror --enable-cet --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-nvptx/usr,amdgcn-amdhsa=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-gcn/usr --enable-offload-defaulted --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu --with-build-config=bootstrap-lto-lean --enable-link-serialization=2
+        Thread model: posix
+        Supported LTO compression algorithms: zlib zstd
+        gcc version 13.3.0 (Ubuntu 13.3.0-6ubuntu2~24.04) 
+        COLLECT_GCC_OPTIONS='-fPIC' '-v' '-o' 'CMakeFiles/cmTC_ebead.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_ebead.dir/'
+         /usr/libexec/gcc/x86_64-linux-gnu/13/cc1 -quiet -v -imultiarch x86_64-linux-gnu /usr/share/cmake-3.28/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_ebead.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mtune=generic -march=x86-64 -version -fPIC -fasynchronous-unwind-tables -fstack-protector-strong -Wformat -Wformat-security -fstack-clash-protection -fcf-protection -o /tmp/ccoqmUcx.s
+        GNU C17 (Ubuntu 13.3.0-6ubuntu2~24.04) version 13.3.0 (x86_64-linux-gnu)
+        	compiled by GNU C version 13.3.0, GMP version 6.3.0, MPFR version 4.2.1, MPC version 1.3.1, isl version isl-0.26-GMP
+        
+        GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+        ignoring nonexistent directory "/usr/local/include/x86_64-linux-gnu"
+        ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/13/include-fixed/x86_64-linux-gnu"
+        ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/13/include-fixed"
+        ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/13/../../../../x86_64-linux-gnu/include"
+        #include "..." search starts here:
+        #include <...> search starts here:
+         /usr/lib/gcc/x86_64-linux-gnu/13/include
+         /usr/local/include
+         /usr/include/x86_64-linux-gnu
+         /usr/include
+        End of search list.
+        Compiler executable checksum: 38987c28e967c64056a6454abdef726e
+        COLLECT_GCC_OPTIONS='-fPIC' '-v' '-o' 'CMakeFiles/cmTC_ebead.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_ebead.dir/'
+         as -v --64 -o CMakeFiles/cmTC_ebead.dir/CMakeCCompilerABI.c.o /tmp/ccoqmUcx.s
+        GNU assembler version 2.42 (x86_64-linux-gnu) using BFD version (GNU Binutils for Ubuntu) 2.42
+        COMPILER_PATH=/usr/libexec/gcc/x86_64-linux-gnu/13/:/usr/libexec/gcc/x86_64-linux-gnu/13/:/usr/libexec/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/13/:/usr/lib/gcc/x86_64-linux-gnu/
+        LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/13/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../:/lib/:/usr/lib/
+        COLLECT_GCC_OPTIONS='-fPIC' '-v' '-o' 'CMakeFiles/cmTC_ebead.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_ebead.dir/CMakeCCompilerABI.c.'
+        Linking C executable cmTC_ebead
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ebead.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC"   -v -rdynamic CMakeFiles/cmTC_ebead.dir/CMakeCCompilerABI.c.o -o cmTC_ebead 
+        Using built-in specs.
+        COLLECT_GCC=/usr/bin/cc
+        COLLECT_LTO_WRAPPER=/usr/libexec/gcc/x86_64-linux-gnu/13/lto-wrapper
+        OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa
+        OFFLOAD_TARGET_DEFAULT=1
+        Target: x86_64-linux-gnu
+        Configured with: ../src/configure -v --with-pkgversion='Ubuntu 13.3.0-6ubuntu2~24.04' --with-bugurl=file:///usr/share/doc/gcc-13/README.Bugs --enable-languages=c,ada,c++,go,d,fortran,objc,obj-c++,m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-13 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/libexec --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-libstdcxx-backtrace --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --disable-werror --enable-cet --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-nvptx/usr,amdgcn-amdhsa=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-gcn/usr --enable-offload-defaulted --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu --with-build-config=bootstrap-lto-lean --enable-link-serialization=2
+        Thread model: posix
+        Supported LTO compression algorithms: zlib zstd
+        gcc version 13.3.0 (Ubuntu 13.3.0-6ubuntu2~24.04) 
+        COMPILER_PATH=/usr/libexec/gcc/x86_64-linux-gnu/13/:/usr/libexec/gcc/x86_64-linux-gnu/13/:/usr/libexec/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/13/:/usr/lib/gcc/x86_64-linux-gnu/
+        LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/13/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../:/lib/:/usr/lib/
+        COLLECT_GCC_OPTIONS='-fPIC' '-v' '-rdynamic' '-o' 'cmTC_ebead' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_ebead.'
+         /usr/libexec/gcc/x86_64-linux-gnu/13/collect2 -plugin /usr/libexec/gcc/x86_64-linux-gnu/13/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-linux-gnu/13/lto-wrapper -plugin-opt=-fresolution=/tmp/cctshH0s.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_ebead /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/13 -L/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/13/../../.. CMakeFiles/cmTC_ebead.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
+        COLLECT_GCC_OPTIONS='-fPIC' '-v' '-rdynamic' '-o' 'cmTC_ebead' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_ebead.'
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-PpivKU'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-PpivKU'
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerABI.cmake:127 (message)"
+      - "/usr/share/cmake-3.28/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:4 (project)"
+    message: |
+      Parsed C implicit include dir info: rv=done
+        found start of include info
+        found start of implicit include info
+          add: [/usr/lib/gcc/x86_64-linux-gnu/13/include]
+          add: [/usr/local/include]
+          add: [/usr/include/x86_64-linux-gnu]
+          add: [/usr/include]
+        end of search list found
+        collapse include dir [/usr/lib/gcc/x86_64-linux-gnu/13/include] ==> [/usr/lib/gcc/x86_64-linux-gnu/13/include]
+        collapse include dir [/usr/local/include] ==> [/usr/local/include]
+        collapse include dir [/usr/include/x86_64-linux-gnu] ==> [/usr/include/x86_64-linux-gnu]
+        collapse include dir [/usr/include] ==> [/usr/include]
+        implicit include dirs: [/usr/lib/gcc/x86_64-linux-gnu/13/include;/usr/local/include;/usr/include/x86_64-linux-gnu;/usr/include]
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerABI.cmake:159 (message)"
+      - "/usr/share/cmake-3.28/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:4 (project)"
+    message: |
+      Parsed C implicit link information:
+        link line regex: [^( *|.*[/\\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        ignore line: [Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-PpivKU']
+        ignore line: []
+        ignore line: [Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_ebead/fast]
+        ignore line: [gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-PpivKU']
+        ignore line: [/usr/bin/gmake  -f CMakeFiles/cmTC_ebead.dir/build.make CMakeFiles/cmTC_ebead.dir/build]
+        ignore line: [gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-PpivKU']
+        ignore line: [Building C object CMakeFiles/cmTC_ebead.dir/CMakeCCompilerABI.c.o]
+        ignore line: [/usr/bin/cc   "-fPIC"    -v -o CMakeFiles/cmTC_ebead.dir/CMakeCCompilerABI.c.o -c /usr/share/cmake-3.28/Modules/CMakeCCompilerABI.c]
+        ignore line: [Using built-in specs.]
+        ignore line: [COLLECT_GCC=/usr/bin/cc]
+        ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa]
+        ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+        ignore line: [Target: x86_64-linux-gnu]
+        ignore line: [Configured with: ../src/configure -v --with-pkgversion='Ubuntu 13.3.0-6ubuntu2~24.04' --with-bugurl=file:///usr/share/doc/gcc-13/README.Bugs --enable-languages=c ada c++ go d fortran objc obj-c++ m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-13 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/libexec --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-libstdcxx-backtrace --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --disable-werror --enable-cet --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32 m64 mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-nvptx/usr amdgcn-amdhsa=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-gcn/usr --enable-offload-defaulted --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu --with-build-config=bootstrap-lto-lean --enable-link-serialization=2]
+        ignore line: [Thread model: posix]
+        ignore line: [Supported LTO compression algorithms: zlib zstd]
+        ignore line: [gcc version 13.3.0 (Ubuntu 13.3.0-6ubuntu2~24.04) ]
+        ignore line: [COLLECT_GCC_OPTIONS='-fPIC' '-v' '-o' 'CMakeFiles/cmTC_ebead.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_ebead.dir/']
+        ignore line: [ /usr/libexec/gcc/x86_64-linux-gnu/13/cc1 -quiet -v -imultiarch x86_64-linux-gnu /usr/share/cmake-3.28/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_ebead.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mtune=generic -march=x86-64 -version -fPIC -fasynchronous-unwind-tables -fstack-protector-strong -Wformat -Wformat-security -fstack-clash-protection -fcf-protection -o /tmp/ccoqmUcx.s]
+        ignore line: [GNU C17 (Ubuntu 13.3.0-6ubuntu2~24.04) version 13.3.0 (x86_64-linux-gnu)]
+        ignore line: [	compiled by GNU C version 13.3.0  GMP version 6.3.0  MPFR version 4.2.1  MPC version 1.3.1  isl version isl-0.26-GMP]
+        ignore line: []
+        ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+        ignore line: [ignoring nonexistent directory "/usr/local/include/x86_64-linux-gnu"]
+        ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/13/include-fixed/x86_64-linux-gnu"]
+        ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/13/include-fixed"]
+        ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/13/../../../../x86_64-linux-gnu/include"]
+        ignore line: [#include "..." search starts here:]
+        ignore line: [#include <...> search starts here:]
+        ignore line: [ /usr/lib/gcc/x86_64-linux-gnu/13/include]
+        ignore line: [ /usr/local/include]
+        ignore line: [ /usr/include/x86_64-linux-gnu]
+        ignore line: [ /usr/include]
+        ignore line: [End of search list.]
+        ignore line: [Compiler executable checksum: 38987c28e967c64056a6454abdef726e]
+        ignore line: [COLLECT_GCC_OPTIONS='-fPIC' '-v' '-o' 'CMakeFiles/cmTC_ebead.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_ebead.dir/']
+        ignore line: [ as -v --64 -o CMakeFiles/cmTC_ebead.dir/CMakeCCompilerABI.c.o /tmp/ccoqmUcx.s]
+        ignore line: [GNU assembler version 2.42 (x86_64-linux-gnu) using BFD version (GNU Binutils for Ubuntu) 2.42]
+        ignore line: [COMPILER_PATH=/usr/libexec/gcc/x86_64-linux-gnu/13/:/usr/libexec/gcc/x86_64-linux-gnu/13/:/usr/libexec/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/13/:/usr/lib/gcc/x86_64-linux-gnu/]
+        ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/13/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../:/lib/:/usr/lib/]
+        ignore line: [COLLECT_GCC_OPTIONS='-fPIC' '-v' '-o' 'CMakeFiles/cmTC_ebead.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_ebead.dir/CMakeCCompilerABI.c.']
+        ignore line: [Linking C executable cmTC_ebead]
+        ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ebead.dir/link.txt --verbose=1]
+        ignore line: [/usr/bin/cc "-fPIC"   -v -rdynamic CMakeFiles/cmTC_ebead.dir/CMakeCCompilerABI.c.o -o cmTC_ebead ]
+        ignore line: [Using built-in specs.]
+        ignore line: [COLLECT_GCC=/usr/bin/cc]
+        ignore line: [COLLECT_LTO_WRAPPER=/usr/libexec/gcc/x86_64-linux-gnu/13/lto-wrapper]
+        ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa]
+        ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+        ignore line: [Target: x86_64-linux-gnu]
+        ignore line: [Configured with: ../src/configure -v --with-pkgversion='Ubuntu 13.3.0-6ubuntu2~24.04' --with-bugurl=file:///usr/share/doc/gcc-13/README.Bugs --enable-languages=c ada c++ go d fortran objc obj-c++ m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-13 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/libexec --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-libstdcxx-backtrace --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --disable-werror --enable-cet --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32 m64 mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-nvptx/usr amdgcn-amdhsa=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-gcn/usr --enable-offload-defaulted --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu --with-build-config=bootstrap-lto-lean --enable-link-serialization=2]
+        ignore line: [Thread model: posix]
+        ignore line: [Supported LTO compression algorithms: zlib zstd]
+        ignore line: [gcc version 13.3.0 (Ubuntu 13.3.0-6ubuntu2~24.04) ]
+        ignore line: [COMPILER_PATH=/usr/libexec/gcc/x86_64-linux-gnu/13/:/usr/libexec/gcc/x86_64-linux-gnu/13/:/usr/libexec/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/13/:/usr/lib/gcc/x86_64-linux-gnu/]
+        ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/13/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../:/lib/:/usr/lib/]
+        ignore line: [COLLECT_GCC_OPTIONS='-fPIC' '-v' '-rdynamic' '-o' 'cmTC_ebead' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_ebead.']
+        link line: [ /usr/libexec/gcc/x86_64-linux-gnu/13/collect2 -plugin /usr/libexec/gcc/x86_64-linux-gnu/13/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-linux-gnu/13/lto-wrapper -plugin-opt=-fresolution=/tmp/cctshH0s.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_ebead /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/13 -L/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/13/../../.. CMakeFiles/cmTC_ebead.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o]
+          arg [/usr/libexec/gcc/x86_64-linux-gnu/13/collect2] ==> ignore
+          arg [-plugin] ==> ignore
+          arg [/usr/libexec/gcc/x86_64-linux-gnu/13/liblto_plugin.so] ==> ignore
+          arg [-plugin-opt=/usr/libexec/gcc/x86_64-linux-gnu/13/lto-wrapper] ==> ignore
+          arg [-plugin-opt=-fresolution=/tmp/cctshH0s.res] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+          arg [-plugin-opt=-pass-through=-lc] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+          arg [--build-id] ==> ignore
+          arg [--eh-frame-hdr] ==> ignore
+          arg [-m] ==> ignore
+          arg [elf_x86_64] ==> ignore
+          arg [--hash-style=gnu] ==> ignore
+          arg [--as-needed] ==> ignore
+          arg [-export-dynamic] ==> ignore
+          arg [-dynamic-linker] ==> ignore
+          arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+          arg [-pie] ==> ignore
+          arg [-znow] ==> ignore
+          arg [-zrelro] ==> ignore
+          arg [-o] ==> ignore
+          arg [cmTC_ebead] ==> ignore
+          arg [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o]
+          arg [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o]
+          arg [/usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o]
+          arg [-L/usr/lib/gcc/x86_64-linux-gnu/13] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/13]
+          arg [-L/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu]
+          arg [-L/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib]
+          arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
+          arg [-L/lib/../lib] ==> dir [/lib/../lib]
+          arg [-L/usr/lib/x86_64-linux-gnu] ==> dir [/usr/lib/x86_64-linux-gnu]
+          arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
+          arg [-L/usr/lib/gcc/x86_64-linux-gnu/13/../../..] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/13/../../..]
+          arg [CMakeFiles/cmTC_ebead.dir/CMakeCCompilerABI.c.o] ==> ignore
+          arg [-lgcc] ==> lib [gcc]
+          arg [--push-state] ==> ignore
+          arg [--as-needed] ==> ignore
+          arg [-lgcc_s] ==> lib [gcc_s]
+          arg [--pop-state] ==> ignore
+          arg [-lc] ==> lib [c]
+          arg [-lgcc] ==> lib [gcc]
+          arg [--push-state] ==> ignore
+          arg [--as-needed] ==> ignore
+          arg [-lgcc_s] ==> lib [gcc_s]
+          arg [--pop-state] ==> ignore
+          arg [/usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o]
+          arg [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o]
+        collapse obj [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o] ==> [/usr/lib/x86_64-linux-gnu/Scrt1.o]
+        collapse obj [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o] ==> [/usr/lib/x86_64-linux-gnu/crti.o]
+        collapse obj [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o] ==> [/usr/lib/x86_64-linux-gnu/crtn.o]
+        collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/13] ==> [/usr/lib/gcc/x86_64-linux-gnu/13]
+        collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+        collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib] ==> [/usr/lib]
+        collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
+        collapse library dir [/lib/../lib] ==> [/lib]
+        collapse library dir [/usr/lib/x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+        collapse library dir [/usr/lib/../lib] ==> [/usr/lib]
+        collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/13/../../..] ==> [/usr/lib]
+        implicit libs: [gcc;gcc_s;c;gcc;gcc_s]
+        implicit objs: [/usr/lib/x86_64-linux-gnu/Scrt1.o;/usr/lib/x86_64-linux-gnu/crti.o;/usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o;/usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o;/usr/lib/x86_64-linux-gnu/crtn.o]
+        implicit dirs: [/usr/lib/gcc/x86_64-linux-gnu/13;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib]
+        implicit fwks: []
+      
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_stdc89"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-cqvqDI"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-cqvqDI"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\""
+    buildResult:
+      variable: "FLAG_SUPPORTED_stdc89"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-cqvqDI'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_71321/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-cqvqDI'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_71321.dir/build.make CMakeFiles/cmTC_71321.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-cqvqDI'
+        Building C object CMakeFiles/cmTC_71321.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_stdc89  "-fPIC"    -std=c89 -o CMakeFiles/cmTC_71321.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-cqvqDI/src.c
+        Linking C executable cmTC_71321
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_71321.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC"  -rdynamic CMakeFiles/cmTC_71321.dir/src.c.o -o cmTC_71321 
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-cqvqDI'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-cqvqDI'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_pedantic"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-hQk5ch"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-hQk5ch"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89"
+    buildResult:
+      variable: "FLAG_SUPPORTED_pedantic"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-hQk5ch'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_6118d/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-hQk5ch'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_6118d.dir/build.make CMakeFiles/cmTC_6118d.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-hQk5ch'
+        Building C object CMakeFiles/cmTC_6118d.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_pedantic  "-fPIC" -std=c89    -pedantic -o CMakeFiles/cmTC_6118d.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-hQk5ch/src.c
+        Linking C executable cmTC_6118d
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6118d.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC" -std=c89  -rdynamic CMakeFiles/cmTC_6118d.dir/src.c.o -o cmTC_6118d 
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-hQk5ch'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-hQk5ch'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_Wall"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-xLdWzU"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-xLdWzU"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic"
+    buildResult:
+      variable: "FLAG_SUPPORTED_Wall"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-xLdWzU'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_bf582/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-xLdWzU'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_bf582.dir/build.make CMakeFiles/cmTC_bf582.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-xLdWzU'
+        Building C object CMakeFiles/cmTC_bf582.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_Wall  "-fPIC" -std=c89 -pedantic    -Wall -o CMakeFiles/cmTC_bf582.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-xLdWzU/src.c
+        Linking C executable cmTC_bf582
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bf582.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC" -std=c89 -pedantic  -rdynamic CMakeFiles/cmTC_bf582.dir/src.c.o -o cmTC_bf582 
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-xLdWzU'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-xLdWzU'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_Wextra"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-sb8GBg"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-sb8GBg"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic -Wall"
+    buildResult:
+      variable: "FLAG_SUPPORTED_Wextra"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-sb8GBg'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_be73a/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-sb8GBg'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_be73a.dir/build.make CMakeFiles/cmTC_be73a.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-sb8GBg'
+        Building C object CMakeFiles/cmTC_be73a.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_Wextra  "-fPIC" -std=c89 -pedantic -Wall    -Wextra -o CMakeFiles/cmTC_be73a.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-sb8GBg/src.c
+        Linking C executable cmTC_be73a
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_be73a.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC" -std=c89 -pedantic -Wall  -rdynamic CMakeFiles/cmTC_be73a.dir/src.c.o -o cmTC_be73a 
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-sb8GBg'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-sb8GBg'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_Werror"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-RhA31i"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-RhA31i"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic -Wall -Wextra"
+    buildResult:
+      variable: "FLAG_SUPPORTED_Werror"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-RhA31i'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_80d0a/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-RhA31i'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_80d0a.dir/build.make CMakeFiles/cmTC_80d0a.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-RhA31i'
+        Building C object CMakeFiles/cmTC_80d0a.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_Werror  "-fPIC" -std=c89 -pedantic -Wall -Wextra    -Werror -o CMakeFiles/cmTC_80d0a.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-RhA31i/src.c
+        Linking C executable cmTC_80d0a
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_80d0a.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC" -std=c89 -pedantic -Wall -Wextra  -rdynamic CMakeFiles/cmTC_80d0a.dir/src.c.o -o cmTC_80d0a 
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-RhA31i'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-RhA31i'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_Wstrictprototypes"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-ihpCWk"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-ihpCWk"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic -Wall -Wextra -Werror"
+    buildResult:
+      variable: "FLAG_SUPPORTED_Wstrictprototypes"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-ihpCWk'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_0f317/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-ihpCWk'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_0f317.dir/build.make CMakeFiles/cmTC_0f317.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-ihpCWk'
+        Building C object CMakeFiles/cmTC_0f317.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_Wstrictprototypes  "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror    -Wstrict-prototypes -o CMakeFiles/cmTC_0f317.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-ihpCWk/src.c
+        Linking C executable cmTC_0f317
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0f317.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror  -rdynamic CMakeFiles/cmTC_0f317.dir/src.c.o -o cmTC_0f317 
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-ihpCWk'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-ihpCWk'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_Wwritestrings"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-NqWSG8"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-NqWSG8"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes"
+    buildResult:
+      variable: "FLAG_SUPPORTED_Wwritestrings"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-NqWSG8'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_2a04c/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-NqWSG8'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_2a04c.dir/build.make CMakeFiles/cmTC_2a04c.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-NqWSG8'
+        Building C object CMakeFiles/cmTC_2a04c.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_Wwritestrings  "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes    -Wwrite-strings -o CMakeFiles/cmTC_2a04c.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-NqWSG8/src.c
+        Linking C executable cmTC_2a04c
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2a04c.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes  -rdynamic CMakeFiles/cmTC_2a04c.dir/src.c.o -o cmTC_2a04c 
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-NqWSG8'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-NqWSG8'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_Wshadow"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-F58t0T"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-F58t0T"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings"
+    buildResult:
+      variable: "FLAG_SUPPORTED_Wshadow"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-F58t0T'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_83cc1/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-F58t0T'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_83cc1.dir/build.make CMakeFiles/cmTC_83cc1.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-F58t0T'
+        Building C object CMakeFiles/cmTC_83cc1.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_Wshadow  "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings    -Wshadow -o CMakeFiles/cmTC_83cc1.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-F58t0T/src.c
+        Linking C executable cmTC_83cc1
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_83cc1.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings  -rdynamic CMakeFiles/cmTC_83cc1.dir/src.c.o -o cmTC_83cc1 
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-F58t0T'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-F58t0T'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_Winitself"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-BoVZcx"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-BoVZcx"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow"
+    buildResult:
+      variable: "FLAG_SUPPORTED_Winitself"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-BoVZcx'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_59555/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-BoVZcx'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_59555.dir/build.make CMakeFiles/cmTC_59555.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-BoVZcx'
+        Building C object CMakeFiles/cmTC_59555.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_Winitself  "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow    -Winit-self -o CMakeFiles/cmTC_59555.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-BoVZcx/src.c
+        Linking C executable cmTC_59555
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_59555.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow  -rdynamic CMakeFiles/cmTC_59555.dir/src.c.o -o cmTC_59555 
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-BoVZcx'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-BoVZcx'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_Wcastalign"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-X56pY5"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-X56pY5"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self"
+    buildResult:
+      variable: "FLAG_SUPPORTED_Wcastalign"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-X56pY5'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_57b46/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-X56pY5'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_57b46.dir/build.make CMakeFiles/cmTC_57b46.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-X56pY5'
+        Building C object CMakeFiles/cmTC_57b46.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_Wcastalign  "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self    -Wcast-align -o CMakeFiles/cmTC_57b46.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-X56pY5/src.c
+        Linking C executable cmTC_57b46
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_57b46.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self  -rdynamic CMakeFiles/cmTC_57b46.dir/src.c.o -o cmTC_57b46 
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-X56pY5'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-X56pY5'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_Wformat2"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-ky8AeA"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-ky8AeA"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align"
+    buildResult:
+      variable: "FLAG_SUPPORTED_Wformat2"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-ky8AeA'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_538ae/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-ky8AeA'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_538ae.dir/build.make CMakeFiles/cmTC_538ae.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-ky8AeA'
+        Building C object CMakeFiles/cmTC_538ae.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_Wformat2  "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align    -Wformat=2 -o CMakeFiles/cmTC_538ae.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-ky8AeA/src.c
+        Linking C executable cmTC_538ae
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_538ae.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align  -rdynamic CMakeFiles/cmTC_538ae.dir/src.c.o -o cmTC_538ae 
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-ky8AeA'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-ky8AeA'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_Wmissingprototypes"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-3N38n8"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-3N38n8"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2"
+    buildResult:
+      variable: "FLAG_SUPPORTED_Wmissingprototypes"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-3N38n8'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_e1ec0/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-3N38n8'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_e1ec0.dir/build.make CMakeFiles/cmTC_e1ec0.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-3N38n8'
+        Building C object CMakeFiles/cmTC_e1ec0.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_Wmissingprototypes  "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2    -Wmissing-prototypes -o CMakeFiles/cmTC_e1ec0.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-3N38n8/src.c
+        Linking C executable cmTC_e1ec0
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e1ec0.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2  -rdynamic CMakeFiles/cmTC_e1ec0.dir/src.c.o -o cmTC_e1ec0 
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-3N38n8'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-3N38n8'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_Wstrictoverflow2"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-cwbpuP"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-cwbpuP"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes"
+    buildResult:
+      variable: "FLAG_SUPPORTED_Wstrictoverflow2"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-cwbpuP'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_ed708/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-cwbpuP'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_ed708.dir/build.make CMakeFiles/cmTC_ed708.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-cwbpuP'
+        Building C object CMakeFiles/cmTC_ed708.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_Wstrictoverflow2  "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes    -Wstrict-overflow=2 -o CMakeFiles/cmTC_ed708.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-cwbpuP/src.c
+        Linking C executable cmTC_ed708
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ed708.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes  -rdynamic CMakeFiles/cmTC_ed708.dir/src.c.o -o cmTC_ed708 
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-cwbpuP'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-cwbpuP'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_Wcastqual"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-mjAW94"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-mjAW94"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2"
+    buildResult:
+      variable: "FLAG_SUPPORTED_Wcastqual"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-mjAW94'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_19411/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-mjAW94'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_19411.dir/build.make CMakeFiles/cmTC_19411.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-mjAW94'
+        Building C object CMakeFiles/cmTC_19411.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_Wcastqual  "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2    -Wcast-qual -o CMakeFiles/cmTC_19411.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-mjAW94/src.c
+        Linking C executable cmTC_19411
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_19411.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2  -rdynamic CMakeFiles/cmTC_19411.dir/src.c.o -o cmTC_19411 
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-mjAW94'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-mjAW94'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_Wundef"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-zi8V5P"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-zi8V5P"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual"
+    buildResult:
+      variable: "FLAG_SUPPORTED_Wundef"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-zi8V5P'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_55835/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-zi8V5P'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_55835.dir/build.make CMakeFiles/cmTC_55835.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-zi8V5P'
+        Building C object CMakeFiles/cmTC_55835.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_Wundef  "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual    -Wundef -o CMakeFiles/cmTC_55835.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-zi8V5P/src.c
+        Linking C executable cmTC_55835
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_55835.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual  -rdynamic CMakeFiles/cmTC_55835.dir/src.c.o -o cmTC_55835 
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-zi8V5P'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-zi8V5P'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_Wswitchdefault"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-33HEYr"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-33HEYr"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef"
+    buildResult:
+      variable: "FLAG_SUPPORTED_Wswitchdefault"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-33HEYr'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_adfac/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-33HEYr'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_adfac.dir/build.make CMakeFiles/cmTC_adfac.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-33HEYr'
+        Building C object CMakeFiles/cmTC_adfac.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_Wswitchdefault  "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef    -Wswitch-default -o CMakeFiles/cmTC_adfac.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-33HEYr/src.c
+        Linking C executable cmTC_adfac
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_adfac.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef  -rdynamic CMakeFiles/cmTC_adfac.dir/src.c.o -o cmTC_adfac 
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-33HEYr'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-33HEYr'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_Wconversion"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-ceqwfK"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-ceqwfK"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default"
+    buildResult:
+      variable: "FLAG_SUPPORTED_Wconversion"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-ceqwfK'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_6e47d/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-ceqwfK'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_6e47d.dir/build.make CMakeFiles/cmTC_6e47d.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-ceqwfK'
+        Building C object CMakeFiles/cmTC_6e47d.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_Wconversion  "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default    -Wconversion -o CMakeFiles/cmTC_6e47d.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-ceqwfK/src.c
+        Linking C executable cmTC_6e47d
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6e47d.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default  -rdynamic CMakeFiles/cmTC_6e47d.dir/src.c.o -o cmTC_6e47d 
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-ceqwfK'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-ceqwfK'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_Wccompat"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-jIDx1c"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-jIDx1c"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion"
+    buildResult:
+      variable: "FLAG_SUPPORTED_Wccompat"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-jIDx1c'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_ff8ef/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-jIDx1c'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_ff8ef.dir/build.make CMakeFiles/cmTC_ff8ef.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-jIDx1c'
+        Building C object CMakeFiles/cmTC_ff8ef.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_Wccompat  "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion    -Wc++-compat -o CMakeFiles/cmTC_ff8ef.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-jIDx1c/src.c
+        Linking C executable cmTC_ff8ef
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ff8ef.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion  -rdynamic CMakeFiles/cmTC_ff8ef.dir/src.c.o -o cmTC_ff8ef 
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-jIDx1c'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-jIDx1c'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_fstackprotectorstrong"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-s8c8qS"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-s8c8qS"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat"
+    buildResult:
+      variable: "FLAG_SUPPORTED_fstackprotectorstrong"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-s8c8qS'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_2d806/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-s8c8qS'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_2d806.dir/build.make CMakeFiles/cmTC_2d806.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-s8c8qS'
+        Building C object CMakeFiles/cmTC_2d806.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_fstackprotectorstrong  "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat    -fstack-protector-strong -o CMakeFiles/cmTC_2d806.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-s8c8qS/src.c
+        Linking C executable cmTC_2d806
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2d806.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat  -rdynamic CMakeFiles/cmTC_2d806.dir/src.c.o -o cmTC_2d806 
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-s8c8qS'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-s8c8qS'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_Wcomma"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-B714Yk"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-B714Yk"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat -fstack-protector-strong"
+    buildResult:
+      variable: "FLAG_SUPPORTED_Wcomma"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-B714Yk'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_5f64d/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-B714Yk'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_5f64d.dir/build.make CMakeFiles/cmTC_5f64d.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-B714Yk'
+        Building C object CMakeFiles/cmTC_5f64d.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_Wcomma  "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat -fstack-protector-strong    -Wcomma -o CMakeFiles/cmTC_5f64d.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-B714Yk/src.c
+        cc: error: unrecognized command-line option '-Wcomma'; did you mean '-Wcomment'?
+        gmake[4]: *** [CMakeFiles/cmTC_5f64d.dir/build.make:78: CMakeFiles/cmTC_5f64d.dir/src.c.o] Error 1
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-B714Yk'
+        gmake[3]: *** [Makefile:127: cmTC_5f64d/fast] Error 2
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-B714Yk'
+        
+      exitCode: 2
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_Wdoublepromotion"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-G1zL5w"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-G1zL5w"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat -fstack-protector-strong"
+    buildResult:
+      variable: "FLAG_SUPPORTED_Wdoublepromotion"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-G1zL5w'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_5d8df/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-G1zL5w'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_5d8df.dir/build.make CMakeFiles/cmTC_5d8df.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-G1zL5w'
+        Building C object CMakeFiles/cmTC_5d8df.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_Wdoublepromotion  "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat -fstack-protector-strong    -Wdouble-promotion -o CMakeFiles/cmTC_5d8df.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-G1zL5w/src.c
+        Linking C executable cmTC_5d8df
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5d8df.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat -fstack-protector-strong  -rdynamic CMakeFiles/cmTC_5d8df.dir/src.c.o -o cmTC_5d8df 
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-G1zL5w'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-G1zL5w'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_Wparentheses"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-VaTv81"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-VaTv81"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat -fstack-protector-strong -Wdouble-promotion"
+    buildResult:
+      variable: "FLAG_SUPPORTED_Wparentheses"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-VaTv81'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_de9cf/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-VaTv81'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_de9cf.dir/build.make CMakeFiles/cmTC_de9cf.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-VaTv81'
+        Building C object CMakeFiles/cmTC_de9cf.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_Wparentheses  "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat -fstack-protector-strong -Wdouble-promotion    -Wparentheses -o CMakeFiles/cmTC_de9cf.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-VaTv81/src.c
+        Linking C executable cmTC_de9cf
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_de9cf.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat -fstack-protector-strong -Wdouble-promotion  -rdynamic CMakeFiles/cmTC_de9cf.dir/src.c.o -o cmTC_de9cf 
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-VaTv81'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-VaTv81'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_Wformatoverflow"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-nPb4ki"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-nPb4ki"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat -fstack-protector-strong -Wdouble-promotion -Wparentheses"
+    buildResult:
+      variable: "FLAG_SUPPORTED_Wformatoverflow"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-nPb4ki'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_9d046/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-nPb4ki'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_9d046.dir/build.make CMakeFiles/cmTC_9d046.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-nPb4ki'
+        Building C object CMakeFiles/cmTC_9d046.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_Wformatoverflow  "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat -fstack-protector-strong -Wdouble-promotion -Wparentheses    -Wformat-overflow -o CMakeFiles/cmTC_9d046.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-nPb4ki/src.c
+        Linking C executable cmTC_9d046
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9d046.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat -fstack-protector-strong -Wdouble-promotion -Wparentheses  -rdynamic CMakeFiles/cmTC_9d046.dir/src.c.o -o cmTC_9d046 
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-nPb4ki'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-nPb4ki'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_Wunusedmacros"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-Sa6y8o"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-Sa6y8o"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat -fstack-protector-strong -Wdouble-promotion -Wparentheses -Wformat-overflow"
+    buildResult:
+      variable: "FLAG_SUPPORTED_Wunusedmacros"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-Sa6y8o'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_16405/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-Sa6y8o'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_16405.dir/build.make CMakeFiles/cmTC_16405.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-Sa6y8o'
+        Building C object CMakeFiles/cmTC_16405.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_Wunusedmacros  "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat -fstack-protector-strong -Wdouble-promotion -Wparentheses -Wformat-overflow    -Wunused-macros -o CMakeFiles/cmTC_16405.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-Sa6y8o/src.c
+        Linking C executable cmTC_16405
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_16405.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat -fstack-protector-strong -Wdouble-promotion -Wparentheses -Wformat-overflow  -rdynamic CMakeFiles/cmTC_16405.dir/src.c.o -o cmTC_16405 
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-Sa6y8o'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-Sa6y8o'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_Wmissingvariabledeclarations"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-6HejUj"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-6HejUj"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat -fstack-protector-strong -Wdouble-promotion -Wparentheses -Wformat-overflow -Wunused-macros"
+    buildResult:
+      variable: "FLAG_SUPPORTED_Wmissingvariabledeclarations"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-6HejUj'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_8d4e7/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-6HejUj'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_8d4e7.dir/build.make CMakeFiles/cmTC_8d4e7.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-6HejUj'
+        Building C object CMakeFiles/cmTC_8d4e7.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_Wmissingvariabledeclarations  "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat -fstack-protector-strong -Wdouble-promotion -Wparentheses -Wformat-overflow -Wunused-macros    -Wmissing-variable-declarations -o CMakeFiles/cmTC_8d4e7.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-6HejUj/src.c
+        cc: error: unrecognized command-line option '-Wmissing-variable-declarations'; did you mean '-Wmissing-declarations'?
+        gmake[4]: *** [CMakeFiles/cmTC_8d4e7.dir/build.make:78: CMakeFiles/cmTC_8d4e7.dir/src.c.o] Error 1
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-6HejUj'
+        gmake[3]: *** [Makefile:127: cmTC_8d4e7/fast] Error 2
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-6HejUj'
+        
+      exitCode: 2
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_Wusedbutmarkedunused"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-6u62gy"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-6u62gy"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat -fstack-protector-strong -Wdouble-promotion -Wparentheses -Wformat-overflow -Wunused-macros"
+    buildResult:
+      variable: "FLAG_SUPPORTED_Wusedbutmarkedunused"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-6u62gy'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_f9844/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-6u62gy'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_f9844.dir/build.make CMakeFiles/cmTC_f9844.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-6u62gy'
+        Building C object CMakeFiles/cmTC_f9844.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_Wusedbutmarkedunused  "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat -fstack-protector-strong -Wdouble-promotion -Wparentheses -Wformat-overflow -Wunused-macros    -Wused-but-marked-unused -o CMakeFiles/cmTC_f9844.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-6u62gy/src.c
+        cc: error: unrecognized command-line option '-Wused-but-marked-unused'
+        gmake[4]: *** [CMakeFiles/cmTC_f9844.dir/build.make:78: CMakeFiles/cmTC_f9844.dir/src.c.o] Error 1
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-6u62gy'
+        gmake[3]: *** [Makefile:127: cmTC_f9844/fast] Error 2
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-6u62gy'
+        
+      exitCode: 2
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_Wswitchenum"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-4hxaDv"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-4hxaDv"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat -fstack-protector-strong -Wdouble-promotion -Wparentheses -Wformat-overflow -Wunused-macros"
+    buildResult:
+      variable: "FLAG_SUPPORTED_Wswitchenum"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-4hxaDv'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_ab72b/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-4hxaDv'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_ab72b.dir/build.make CMakeFiles/cmTC_ab72b.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-4hxaDv'
+        Building C object CMakeFiles/cmTC_ab72b.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_Wswitchenum  "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat -fstack-protector-strong -Wdouble-promotion -Wparentheses -Wformat-overflow -Wunused-macros    -Wswitch-enum -o CMakeFiles/cmTC_ab72b.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-4hxaDv/src.c
+        Linking C executable cmTC_ab72b
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ab72b.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat -fstack-protector-strong -Wdouble-promotion -Wparentheses -Wformat-overflow -Wunused-macros  -rdynamic CMakeFiles/cmTC_ab72b.dir/src.c.o -o cmTC_ab72b 
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-4hxaDv'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-4hxaDv'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:103 (CHECK_C_COMPILER_FLAG)"
+    checks:
+      - "Performing Test FLAG_SUPPORTED_fvisibilityhidden"
+    directories:
+      source: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-JVmeEO"
+      binary: "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-JVmeEO"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "\"-fPIC\" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat -fstack-protector-strong -Wdouble-promotion -Wparentheses -Wformat-overflow -Wunused-macros -Wswitch-enum"
+    buildResult:
+      variable: "FLAG_SUPPORTED_fvisibilityhidden"
+      cached: true
+      stdout: |
+        Change Dir: '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-JVmeEO'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_9813d/fast
+        gmake[3]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-JVmeEO'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_9813d.dir/build.make CMakeFiles/cmTC_9813d.dir/build
+        gmake[4]: Entering directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-JVmeEO'
+        Building C object CMakeFiles/cmTC_9813d.dir/src.c.o
+        /usr/bin/cc -DFLAG_SUPPORTED_fvisibilityhidden  "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat -fstack-protector-strong -Wdouble-promotion -Wparentheses -Wformat-overflow -Wunused-macros -Wswitch-enum    -fvisibility=hidden -o CMakeFiles/cmTC_9813d.dir/src.c.o -c /home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-JVmeEO/src.c
+        Linking C executable cmTC_9813d
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9813d.dir/link.txt --verbose=1
+        /usr/bin/cc "-fPIC" -std=c89 -pedantic -Wall -Wextra -Werror -Wstrict-prototypes -Wwrite-strings -Wshadow -Winit-self -Wcast-align -Wformat=2 -Wmissing-prototypes -Wstrict-overflow=2 -Wcast-qual -Wundef -Wswitch-default -Wconversion -Wc++-compat -fstack-protector-strong -Wdouble-promotion -Wparentheses -Wformat-overflow -Wunused-macros -Wswitch-enum  -rdynamic CMakeFiles/cmTC_9813d.dir/src.c.o -o cmTC_9813d 
+        gmake[4]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-JVmeEO'
+        gmake[3]: Leaving directory '/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-build/CMakeFiles/CMakeScratch/TryCompile-JVmeEO'
+        
+      exitCode: 0
+...

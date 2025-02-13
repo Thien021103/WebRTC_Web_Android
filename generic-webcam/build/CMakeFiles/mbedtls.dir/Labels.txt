@@ -1,0 +1,13 @@
+# Target labels
+ mbedtls
+# Source files and their labels
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/CMakeFiles/mbedtls
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/CMakeFiles/mbedtls.rule
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/CMakeFiles/mbedtls-complete.rule
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/mbedtls-prefix/src/mbedtls-stamp/mbedtls-build.rule
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/mbedtls-prefix/src/mbedtls-stamp/mbedtls-configure.rule
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/mbedtls-prefix/src/mbedtls-stamp/mbedtls-download.rule
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/mbedtls-prefix/src/mbedtls-stamp/mbedtls-install.rule
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/mbedtls-prefix/src/mbedtls-stamp/mbedtls-mkdir.rule
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/mbedtls-prefix/src/mbedtls-stamp/mbedtls-patch.rule
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/mbedtls-prefix/src/mbedtls-stamp/mbedtls-update.rule

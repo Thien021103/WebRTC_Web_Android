@@ -1,0 +1,13 @@
+# Target labels
+ srtp2
+# Source files and their labels
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/CMakeFiles/srtp2
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/CMakeFiles/srtp2.rule
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/CMakeFiles/srtp2-complete.rule
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/srtp2-prefix/src/srtp2-stamp/srtp2-build.rule
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/srtp2-prefix/src/srtp2-stamp/srtp2-configure.rule
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/srtp2-prefix/src/srtp2-stamp/srtp2-download.rule
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/srtp2-prefix/src/srtp2-stamp/srtp2-install.rule
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/srtp2-prefix/src/srtp2-stamp/srtp2-mkdir.rule
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/srtp2-prefix/src/srtp2-stamp/srtp2-patch.rule
+/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/srtp2-prefix/src/srtp2-stamp/srtp2-update.rule

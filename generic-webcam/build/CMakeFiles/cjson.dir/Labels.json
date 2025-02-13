@@ -1,0 +1,43 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/CMakeFiles/cjson"
+		},
+		{
+			"file" : "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/CMakeFiles/cjson.rule"
+		},
+		{
+			"file" : "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/CMakeFiles/cjson-complete.rule"
+		},
+		{
+			"file" : "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-stamp/cjson-build.rule"
+		},
+		{
+			"file" : "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-stamp/cjson-configure.rule"
+		},
+		{
+			"file" : "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-stamp/cjson-download.rule"
+		},
+		{
+			"file" : "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-stamp/cjson-install.rule"
+		},
+		{
+			"file" : "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-stamp/cjson-mkdir.rule"
+		},
+		{
+			"file" : "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-stamp/cjson-patch.rule"
+		},
+		{
+			"file" : "/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/cjson-prefix/src/cjson-stamp/cjson-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"cjson"
+		],
+		"name" : "cjson"
+	}
+}
