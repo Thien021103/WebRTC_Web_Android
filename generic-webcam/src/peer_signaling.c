@@ -262,7 +262,22 @@ static int websocket_write_back(struct lws* wsi_in, char* str, int str_size_in) 
             value++;
             LOGI("Received an answer SDP: %s", value);
             if (state == PEER_CONNECTION_NEW) {
-                peer_connection_set_remote_description(g_ps.pc, sdp);
+                peer_connection_set_remote_description(g_ps.pc, value);
+            }
+        }
+    } else if (strncmp(str, "ICE ", 4) == 0) {
+        const char *value = strchr(str, ' '); // Find the first space
+        if (value) {
+            value++;
+            LOGI("Received an ice candidate: %s", value);
+            if (state == PEER_CONNECTION_NEW) {
+                char converted_candidate[1024];
+                if (strncmp(value, "0$0$candidate", 13) == 0) {
+
+                    snprintf(converted_candidate, sizeof(value)-2, "a=%s", value+4);
+                    LOGI("Candidate: %s", converted_candidate);
+                    agent_set_remote_description(g_ps.pc, value);
+                }
             }
         }
     }
