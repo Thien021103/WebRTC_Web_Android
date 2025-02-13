@@ -243,9 +243,26 @@ static int websocket_write_back(struct lws* wsi_in, char* str, int str_size_in) 
                 LOGI("Offer sent...");
             } else if (strcmp(value, "Ready") == 0) {
                 signaling_state = Ready;
-                LOGI("Ready to start signaling");
+                LOGI("Ready to start signaling, making Offer");
+                if (state == PEER_CONNECTION_CLOSED ||
+                    state == PEER_CONNECTION_NEW    ||
+                    state == PEER_CONNECTION_FAILED ||
+                    state == PEER_CONNECTION_DISCONNECTED) {
+                    g_ps.id = strdup(id); // Save the request ID
+                    peer_connection_create_offer(g_ps.pc);
+                }
             } else if (strcmp(value, "Offline") == 0) {
                 signaling_state = Offline;
+                LOGI("Offline");
+            }
+        }
+    } else if (strncmp(str, "ANSWER ", 7) == 0) {
+        const char *value = strchr(str, ' '); // Find the first space
+        if (value) {
+            value++;
+            LOGI("Received an answer SDP: %s", value);
+            if (state == PEER_CONNECTION_NEW) {
+                peer_connection_set_remote_description(g_ps.pc, sdp);
             }
         }
     }
