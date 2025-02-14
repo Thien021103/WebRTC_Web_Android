@@ -93,7 +93,7 @@ static GstFlowReturn on_video_data(GstElement* sink, void* data) {
     gst_buffer_map(buffer, &info, GST_MAP_READ);
     peer_connection_send_video(g_pc, info.data, info.size);
 
-    //printf(", send frame\n");
+    // printf(", send frame\n");
 
     gst_buffer_unmap(buffer, &info);
     gst_sample_unref(sample);
@@ -126,7 +126,6 @@ static GstFlowReturn on_audio_data(GstElement* sink, void* data) {
 }
 
 static void onremoteaudio(uint8_t* data, size_t size, void *userdata) {
-    g_print("Recv remote audio\n:%d\n",(int)size);
 
     GstBuffer *audio_buffer = gst_buffer_new_and_alloc(size);
     gst_buffer_fill(audio_buffer, 0, data, size);

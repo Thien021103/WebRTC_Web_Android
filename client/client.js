@@ -149,13 +149,15 @@ function createPeerConnection() {
 async function sendMedia(pc) {
     try {
         // Capture audio and video from the user's device
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+        const audiostream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+        const videostream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
         // Add our local video for better viewing
         const localVideo = document.getElementById('local-video');
-        localVideo.srcObject = stream;
+        localVideo.srcObject = videostream;
 
         // Add each track (audio and video) to the PeerConnection
-        stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+        audiostream.getTracks().forEach((track) => pc.addTrack(track, audiostream));
+        videostream.getTracks().forEach((track) => pc.addTrack(track, videostream));
         console.log('Media tracks added:', stream.getTracks());
     } catch (error) {
         console.error('Error accessing media devices:', error);
