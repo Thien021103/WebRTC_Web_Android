@@ -1,1 +1,0 @@
-cmd='/usr/bin/cmake;-DCMAKE_C_FLAGS="-fPIC";-DTEST_APPS=off;-DCMAKE_INSTALL_PREFIX=/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/dist;-DCMAKE_TOOLCHAIN_FILE=;-GUnix Makefiles;-S;<SOURCE_DIR><SOURCE_SUBDIR>;-B;<BINARY_DIR>'

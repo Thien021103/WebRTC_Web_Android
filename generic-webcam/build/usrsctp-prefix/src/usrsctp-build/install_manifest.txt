@@ -1,3 +1,0 @@
-/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/dist/lib/libusrsctp.a
-/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/dist/include/usrsctp.h
-/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/dist/lib/pkgconfig/usrsctp.pc

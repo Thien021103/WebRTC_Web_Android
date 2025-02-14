@@ -1,7 +1,0 @@
-/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/srtp2-prefix/src/srtp2-build/CMakeFiles/srtp2.dir
-/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/srtp2-prefix/src/srtp2-build/CMakeFiles/edit_cache.dir
-/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/srtp2-prefix/src/srtp2-build/CMakeFiles/rebuild_cache.dir
-/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/srtp2-prefix/src/srtp2-build/CMakeFiles/list_install_components.dir
-/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/srtp2-prefix/src/srtp2-build/CMakeFiles/install.dir
-/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/srtp2-prefix/src/srtp2-build/CMakeFiles/install/local.dir
-/home/thien-gay/WebRTC_Web_Android/generic-webcam/build/srtp2-prefix/src/srtp2-build/CMakeFiles/install/strip.dir
