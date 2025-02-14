@@ -34,6 +34,8 @@ add_definitions(${LIBWEBSOCKETS_CFLAGS_OTHER})
 
 target_link_libraries(peer ${DEP_LIBS} ${JSON_GLIB_LIBRARIES} ${LIBWEBSOCKETS_LIBRARIES} ${GST_LIBRARIES})
 
+message(STATUS "DEP_LIBS in src is: ${DEP_LIBS}")
+
 set_target_properties(peer PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
 install(TARGETS peer

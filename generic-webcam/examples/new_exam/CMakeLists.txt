@@ -12,6 +12,10 @@ pkg_check_modules(GST REQUIRED gstreamer-1.0>=1.4 gstreamer-base-1.0>=1.4 gstrea
 # Add include directories
 include_directories(${CMAKE_SOURCE_DIR}/src ${GST_INCLUDE_DIRS})
 
+message(STATUS "CMAKE_SOURCE_DIR in newexam is: ${CMAKE_SOURCE_DIR}")
+message(STATUS "GST_LIBRARY_DIRS in newexam is: ${GST_LIBRARY_DIRS}")
+message(STATUS "GST_LIBRARIES in newexam is: ${GST_LIBRARIES}")
+
 # Add library directories
 link_directories( ${GST_LIBRARY_DIRS})
 
