@@ -149,15 +149,13 @@ function createPeerConnection() {
 async function sendMedia(pc) {
     try {
         // Capture audio and video from the user's device
-        const audiostream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-        const videostream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
         // Add our local video for better viewing
         const localVideo = document.getElementById('local-video');
-        localVideo.srcObject = videostream;
+        localVideo.srcObject = stream;
 
         // Add each track (audio and video) to the PeerConnection
-        audiostream.getTracks().forEach((track) => pc.addTrack(track, audiostream));
-        videostream.getTracks().forEach((track) => pc.addTrack(track, videostream));
+        stream.getTracks().forEach((track) => pc.addTrack(track, stream));
         console.log('Media tracks added:', stream.getTracks());
     } catch (error) {
         console.error('Error accessing media devices:', error);
@@ -169,6 +167,11 @@ async function sendMedia(pc) {
 async function handleStateMessage(state, details) {
     console.log(`State: ${state}, Details: ${details}\nreceivedOffer state: ${receivedOffer}`);
     currentState = state;
+    if(state == "Ready"){
+        const offer = 
+        "OFFER v=0\no=- 1495799811084970 1495799811084970 IN IP4 0.0.0.0\ns=-\nt=0 0\na=msid-semantic: iot\na=group:BUNDLE video audio datachannel\nm=video 9 UDP/TLS/RTP/SAVPF 96 102\na=rtcp-fb:102 nack\na=rtcp-fb:102 nack pli\na=fmtp:96 profile-level-id=42e01f;level-asymmetry-allowed=1\na=fmtp:102 profile-level-id=42e01f;packetization-mode=1;level-asymmetry-allowed=1\na=rtpmap:96 H264/90000\na=rtpmap:102 H264/90000\na=ssrc:1 cname:webrtc-h264\na=sendrecv\na=mid:video\nc=IN IP4 0.0.0.0\na=rtcp-mux\na=fingerprint:sha-256 E4:0D:6F:FA:27:8A:0F:A8:80:5F:05:5C:C5:6B:3D:C8:A2:E1:3A:0B:28:82:2F:E2:F6:38:75:0F:D6:3E:42:88\na=setup:passive\na=ice-ufrag:OzoD\na=ice-pwd:OzoDoEA7U7GZZEpagGr1c0zf\na=candidate:2 1 UDP 1687875071 113.185.48.0 39661 typ srflx raddr 0.0.0.0 rport 0\nm=audio 9 UDP/TLS/RTP/SAVP 8\na=rtpmap:8 PCMA/8000\na=ssrc:4 cname:webrtc-pcma\na=sendrecv\na=mid:audio\nc=IN IP4 0.0.0.0\na=rtcp-mux\na=fingerprint:sha-256 E4:0D:6F:FA:27:8A:0F:A8:80:5F:05:5C:C5:6B:3D:C8:A2:E1:3A:0B:28:82:2F:E2:F6:38:75:0F:D6:3E:42:88\na=setup:passive\na=ice-ufrag:OzoD\na=ice-pwd:OzoDoEA7U7GZZEpagGr1c0zf\na=candidate:2 1 UDP 1687875071 113.185.48.0 39661 typ srflx raddr 0.0.0.0 rport 0\nm=application 50712 UDP/DTLS/SCTP webrtc-datachannel\na=mid:datachannel\na=sctp-port:5000\nc=IN IP4 0.0.0.0\na=max-message-size:262144\na=fingerprint:sha-256 E4:0D:6F:FA:27:8A:0F:A8:80:5F:05:5C:C5:6B:3D:C8:A2:E1:3A:0B:28:82:2F:E2:F6:38:75:0F:D6:3E:42:88\na=setup:passive\na=ice-ufrag:OzoD\na=ice-pwd:OzoDoEA7U7GZZEpagGr1c0zf\na=candidate:2 1 UDP 1687875071 113.185.48.0 39661 typ srflx raddr 0.0.0.0 rp\n";
+        websocket.send(offer);
+    }
 }
 
 // Handle incoming ICE candidates

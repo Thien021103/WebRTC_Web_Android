@@ -412,7 +412,7 @@ static void peer_signaling_onicecandidate(char* description, void* userdata) {
     int a = strlen(description);
     LOGI("%d", a);
 
-    snprintf(offer, strlen(description), "OFFER %s", description);
+    snprintf(offer, strlen(description), "OFFER %s\n", description);
 
     LOGI("Sending modified offer:\n%s", offer);
 
