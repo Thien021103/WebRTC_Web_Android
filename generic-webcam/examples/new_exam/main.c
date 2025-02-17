@@ -1,7 +1,10 @@
 #include <arpa/inet.h>
-#include <gst/gst.h>
-#include <gst/app/gstappsink.h> // Include this
-#include <gst/app/gstappsrc.h>
+#include <gstreamer-1.0/gst/gst.h>
+#include <gstreamer-1.0/gst/app/gstappsink.h>
+#include <gstreamer-1.0/gst/app/gstappsrc.h>
+// #include <gst/gst.h>
+// #include <gst/app/gstappsink.h> // Include this
+// #include <gst/app/gstappsrc.h>
 #include <ifaddrs.h>
 #include <net/if.h>
 #include <netinet/in.h>

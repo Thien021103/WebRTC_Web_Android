@@ -14,7 +14,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src ${GST_INCLUDE_DIRS})
 
 message(STATUS "CMAKE_SOURCE_DIR in newexam is: ${CMAKE_SOURCE_DIR}")
 message(STATUS "GST_LIBRARY_DIRS in newexam is: ${GST_LIBRARY_DIRS}")
-message(STATUS "GST_LIBRARIES in newexam is: ${GST_LIBRARIES}")
+message(STATUS "GST_INCLUDE_DIRS in newexam is: ${GST_INCLUDE_DIRS}")
 
 # Add library directories
 link_directories( ${GST_LIBRARY_DIRS})

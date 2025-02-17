@@ -81,7 +81,7 @@ function handleOffer(sessionId, message) {
   // Forward the offer to the other client
   for (const [otherSessionId, otherClient] of Object.entries(clients)) {
     if (otherSessionId !== sessionId) {
-      otherClient.send(message);
+      otherClient.send(`${message}\n`);
     }
   }
 }
