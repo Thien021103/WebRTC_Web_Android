@@ -11,7 +11,8 @@
 #include "ports.h"
 #include "utils.h"
 #include <libwebsockets.h>
-#include <json-glib/json-glib.h>
+#include "agent.h"
+// #include <json-glib/json-glib.h>
 
 #define KEEP_ALIVE_TIMEOUT_SECONDS 60
 #define CONNACK_RECV_TIMEOUT_MS 1000
@@ -273,11 +274,13 @@ static int websocket_write_back(struct lws* wsi_in, char* str, int str_size_in) 
             LOGI("Received an ice candidate: %s", value);
             if (state == PEER_CONNECTION_NEW) {
                 char converted_candidate[1024];
-                if (strncmp(value, "0$0$candidate", 13) == 0) {
-                    snprintf(converted_candidate, strlen(value)-4, "a=%s", value+4);
-                    LOGI("Candidate: %s", converted_candidate);
-                    agent_set_remote_description(g_ps.pc, converted_candidate);
-                }
+                const char *candidate = strstr(value, "candidate");
+                printf ("%s", candidate);
+                LOGI("Candidate: %s", candidate);
+                snprintf(converted_candidate, strlen(candidate), "a=%s", candidate);
+                LOGI("Candidate: %s", converted_candidate);
+                agent_set_remote_description(g_ps.pc, converted_candidate);
+                
             }
         }
     }

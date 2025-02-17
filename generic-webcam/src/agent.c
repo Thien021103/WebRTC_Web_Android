@@ -410,7 +410,7 @@ void agent_set_remote_description(Agent* agent, char* description) {
   */
   int i, j;
 
-  LOGD("Seting remote description (candidate):\n%s", description);
+  LOGI("Seting remote description (candidate):\n%s", description);
 
   char* line_start = description;
   char* line_end = NULL;
