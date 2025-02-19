@@ -410,7 +410,7 @@ void agent_set_remote_description(Agent* agent, char* description) {
   */
   int i, j;
 
-  LOGI("Seting remote description (candidate):\n%s", description);
+  // LOGD("Seting remote description (candidate):\n%s", description);
 
   char* line_start = description;
   char* line_end = NULL;
@@ -463,7 +463,7 @@ int agent_connectivity_check(Agent* agent) {
 
   if (agent->nominated_pair->conncheck % AGENT_CONNCHECK_PERIOD == 0) {
     addr_to_string(&agent->nominated_pair->remote->addr, addr_string, sizeof(addr_string));
-    LOGD("send binding request to remote ip: %s, port: %d", addr_string, agent->nominated_pair->remote->addr.port);
+    LOGI("send binding request to remote ip: %s, port: %d", addr_string, agent->nominated_pair->remote->addr.port);
     agent_create_binding_request(agent, &msg);
     agent_socket_send(agent, &agent->nominated_pair->remote->addr, msg.buf, msg.size);
   }

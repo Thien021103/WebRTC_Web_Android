@@ -372,6 +372,7 @@ int peer_connection_loop(PeerConnection* pc) {
       break;
 
     case PEER_CONNECTION_CHECKING:
+      // LOGI("Checking...");
       if (agent_select_candidate_pair(&pc->agent) < 0) {
         break;
       } else if (agent_connectivity_check(&pc->agent) == 0) {
@@ -601,7 +602,18 @@ int peer_connection_add_ice_candidate(PeerConnection* pc, char* candidate) {
   if (ice_candidate_from_description(&agent->remote_candidates[agent->remote_candidates_count], candidate, candidate + strlen(candidate)) != 0) {
     return -1;
   }
-
+  
+  int i;
+  int j = agent->remote_candidates_count;
+  for (i = 0; i < agent->local_candidates_count; i++) { 
+      if (agent->local_candidates[i].addr.family == agent->remote_candidates[j].addr.family) {
+        agent->candidate_pairs[agent->candidate_pairs_num].local = &agent->local_candidates[i];
+        agent->candidate_pairs[agent->candidate_pairs_num].remote = &agent->remote_candidates[j];
+        agent->candidate_pairs[agent->candidate_pairs_num].priority = agent->local_candidates[i].priority + agent->remote_candidates[j].priority;
+        agent->candidate_pairs[agent->candidate_pairs_num].state = ICE_CANDIDATE_STATE_FROZEN;
+        agent->candidate_pairs_num++;
+      }
+  }
   agent->remote_candidates_count++;
   return 0;
 }

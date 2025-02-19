@@ -262,7 +262,6 @@ static int websocket_write_back(struct lws* wsi_in, char* str, int str_size_in) 
         const char *value = strchr(str, ' '); // Find the first space
         if (value) {
             value++;
-            LOGI("Received an answer SDP: \n%s\n", value);
             if (state == PEER_CONNECTION_NEW) {
                 peer_connection_set_remote_description(g_ps.pc, value);
             }
@@ -271,15 +270,11 @@ static int websocket_write_back(struct lws* wsi_in, char* str, int str_size_in) 
         const char *value = strchr(str, ' '); // Find the first space
         if (value) {
             value++;
-            LOGI("Received an ice candidate: %s", value);
-            if (state == PEER_CONNECTION_NEW) {
+            if (state == PEER_CONNECTION_CHECKING) {
                 char converted_candidate[1024];
-                const char *candidate = strstr(value, "candidate");
-                printf ("%s", candidate);
-                LOGI("Candidate: %s", candidate);
+                char *candidate = strstr(value, "candidate");
                 snprintf(converted_candidate, strlen(candidate), "a=%s", candidate);
-                LOGI("Candidate: %s", converted_candidate);
-                agent_set_remote_description(g_ps.pc, converted_candidate);
+                peer_connection_add_ice_candidate(g_ps.pc, converted_candidate);
                 
             }
         }
@@ -385,7 +380,7 @@ static int callback_janus(struct lws* wsi, enum lws_callback_reasons reason, voi
 }
 
 static void peer_signaling_onicecandidate(char* description, void* userdata) {
-    LOGI("Making initial offer:\n%s\n", description);
+    // LOGI("Making initial offer:\n%s\n", description);
 
     // // Create JSON object for the offer
     // cJSON *jsepOffer = cJSON_CreateObject();
@@ -413,7 +408,7 @@ static void peer_signaling_onicecandidate(char* description, void* userdata) {
     // char *text = cJSON_PrintUnformatted(jsepOffer);
     char offer[5000];
     int a = strlen(description);
-    LOGI("%d", a);
+    // LOGI("%d", a);
 
     snprintf(offer, strlen(description), "OFFER %s \n ", description);
 
