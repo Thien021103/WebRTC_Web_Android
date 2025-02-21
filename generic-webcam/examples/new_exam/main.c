@@ -252,10 +252,3 @@ int main(int argc, char* argv[]) {
 
   return 0;
 }
-
-// Check dồng bộ time giữa audio và video
-// Nếu đưa xuống mạch thì có dùng được gst không
-// Nguồn phát từ đâu
-// Thiếu 1 laptop
-// Tính năng 2 chiều
-// Viết full luồng nhận
