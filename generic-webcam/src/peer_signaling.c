@@ -226,7 +226,7 @@ static int websocket_write_back(struct lws* wsi_in, char* str, int str_size_in) 
 
     PeerConnectionState state = peer_connection_get_state(g_ps.pc);
 
-    LOGI("Message received: \n%s\n", str);
+    // LOGD("Message received: \n%s\n", str);
     if (str == NULL || wsi_in == NULL) {
         LOGW("Invalid arguments received");
         return -1;

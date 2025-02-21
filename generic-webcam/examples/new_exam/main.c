@@ -96,7 +96,7 @@ static GstFlowReturn on_video_data(GstElement* sink, void* data) {
     gst_buffer_map(buffer, &info, GST_MAP_READ);
     peer_connection_send_video(g_pc, info.data, info.size);
 
-    // printf(", send frame\n");
+    printf(", send frame\n");
 
     gst_buffer_unmap(buffer, &info);
     gst_sample_unref(sample);
