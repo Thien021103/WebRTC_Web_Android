@@ -22,18 +22,18 @@
 #define CRED_LEN 128
 #define PEER_ID_SIZE 100
 
-#define RPC_VERSION "2.0"
+// #define RPC_VERSION "2.0"
 
 #define RPC_METHOD_STATE "state"
 #define RPC_METHOD_OFFER "offer"
 #define RPC_METHOD_ANSWER "answer"
 #define RPC_METHOD_CLOSE "close"
 
-#define RPC_ERROR_PARSE_ERROR "{\"code\":-32700,\"message\":\"Parse error\"}"
-#define RPC_ERROR_INVALID_REQUEST "{\"code\":-32600,\"message\":\"Invalid Request\"}"
-#define RPC_ERROR_METHOD_NOT_FOUND "{\"code\":-32601,\"message\":\"Method not found\"}"
-#define RPC_ERROR_INVALID_PARAMS "{\"code\":-32602,\"message\":\"Invalid params\"}"
-#define RPC_ERROR_INTERNAL_ERROR "{\"code\":-32603,\"message\":\"Internal error\"}"
+// #define RPC_ERROR_PARSE_ERROR "{\"code\":-32700,\"message\":\"Parse error\"}"
+// #define RPC_ERROR_INVALID_REQUEST "{\"code\":-32600,\"message\":\"Invalid Request\"}"
+// #define RPC_ERROR_METHOD_NOT_FOUND "{\"code\":-32601,\"message\":\"Method not found\"}"
+// #define RPC_ERROR_INVALID_PARAMS "{\"code\":-32602,\"message\":\"Invalid params\"}"
+// #define RPC_ERROR_INTERNAL_ERROR "{\"code\":-32603,\"message\":\"Internal error\"}"
 
 static char* rand_string(char* str, size_t size)
 {
@@ -110,12 +110,18 @@ long long feed_id = 0;
 long long session_id = 0;
 long long handle_id = 0;
 char transaction[12];
+
+static struct lws_context *lws_context = NULL;
 static struct lws* web_socket = NULL;
+
 static const char* room = "1234";
 static const char* token = "";
-static const char* receiver_id = "2002";
+// static const char* receiver_id = "2002";
 static const char* peer_id = "1001";
+
+static int retry_delay = 1000000; // Start with 1s
 static int mainloop = 1;
+
 enum AppState {
     APP_STATE_UNKNOWN = 0,
     APP_STATE_ERROR = 1, /* generic error */
@@ -151,6 +157,8 @@ static enum AppState app_state = APP_STATE_UNKNOWN;
 //     PROTOCOL_JANUS = 0,
 //     PROTOCOL_COUNT
 // };
+
+static int callback_janus(struct lws* wsi, enum lws_callback_reasons reason, void* user, void* in, size_t len);
 
 static int lws_websocket_connection_send_text(struct lws* wsi_in, char* str, enum MsgType msgtype) {
     if (str == NULL || wsi_in == NULL)
@@ -328,15 +336,29 @@ static int websocket_write_back(struct lws* wsi_in, char* str, int str_size_in) 
     return 0;
 }
 
+static struct lws_protocols protocols[] =
+{
+    {
+        "janus-protocol",
+        callback_janus,
+        0,
+        JANUS_RX_BUFFER_BYTES,
+    },
+    { NULL, NULL, 0, 0 } /* terminator */
+};
+
 static int callback_janus(struct lws* wsi, enum lws_callback_reasons reason, void* user, void* in, size_t len)
 {
+    struct lws_client_connect_info i;
+
     LOGI("\tcallback_janus %d", reason);
     switch (reason)
     {
     case LWS_CALLBACK_CLIENT_ESTABLISHED:
     {
+        app_state = SERVER_CONNECTED;
         lws_callback_on_writable(wsi);
-        LOGI("Connected");
+        LOGI("--- CONNECTED ---");
         break;
     }
     case LWS_CALLBACK_CLIENT_RECEIVE:
@@ -356,20 +378,57 @@ static int callback_janus(struct lws* wsi, enum lws_callback_reasons reason, voi
     }
     case LWS_CALLBACK_CLIENT_WRITEABLE:
     {
-        app_state = SERVER_REGISTERING;
+        app_state = SERVER_REGISTERED;
         // lws_websocket_connection_send_text(web_socket,(char*)"",JANUS_MSS_REGISTER_WITH_SERVER);
         break;
     }
     case LWS_CALLBACK_CLOSED:
+    case LWS_CALLBACK_CLIENT_CLOSED:
     {
         LOGI("--- CLOSED ---");
-        web_socket = NULL;
+
+        app_state = SERVER_CLOSED;
+        usleep(retry_delay);
+
+        memset(&i, 0 , sizeof(i));
+        i.context = lws_context;
+        i.port = 443;
+        i.address = "webrtc-websocket-lc03.onrender.com";
+        i.path = "/";
+        i.host = "webrtc-websocket-lc03.onrender.com";
+        i.origin = "webrtc-websocket-lc03.onrender.com";
+        i.ssl_connection = LCCSCF_USE_SSL;
+        i.protocol = protocols[0].name;
+        i.local_protocol_name = protocols[0].name;
+
+        web_socket = lws_client_connect_via_info(&i);
+
+        LOGI("--- RECONNECTING ---");
+        app_state = SERVER_CONNECTING;
         break;
     }
     case LWS_CALLBACK_CLIENT_CONNECTION_ERROR:
     {
         LOGI("--- CLIENT CONNECTION ERROR ---");
-        web_socket = NULL;
+
+        app_state = SERVER_CONNECTION_ERROR;
+        usleep(retry_delay);
+        
+        memset(&i, 0 , sizeof(i));
+        i.context = lws_context;
+        i.port = 443;
+        i.address = "webrtc-websocket-lc03.onrender.com";
+        i.path = "/";
+        i.host = "webrtc-websocket-lc03.onrender.com";
+        i.origin = "webrtc-websocket-lc03.onrender.com";
+        i.ssl_connection = LCCSCF_USE_SSL;
+        i.protocol = protocols[0].name;
+        i.local_protocol_name = protocols[0].name;
+
+        web_socket = lws_client_connect_via_info(&i);
+
+        LOGI("--- RECONNECTING ---");
+        app_state = SERVER_CONNECTING;
         break;
     }
     default:
@@ -407,7 +466,7 @@ static void peer_signaling_onicecandidate(char* description, void* userdata) {
     // Convert the JSON object to a string
     // char *text = cJSON_PrintUnformatted(jsepOffer);
     char offer[5000];
-    int a = strlen(description);
+    // int a = strlen(description);
     // LOGI("%d", a);
 
     snprintf(offer, strlen(description), "OFFER %s \n ", description);
@@ -475,17 +534,6 @@ void disconnect_websocket() {
     }
 }
 
-static struct lws_protocols protocols[] =
-{
-    {
-        "janus-protocol",
-        callback_janus,
-        0,
-        JANUS_RX_BUFFER_BYTES,
-    },
-    { NULL, NULL, 0, 0 } /* terminator */
-};
-
 void connect_to_janus_server()
 {
     struct lws_context_creation_info info;
@@ -496,7 +544,7 @@ void connect_to_janus_server()
     info.protocols = protocols;
     info.fd_limit_per_thread = 3;
 
-    struct lws_context* lws_context = lws_create_context(&info);
+    lws_context = lws_create_context(&info);
     if (!lws_context) {
         lwsl_err("lws init failed!\n");
         return;
@@ -521,6 +569,7 @@ void connect_to_janus_server()
 
     while (mainloop) {
         lws_service(lws_context, /* timeout_ms = */ 5000);
+        usleep(10000);
     }
     lws_context_destroy(lws_context);
 }

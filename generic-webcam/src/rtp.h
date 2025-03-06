@@ -20,7 +20,7 @@ typedef enum RtpPayloadType {
   PT_PCMU = 0,
   PT_PCMA = 8,
   PT_G722 = 9,
-  PT_H264 = 96,
+  PT_H264 = 102,
   PT_OPUS = 111
 
 } RtpPayloadType;

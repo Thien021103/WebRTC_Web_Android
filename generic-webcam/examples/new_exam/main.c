@@ -1,10 +1,10 @@
 #include <arpa/inet.h>
-#include <gstreamer-1.0/gst/gst.h>
-#include <gstreamer-1.0/gst/app/gstappsink.h>
-#include <gstreamer-1.0/gst/app/gstappsrc.h>
-// #include <gst/gst.h>
-// #include <gst/app/gstappsink.h> // Include this
-// #include <gst/app/gstappsrc.h>
+// #include <gstreamer-1.0/gst/gst.h>
+// #include <gstreamer-1.0/gst/app/gstappsink.h>
+// #include <gstreamer-1.0/gst/app/gstappsrc.h>
+#include <gst/gst.h>
+#include <gst/app/gstappsink.h> // Include this
+#include <gst/app/gstappsrc.h>
 #include <ifaddrs.h>
 #include <net/if.h>
 #include <netinet/in.h>
@@ -28,7 +28,7 @@ const char CAMERA_PIPELINE[] = "v4l2src device=/dev/video0 ! queue ! video/x-raw
 // const char MIC_PIPELINE[] = "alsasrc device=plughw:seeed2micvoicec,0 ! audio/x-raw,format=S16LE,rate=8000,channels=1 ! alawenc ! appsink name=mic-sink";
 const char MIC_PIPELINE[] = "alsasrc latency-time=20000 device=plughw:0,6 ! audio/x-raw,format=S16LE,rate=8000,channels=1 ! alawenc ! appsink name=mic-sink";
 
-const char SPK_PIPELINE[] = "appsrc name=spk-src format=time ! audio/x-alaw ! alawdec ! audio/x-raw,format=S16LE,rate=8000,channels=1 ! alsasink sync=false device=plughw:0,0";
+const char SPK_PIPELINE[] = "appsrc name=spk-src format=time ! audio/x-alaw ! alawdec ! audio/x-raw,format=S16LE,rate=8000,channels=1 ! alsasink sync=false device=plughw:1,0";
 //const char SPK_PIPELINE[] = "appsrc name=spk-src format=time ! alawdec ! audio/x-raw,format=S16LE,rate=8000,channels=1 ! alsasink sync=false device=plughw:seeed2micvoicec,0";
 
 int g_interrupted = 0;
@@ -96,7 +96,7 @@ static GstFlowReturn on_video_data(GstElement* sink, void* data) {
     gst_buffer_map(buffer, &info, GST_MAP_READ);
     peer_connection_send_video(g_pc, info.data, info.size);
 
-    printf(", send frame\n");
+    // printf(", send frame\n");
 
     gst_buffer_unmap(buffer, &info);
     gst_sample_unref(sample);
@@ -186,10 +186,10 @@ int main(int argc, char* argv[]) {
       .ice_servers = 
           {
             {.urls = "stun:stun.l.google.com:19302"},
-            // {.urls = "turn:192.168.0.170:3478?transport=udp",
-            //  .username="camera",
-            //  .credential="camera123"
-            // }
+            {.urls = "turn:192.168.0.170:3478?transport=udp",
+             .username="camera",
+             .credential="camera123"
+            }
           },
       .datachannel = DATA_CHANNEL_STRING,
       .video_codec = CODEC_H264,

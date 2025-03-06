@@ -77,6 +77,7 @@ static int peer_connection_dtls_srtp_recv(void* ctx, unsigned char* buf, size_t 
     if (ret > 0) {
       break;
     }
+    LOGD("dtls_srtp_udp_recv (%d)", ret);
 
     recv_max++;
   }
@@ -86,6 +87,7 @@ static int peer_connection_dtls_srtp_recv(void* ctx, unsigned char* buf, size_t 
 static int peer_connection_dtls_srtp_send(void* ctx, const uint8_t* buf, size_t len) {
   DtlsSrtp* dtls_srtp = (DtlsSrtp*)ctx;
   PeerConnection* pc = (PeerConnection*)dtls_srtp->user_data;
+  LOGD("dtls_srtp_udp_send ");
 
   // LOGD("send %.4x %.4x, %ld", *(uint16_t*)buf, *(uint16_t*)(buf + 2), len);
   return agent_send(&pc->agent, buf, len);
@@ -445,6 +447,8 @@ int peer_connection_loop(PeerConnection* pc) {
           dtls_srtp_decrypt_rtp_packet(&pc->dtls_srtp, pc->agent_buf, &pc->agent_ret);
 
           ssrc = rtp_get_ssrc(pc->agent_buf);
+          LOGD("remote ssrc: %u", pc->remote_assrc);
+          LOGD("actual remote audio ssrc: %u", ssrc);
           if (ssrc == pc->remote_assrc) {
             rtp_decoder_decode(&pc->artp_decoder, pc->agent_buf, pc->agent_ret);
           } else if (ssrc == pc->remote_vssrc) {
@@ -512,7 +516,7 @@ void peer_connection_set_remote_description(PeerConnection* pc, const char* sdp_
 
     if ((val_start = strstr(buf, "a=ssrc:")) && ssrc) {
       *ssrc = strtoul(val_start + 7, NULL, 10);
-      LOGD("SSRC: %" PRIu32, *ssrc);
+      LOGI("SSRC: %" PRIu32, *ssrc);
     }
 
     start = line + 2;

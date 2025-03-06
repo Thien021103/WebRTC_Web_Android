@@ -304,7 +304,7 @@ void agent_get_local_description(Agent* agent, char* description, int length) {
 
   // remove last \n
   description[strlen(description)] = '\0';
-  LOGD("local description:\n%s", description);
+  LOGI("local description:\n%s", description);
 }
 
 int agent_send(Agent* agent, const uint8_t* buf, int len) {
@@ -356,6 +356,7 @@ void agent_process_stun_request(Agent* agent, StunMessage* stun_msg, Address* ad
         header = (StunHeader*)stun_msg->buf;
         memcpy(agent->transaction_id, header->transaction_id, sizeof(header->transaction_id));
         agent_create_binding_response(agent, &msg, addr);
+        LOGD("Sending binding RESPONSE to remote ip");
         agent_socket_send(agent, addr, msg.buf, msg.size);
         agent->binding_request_time = ports_get_epoch_time();
       }
@@ -381,15 +382,21 @@ int agent_recv(Agent* agent, uint8_t* buf, int len) {
   int ret = -1;
   StunMessage stun_msg;
   Address addr;
+  char addr_string[ADDRSTRLEN];
+
   if ((ret = agent_socket_recv(agent, &addr, buf, len)) > 0 && stun_probe(buf, len) == 0) {
     memcpy(stun_msg.buf, buf, ret);
     stun_msg.size = ret;
     stun_parse_msg_buf(&stun_msg);
     switch (stun_msg.stunclass) {
       case STUN_CLASS_REQUEST:
+        addr_to_string(&addr, addr_string, sizeof(addr_string));
+        LOGD("Received binding REQUEST from addres ip: %s, port: %d", addr_string, agent->nominated_pair->remote->addr.port);
         agent_process_stun_request(agent, &stun_msg, &addr);
         break;
       case STUN_CLASS_RESPONSE:
+        addr_to_string(&agent->nominated_pair->remote->addr, addr_string, sizeof(addr_string));
+        LOGD("Received binding RESPONSE from remote ip: %s, port: %d", addr_string, agent->nominated_pair->remote->addr.port);
         agent_process_stun_response(agent, &stun_msg);
         break;
       case STUN_CLASS_ERROR:
@@ -463,7 +470,7 @@ int agent_connectivity_check(Agent* agent) {
 
   if (agent->nominated_pair->conncheck % AGENT_CONNCHECK_PERIOD == 0) {
     addr_to_string(&agent->nominated_pair->remote->addr, addr_string, sizeof(addr_string));
-    LOGI("send binding request to remote ip: %s, port: %d", addr_string, agent->nominated_pair->remote->addr.port);
+    LOGI("Sending binding REQUEST to remote ip: %s, port: %d", addr_string, agent->nominated_pair->remote->addr.port);
     agent_create_binding_request(agent, &msg);
     agent_socket_send(agent, &agent->nominated_pair->remote->addr, msg.buf, msg.size);
   }
