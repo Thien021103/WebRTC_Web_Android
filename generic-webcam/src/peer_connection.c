@@ -374,10 +374,15 @@ int peer_connection_loop(PeerConnection* pc) {
       break;
 
     case PEER_CONNECTION_CHECKING:
-      // LOGI("Checking...");
+      LOGD("Checking...");
+      usleep(10000);
       if (agent_select_candidate_pair(&pc->agent) < 0) {
         break;
-      } else if (agent_connectivity_check(&pc->agent) == 0) {
+      } 
+      else if (agent_create_permission(&pc->agent) < 0) {
+        break;
+      } 
+      else if (agent_connectivity_check(&pc->agent) == 0) {
         STATE_CHANGED(pc, PEER_CONNECTION_CONNECTED);
       }
       break;

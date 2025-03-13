@@ -56,6 +56,42 @@ void stun_msg_create(StunMessage* msg, uint16_t type) {
   msg->size = sizeof(StunHeader);
 }
 
+// int stun_xor_address(StunMessage* msg, const Address* addr, char* xor_addr) {
+//   // Build the XOR mask: magic cookie + transaction ID
+//   StunHeader* header = (StunHeader*)msg->buf;
+//   uint8_t mask[16];
+//   uint32_t magic = htonl(MAGIC_COOKIE);
+//   memcpy(mask, &magic, 4);
+//   memcpy(mask + 4, header->transaction_id, 12);
+
+//   uint16_t* port = (uint16_t*)(xor_addr + 2);
+//   uint32_t* val32 = (uint32_t*)(xor_addr + 4);
+//   uint16_t* val16 = (uint16_t*)(xor_addr + 4);
+//   int i;
+
+//   switch (addr->family) {
+//     case AF_INET:
+//       xor_addr[1] = STUN_FAMILY_IPV4; // Family
+//       xor_addr[0] = 0x00;             // Reserved byte
+//       *port = htons(addr->port) ^ *(uint16_t*)mask; // XOR port with first 16 bits
+//       *val32 = addr->sin.sin_addr.s_addr ^ *(uint32_t*)mask; // XOR IPv4 with first 32 bits
+//       return 8;
+
+//     case AF_INET6:
+//       xor_addr[1] = STUN_FAMILY_IPV6; // Family
+//       xor_addr[0] = 0x00;             // Reserved byte
+//       *port = htons(addr->port) ^ *(uint16_t*)mask; // XOR port with first 16 bits
+//       for (i = 0; i < 8; i++) {
+//           uint16_t ip_segment = ntohs(*(uint16_t*)(addr->sin6.sin6_addr.s6_addr + 2 * i));
+//           val16[i] = ip_segment ^ *(uint16_t*)(mask + 2 * i);
+//       }
+//       return 20;
+
+//     default:
+//         return 0; // Unsupported family
+//     }
+// }
+
 int stun_set_mapped_address(char* value, uint8_t* mask, Address* addr) {
   int ret, i;
   char addr_string[ADDRSTRLEN];
@@ -132,6 +168,7 @@ void stun_parse_msg_buf(StunMessage* msg) {
   uint8_t mask[16];
 
   msg->stunclass = ntohs(header->type);
+  LOGD("Header Type: 0x%04x", ntohs(header->type));
   if ((msg->stunclass & STUN_CLASS_ERROR) == STUN_CLASS_ERROR) {
     msg->stunclass = STUN_CLASS_ERROR;
   } else if ((msg->stunclass & STUN_CLASS_INDICATION) == STUN_CLASS_INDICATION) {
@@ -147,7 +184,9 @@ void stun_parse_msg_buf(StunMessage* msg) {
     msg->stunmethod = STUN_METHOD_ALLOCATE;
   } else if ((msg->stunmethod & STUN_METHOD_BINDING) == STUN_METHOD_BINDING) {
     msg->stunmethod = STUN_METHOD_BINDING;
-  }
+  } else if ((msg->stunmethod & STUN_METHOD_DATA) == STUN_METHOD_DATA) {
+    msg->stunmethod = STUN_METHOD_DATA;
+  } 
 
   while (pos < length) {
     StunAttribute* attr = (StunAttribute*)(msg->buf + pos);
@@ -165,6 +204,7 @@ void stun_parse_msg_buf(StunMessage* msg) {
         // LOGD("length = %d, Username %s", ntohs(attr->length), msg->username);
         break;
       case STUN_ATTR_TYPE_MESSAGE_INTEGRITY:
+        memset(msg->message_integrity, 0, sizeof(msg->message_integrity));
         memcpy(msg->message_integrity, attr->value, ntohs(attr->length));
 
         char message_integrity_hex[41];
@@ -195,7 +235,14 @@ void stun_parse_msg_buf(StunMessage* msg) {
       case STUN_ATTR_TYPE_XOR_MAPPED_ADDRESS:
         *((uint32_t*)mask) = htonl(MAGIC_COOKIE);
         memcpy(mask + 4, header->transaction_id, sizeof(header->transaction_id));
+        LOGD("XOR Mapped Address");
         stun_get_mapped_address(attr->value, mask, &msg->mapped_addr);
+        break;
+      case STUN_ATTR_TYPE_XOR_PEER_ADDRESS:
+        *((uint32_t*)mask) = htonl(MAGIC_COOKIE);
+        memcpy(mask + 4, header->transaction_id, sizeof(header->transaction_id));
+        LOGD("XOR Peer Address");
+        stun_get_mapped_address(attr->value, mask, &msg->peer_addr);
         break;
       case STUN_ATTR_TYPE_PRIORITY:
         break;
@@ -206,9 +253,15 @@ void stun_parse_msg_buf(StunMessage* msg) {
         memcpy(&msg->fingerprint, attr->value, ntohs(attr->length));
         // LOGD("Fingerprint: 0x%.4x", msg->fingerprint);
         break;
+      case STUN_ATTR_TYPE_DATA:
+        memset(msg->turn_data, 0, sizeof(msg->turn_data));
+        memcpy(msg->turn_data, attr->value, ntohs(attr->length));
+        msg->turn_data_size = ntohs(attr->length);
+        break;
       case STUN_ATTR_TYPE_ICE_CONTROLLED:
       case STUN_ATTR_TYPE_ICE_CONTROLLING:
       case STUN_ATTR_TYPE_NETWORK_COST:
+      case STUN_ATTR_TYPE_SOFTWARE:
         // Do nothing
         break;
       default:
@@ -243,17 +296,19 @@ int stun_msg_write_attr(StunMessage* msg, StunAttrType type, uint16_t length, ch
 
   length = 4 * ((length + 3) / 4);
   header->length = htons(ntohs(header->length) + sizeof(StunAttribute) + length);
-
   msg->size += length + sizeof(StunAttribute);
 
   switch (type) {
     case STUN_ATTR_TYPE_REALM:
+      memset(msg->nonce, 0, sizeof(msg->nonce));
       memcpy(msg->realm, value, length);
       break;
     case STUN_ATTR_TYPE_NONCE:
+      memset(msg->nonce, 0, sizeof(msg->nonce));
       memcpy(msg->nonce, value, length);
       break;
     case STUN_ATTR_TYPE_USERNAME:
+      memset(msg->username, 0, sizeof(msg->username));
       memcpy(msg->username, value, length);
       break;
     default:

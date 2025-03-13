@@ -13,9 +13,10 @@
 #include "utils.h"
 
 #define AGENT_POLL_TIMEOUT 1
-#define AGENT_CONNCHECK_MAX 1000
-#define AGENT_CONNCHECK_PERIOD 100
-#define AGENT_STUN_RECV_MAXTIMES 1000
+#define AGENT_CONNCHECK_MAX 30
+#define AGENT_CONNCHECK_PERIOD 50
+#define AGENT_PERMISSION_PERIOD 100
+#define AGENT_STUN_RECV_MAXTIMES 500
 
 void agent_clear_candidates(Agent* agent) {
   agent->local_candidates_count = 0;
@@ -42,6 +43,8 @@ int agent_create(Agent* agent) {
 #endif
 
   agent_clear_candidates(agent);
+  agent->indication_sent = 0;
+  agent->turn_permission = 0;
   return 0;
 }
 
@@ -107,6 +110,7 @@ static int agent_socket_recv_attempts(Agent* agent, Address* addr, uint8_t* buf,
     if ((ret = agent_socket_recv(agent, addr, buf, len)) != 0) {
       break;
     }
+    usleep(1000); // Sleep for 1 ms
   }
   return ret;
 }
@@ -157,7 +161,7 @@ static int agent_create_host_addr(Agent* agent) {
 
 static int agent_create_stun_addr(Agent* agent, Address* serv_addr) {
   int ret = -1;
-  Address bind_addr;
+  Address mapped_addr;
   StunMessage send_msg;
   StunMessage recv_msg;
   memset(&send_msg, 0, sizeof(send_msg));
@@ -174,14 +178,14 @@ static int agent_create_stun_addr(Agent* agent, Address* serv_addr) {
 
   ret = agent_socket_recv_attempts(agent, NULL, recv_msg.buf, sizeof(recv_msg.buf), AGENT_STUN_RECV_MAXTIMES);
   if (ret <= 0) {
-    LOGD("Failed to receive STUN Binding Response.");
+    LOGE("Failed to receive STUN Binding Response.");
     return ret;
   }
 
   stun_parse_msg_buf(&recv_msg);
-  memcpy(&bind_addr, &recv_msg.mapped_addr, sizeof(Address));
+  memcpy(&mapped_addr, &recv_msg.mapped_addr, sizeof(Address));
   IceCandidate* ice_candidate = agent->local_candidates + agent->local_candidates_count++;
-  ice_candidate_create(ice_candidate, agent->local_candidates_count, ICE_CANDIDATE_TYPE_SRFLX, &bind_addr);
+  ice_candidate_create(ice_candidate, agent->local_candidates_count, ICE_CANDIDATE_TYPE_SRFLX, &mapped_addr);
   return ret;
 }
 
@@ -218,7 +222,19 @@ static int agent_create_turn_addr(Agent* agent, Address* serv_addr, const char* 
     stun_msg_write_attr(&send_msg, STUN_ATTR_TYPE_USERNAME, strlen(username), (char*)username);
     stun_msg_write_attr(&send_msg, STUN_ATTR_TYPE_NONCE, strlen(recv_msg.nonce), recv_msg.nonce);
     stun_msg_write_attr(&send_msg, STUN_ATTR_TYPE_REALM, strlen(recv_msg.realm), recv_msg.realm);
-    stun_msg_finish(&send_msg, STUN_CREDENTIAL_LONG_TERM, credential, strlen(credential));
+
+    // For further creation of STUN message
+    memset(&(agent->turn_ser_addr), 0, sizeof(Address));
+    memset(agent->turn_nonce, 0, sizeof(agent->turn_nonce));
+    memset(agent->turn_realm, 0, sizeof(agent->turn_realm));
+
+    memcpy(&(agent->turn_ser_addr), serv_addr, sizeof(Address));
+    agent->turn_username = username;
+    agent->turn_password = credential;
+    memcpy(agent->turn_nonce, recv_msg.nonce, sizeof(recv_msg.nonce));
+    memcpy(agent->turn_realm, recv_msg.realm, sizeof(recv_msg.realm));
+    stun_msg_finish(&send_msg, STUN_CREDENTIAL_LONG_TERM, agent->turn_password, strlen(agent->turn_password));
+
   } else {
     LOGE("Invalid TURN Binding Response.");
     return -1;
@@ -230,7 +246,7 @@ static int agent_create_turn_addr(Agent* agent, Address* serv_addr, const char* 
     return -1;
   }
 
-  agent_socket_recv_attempts(agent, NULL, recv_msg.buf, sizeof(recv_msg.buf), AGENT_STUN_RECV_MAXTIMES);
+  ret = agent_socket_recv_attempts(agent, NULL, recv_msg.buf, sizeof(recv_msg.buf), AGENT_STUN_RECV_MAXTIMES);
   if (ret <= 0) {
     LOGD("Failed to receive TURN Binding Response.");
     return ret;
@@ -311,18 +327,41 @@ int agent_send(Agent* agent, const uint8_t* buf, int len) {
   return agent_socket_send(agent, &agent->nominated_pair->remote->addr, buf, len);
 }
 
+static void agent_create_permission_request(Agent* agent, StunMessage* msg, const Address* peer_addr) {
+  char xor_peer_addr[32];
+  int size = 0;
+  uint8_t mask[16];
+  StunHeader* header;
+
+  stun_msg_create(msg, STUN_METHOD_CREATE_PERMISSION);
+  header = (StunHeader*)msg->buf;
+  *((uint32_t*)mask) = htonl(MAGIC_COOKIE);
+  memcpy(mask + 4, header->transaction_id, sizeof(header->transaction_id));
+  
+  memset(xor_peer_addr, 0, sizeof(xor_peer_addr));
+  size = stun_set_mapped_address(xor_peer_addr, mask, peer_addr); // XOR with transaction ID (per STUN spec) 
+  stun_msg_write_attr(msg, STUN_ATTR_TYPE_XOR_PEER_ADDRESS, size, xor_peer_addr);
+  stun_msg_write_attr(msg, STUN_ATTR_TYPE_USERNAME, strlen(agent->turn_username), agent->turn_username);
+  stun_msg_write_attr(msg, STUN_ATTR_TYPE_REALM, strlen(agent->turn_realm), agent->turn_realm);
+  stun_msg_write_attr(msg, STUN_ATTR_TYPE_NONCE, strlen(agent->turn_nonce), agent->turn_nonce);
+  stun_msg_finish(msg, STUN_CREDENTIAL_LONG_TERM, agent->turn_password, strlen(agent->turn_password));
+}
+
 static void agent_create_binding_response(Agent* agent, StunMessage* msg, Address* addr) {
   int size = 0;
   char username[584];
   char mapped_address[32];
   uint8_t mask[16];
   StunHeader* header;
+  
   stun_msg_create(msg, STUN_CLASS_RESPONSE | STUN_METHOD_BINDING);
   header = (StunHeader*)msg->buf;
   memcpy(header->transaction_id, agent->transaction_id, sizeof(header->transaction_id));
   snprintf(username, sizeof(username), "%s:%s", agent->local_ufrag, agent->remote_ufrag);
   *((uint32_t*)mask) = htonl(MAGIC_COOKIE);
   memcpy(mask + 4, agent->transaction_id, sizeof(agent->transaction_id));
+  
+  memset(mapped_address, 0, sizeof(mapped_address));
   size = stun_set_mapped_address(mapped_address, mask, addr);
   stun_msg_write_attr(msg, STUN_ATTR_TYPE_XOR_MAPPED_ADDRESS, size, mapped_address);
   stun_msg_write_attr(msg, STUN_ATTR_TYPE_USERNAME, strlen(username), username);
@@ -331,11 +370,12 @@ static void agent_create_binding_response(Agent* agent, StunMessage* msg, Addres
 
 static void agent_create_binding_request(Agent* agent, StunMessage* msg) {
   uint64_t tie_breaker = 0;  // always be controlled
-  // send binding request
-  stun_msg_create(msg, STUN_CLASS_REQUEST | STUN_METHOD_BINDING);
   char username[584];
   memset(username, 0, sizeof(username));
   snprintf(username, sizeof(username), "%s:%s", agent->remote_ufrag, agent->local_ufrag);
+  
+  // Send binding request
+  stun_msg_create(msg, STUN_CLASS_REQUEST | STUN_METHOD_BINDING);
   stun_msg_write_attr(msg, STUN_ATTR_TYPE_USERNAME, strlen(username), username);
   stun_msg_write_attr(msg, STUN_ATTR_TYPE_PRIORITY, 4, (char*)&agent->nominated_pair->priority);
   if (agent->mode == AGENT_MODE_CONTROLLING) {
@@ -347,17 +387,48 @@ static void agent_create_binding_request(Agent* agent, StunMessage* msg) {
   stun_msg_finish(msg, STUN_CREDENTIAL_SHORT_TERM, agent->remote_upwd, strlen(agent->remote_upwd));
 }
 
+static void agent_create_send_indication(Agent* agent, StunMessage* msg, const Address* peer_addr, StunMessage* inner_msg) {
+  int size = 0;
+  char xor_peer_addr[32];
+  char data[512];
+  uint8_t mask[16]; 
+  StunHeader* header;
+
+  stun_msg_create(msg, STUN_CLASS_INDICATION | STUN_METHOD_SEND);
+  header = (StunHeader*)msg->buf;
+  *((uint32_t*)mask) = htonl(MAGIC_COOKIE);
+  memcpy(mask + 4, header->transaction_id, sizeof(header->transaction_id));
+  
+  memset(xor_peer_addr, 0, sizeof(xor_peer_addr));
+  memset(data, 0, sizeof(data));
+
+  size = stun_set_mapped_address(xor_peer_addr, mask, peer_addr); // XOR with transaction ID (per STUN spec) 
+  memcpy(data, inner_msg->buf, sizeof(inner_msg->buf));
+
+  stun_msg_write_attr(msg, STUN_ATTR_TYPE_XOR_PEER_ADDRESS, size, xor_peer_addr);
+  stun_msg_write_attr(msg, STUN_ATTR_TYPE_DATA, inner_msg->size, data);
+  stun_msg_finish(msg, STUN_CREDENTIAL_LONG_TERM, agent->turn_password, strlen(agent->turn_password));
+}
+
 void agent_process_stun_request(Agent* agent, StunMessage* stun_msg, Address* addr) {
   StunMessage msg;
   StunHeader* header;
+  StunMessage outer_msg;
   switch (stun_msg->stunmethod) {
     case STUN_METHOD_BINDING:
       if (stun_msg_is_valid(stun_msg->buf, stun_msg->size, agent->local_upwd) == 0) {
+        
         header = (StunHeader*)stun_msg->buf;
         memcpy(agent->transaction_id, header->transaction_id, sizeof(header->transaction_id));
+        LOGI("Sending binding RESPONSE and INDICATION to remote ip");
+
         agent_create_binding_response(agent, &msg, addr);
-        LOGD("Sending binding RESPONSE to remote ip");
         agent_socket_send(agent, addr, msg.buf, msg.size);
+
+        memset(&outer_msg, 0, sizeof(outer_msg));
+        agent_create_send_indication(agent, &outer_msg, addr, &msg);
+        agent_socket_send(agent, &agent->turn_ser_addr, outer_msg.buf, outer_msg.size);
+
         agent->binding_request_time = ports_get_epoch_time();
       }
       break;
@@ -381,6 +452,7 @@ void agent_process_stun_response(Agent* agent, StunMessage* stun_msg) {
 int agent_recv(Agent* agent, uint8_t* buf, int len) {
   int ret = -1;
   StunMessage stun_msg;
+  StunMessage inner_msg;
   Address addr;
   char addr_string[ADDRSTRLEN];
 
@@ -391,7 +463,7 @@ int agent_recv(Agent* agent, uint8_t* buf, int len) {
     switch (stun_msg.stunclass) {
       case STUN_CLASS_REQUEST:
         addr_to_string(&addr, addr_string, sizeof(addr_string));
-        LOGD("Received binding REQUEST from addres ip: %s, port: %d", addr_string, agent->nominated_pair->remote->addr.port);
+        LOGD("Received binding REQUEST from address ip: %s, port: %d", addr_string, agent->nominated_pair->remote->addr.port);
         agent_process_stun_request(agent, &stun_msg, &addr);
         break;
       case STUN_CLASS_RESPONSE:
@@ -401,6 +473,21 @@ int agent_recv(Agent* agent, uint8_t* buf, int len) {
         break;
       case STUN_CLASS_ERROR:
         break;
+      case STUN_CLASS_INDICATION:
+        addr_to_string(&addr, addr_string, sizeof(addr_string));
+        LOGI("Received DATA INDICATION from remote ip: %s, port: %d", addr_string, addr.port);
+        memcpy(inner_msg.buf, stun_msg.turn_data, sizeof(stun_msg.turn_data));
+        inner_msg.size = stun_msg.turn_data_size;
+        stun_parse_msg_buf(&inner_msg);
+        if (inner_msg.stunclass == STUN_CLASS_REQUEST) {
+          LOGI("Received BINDING request in DATA INDICATION");
+          // agent_process_stun_request(agent, &inner_msg, &agent->nominated_pair->remote->addr);
+        }
+        else if(inner_msg.stunclass == STUN_CLASS_RESPONSE) {
+          LOGI("Received BINDING request in DATA INDICATION");
+          agent_process_stun_response(agent, &inner_msg);
+
+        }
       default:
         break;
     }
@@ -453,26 +540,74 @@ void agent_set_remote_description(Agent* agent, char* description) {
       }
     }
   }
-  LOGD("candidate pairs num: %d", agent->candidate_pairs_num);
+  LOGI("candidate pairs num: %d", agent->candidate_pairs_num);
+}
+
+int agent_create_permission(Agent* agent) {
+  StunMessage cre_per_msg;
+  StunMessage recv_msg;
+  uint8_t buf[512];
+  char addr_string[ADDRSTRLEN];
+  memset(&recv_msg, 0, sizeof(recv_msg));
+
+  LOGD("Concheck: %d", agent->nominated_pair->conncheck);
+
+  if (agent->nominated_pair->conncheck % AGENT_PERMISSION_PERIOD == 0) {
+  // Create and send the request
+    addr_to_string(&agent->nominated_pair->remote->addr, addr_string, sizeof(addr_string)); 
+    LOGD("Setting permission for remote ip %s, port: %d", addr_string, agent->nominated_pair->remote->addr.port);
+    agent_create_permission_request(agent, &cre_per_msg, &agent->nominated_pair->remote->addr);
+    agent_socket_send(agent, &agent->turn_ser_addr, cre_per_msg.buf, cre_per_msg.size);
+
+  // Wait for response
+    int ret = agent_socket_recv_attempts(agent, NULL, recv_msg.buf, sizeof(recv_msg.buf), AGENT_STUN_RECV_MAXTIMES); // Retry 5 times
+    if (ret > 0) {
+      stun_parse_msg_buf(&recv_msg);
+      if (recv_msg.stunclass == STUN_CLASS_RESPONSE) {
+        LOGI("CreatePermission succeeded");
+        agent->turn_permission = 1;
+        return 0;
+      } else {
+        LOGE("CreatePermission failed");
+        return -1;
+      }
+    }
+    else {
+      LOGE("No response from TURN server");
+      return -1;
+    }
+  }
+  return -1;
 }
 
 int agent_connectivity_check(Agent* agent) {
   char addr_string[ADDRSTRLEN];
   uint8_t buf[1400];
-  StunMessage msg;
+  StunMessage inner_msg;
+  StunMessage outer_msg;
 
   if (agent->nominated_pair->state != ICE_CANDIDATE_STATE_INPROGRESS) {
-    LOGI("nominated pair is not in progress");
+    LOGI("Nominated pair is not in progress");
     return -1;
   }
 
-  memset(&msg, 0, sizeof(msg));
+  memset(&inner_msg, 0, sizeof(inner_msg));
+  memset(&outer_msg, 0, sizeof(outer_msg));
 
   if (agent->nominated_pair->conncheck % AGENT_CONNCHECK_PERIOD == 0) {
     addr_to_string(&agent->nominated_pair->remote->addr, addr_string, sizeof(addr_string));
-    LOGI("Sending binding REQUEST to remote ip: %s, port: %d", addr_string, agent->nominated_pair->remote->addr.port);
-    agent_create_binding_request(agent, &msg);
-    agent_socket_send(agent, &agent->nominated_pair->remote->addr, msg.buf, msg.size);
+    LOGI("Sending binding REQUEST and SEND INDICATION to remote ip: %s, port: %d", addr_string, agent->nominated_pair->remote->addr.port);
+
+    agent_create_binding_request(agent, &inner_msg);
+    agent_socket_send(agent, &agent->nominated_pair->remote->addr, inner_msg.buf, inner_msg.size);
+    
+    if(agent->indication_sent < 2){
+      agent_create_send_indication(agent, &outer_msg, &agent->nominated_pair->remote->addr, &inner_msg);
+      agent_socket_send(agent, &agent->turn_ser_addr, outer_msg.buf, outer_msg.size);
+      agent->indication_sent++;
+
+      LOGD("Sent: %d", outer_msg.size);
+    }
   }
 
   agent_recv(agent, buf, sizeof(buf));

@@ -234,7 +234,7 @@ static int websocket_write_back(struct lws* wsi_in, char* str, int str_size_in) 
 
     PeerConnectionState state = peer_connection_get_state(g_ps.pc);
 
-    // LOGD("Message received: \n%s\n", str);
+    LOGD("Message received: \n%s\n", str);
     if (str == NULL || wsi_in == NULL) {
         LOGW("Invalid arguments received");
         return -1;
@@ -351,7 +351,7 @@ static int callback_janus(struct lws* wsi, enum lws_callback_reasons reason, voi
 {
     struct lws_client_connect_info i;
 
-    LOGI("\tcallback_janus %d", reason);
+    LOGD("\tcallback_janus %d", reason);
     switch (reason)
     {
     case LWS_CALLBACK_CLIENT_ESTABLISHED:
@@ -471,7 +471,7 @@ static void peer_signaling_onicecandidate(char* description, void* userdata) {
 
     snprintf(offer, strlen(description), "OFFER %s \n ", description);
 
-    LOGI("Sending modified offer:\n%s", offer);
+    // LOGI("Sending modified offer:\n%s", offer);
 
     // if (text == NULL) {
     //     LOGW("Error creating JSON string\n");

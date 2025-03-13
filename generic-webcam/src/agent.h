@@ -61,6 +61,15 @@ struct Agent {
   uint64_t binding_request_time;
   AgentState state;
 
+  char turn_realm[64];
+  char turn_nonce[128];
+  Address turn_ser_addr;
+  const char* turn_username;
+  const char* turn_password;
+  int turn_permission;
+  
+  int indication_sent;
+
   AgentMode mode;
 
   IceCandidatePair candidate_pairs[AGENT_MAX_CANDIDATE_PAIRS];
@@ -83,6 +92,8 @@ int agent_recv(Agent* agent, uint8_t* buf, int len);
 void agent_set_remote_description(Agent* agent, char* description);
 
 int agent_select_candidate_pair(Agent* agent);
+
+int agent_create_permission(Agent* agent);
 
 int agent_connectivity_check(Agent* agent);
 
