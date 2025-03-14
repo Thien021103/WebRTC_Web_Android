@@ -21,7 +21,7 @@ int dtls_srtp_udp_send(void* ctx, const uint8_t* buf, size_t len) {
 
   int ret = udp_socket_sendto(udp_socket, dtls_srtp->remote_addr, buf, len);
 
-  LOGD("dtls_srtp_udp_send (%d)", ret);
+  LOGI("dtls_srtp_udp_send (%d)", ret);
 
   return ret;
 }
@@ -36,7 +36,7 @@ int dtls_srtp_udp_recv(void* ctx, uint8_t* buf, size_t len) {
     ports_sleep_ms(1);
   }
 
-  LOGD("dtls_srtp_udp_recv (%d)", ret);
+  LOGI("dtls_srtp_udp_recv (%d)", ret);
 
   return ret;
 }
@@ -156,8 +156,8 @@ int dtls_srtp_init(DtlsSrtp* dtls_srtp, DtlsSrtpRole role, void* user_data) {
   dtls_srtp->role = role;
   dtls_srtp->state = DTLS_SRTP_STATE_INIT;
   dtls_srtp->user_data = user_data;
-  dtls_srtp->udp_send = dtls_srtp_udp_send;
-  dtls_srtp->udp_recv = dtls_srtp_udp_recv;
+  // dtls_srtp->udp_send = dtls_srtp_udp_send;
+  // dtls_srtp->udp_recv = dtls_srtp_udp_recv;
 
   mbedtls_ssl_config_init(&dtls_srtp->conf);
   mbedtls_ssl_init(&dtls_srtp->ssl);
@@ -205,7 +205,7 @@ int dtls_srtp_init(DtlsSrtp* dtls_srtp, DtlsSrtpRole role, void* user_data) {
 
   dtls_srtp_x509_digest(&dtls_srtp->cert, dtls_srtp->local_fingerprint);
 
-  LOGD("local fingerprint: %s", dtls_srtp->local_fingerprint);
+  LOGI("local fingerprint: %s", dtls_srtp->local_fingerprint);
 
   mbedtls_ssl_conf_dtls_srtp_protection_profiles(&dtls_srtp->conf, default_profiles);
 
@@ -402,7 +402,7 @@ static int dtls_srtp_handshake_server(DtlsSrtp* dtls_srtp) {
     ret = dtls_srtp_do_handshake(dtls_srtp);
 
     if (ret == MBEDTLS_ERR_SSL_HELLO_VERIFY_REQUIRED) {
-      LOGD("DTLS hello verification requested");
+      LOGI("DTLS hello verification requested");
 
     } else if (ret != 0) {
       LOGE("failed! mbedtls_ssl_handshake returned -0x%.4x", (unsigned int)-ret);
@@ -414,7 +414,7 @@ static int dtls_srtp_handshake_server(DtlsSrtp* dtls_srtp) {
     }
   }
 
-  LOGD("DTLS server handshake done");
+  LOGI("DTLS server handshake done");
 
   return ret;
 }
@@ -427,7 +427,7 @@ static int dtls_srtp_handshake_client(DtlsSrtp* dtls_srtp) {
     LOGE("failed! mbedtls_ssl_handshake returned -0x%.4x\n\n", (unsigned int)-ret);
   }
 
-  LOGD("DTLS client handshake done");
+  LOGI("DTLS client handshake done");
 
   return ret;
 }

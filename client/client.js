@@ -46,11 +46,16 @@ websocket.onmessage = async (evt) => {
 function createPeerConnection() {
     const config = {
         bundlePolicy: "max-bundle",
+        iceTransportPolicy: "relay",
     };
 
     if (document.getElementById('use-stun').checked) {
         config.iceServers = [
-            { urls: ['stun:stun.l.google.com:19302'] },
+            {
+                urls: "turn:global.relay.metered.ca:80",
+                username: "ed7eefc8221803e03314328d",
+                credential: "8u02WYPAgcyPhfuN",
+            },
         ];
     }
 

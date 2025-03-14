@@ -56,7 +56,7 @@ struct PeerConnection {
 static void peer_connection_outgoing_rtp_packet(uint8_t* data, size_t size, void* user_data) {
   PeerConnection* pc = (PeerConnection*)user_data;
   dtls_srtp_encrypt_rtp_packet(&pc->dtls_srtp, data, (int*)&size);
-  agent_send(&pc->agent, data, size);
+  agent_send(&pc->agent, data, size, 1);
 }
 
 static int peer_connection_dtls_srtp_recv(void* ctx, unsigned char* buf, size_t len) {
@@ -72,7 +72,7 @@ static int peer_connection_dtls_srtp_recv(void* ctx, unsigned char* buf, size_t 
   }
 
   while (recv_max < MAX_RECV) {
-    ret = agent_recv(&pc->agent, buf, len);
+    ret = agent_recv(&pc->agent, buf, len, 1);
 
     if (ret > 0) {
       break;
@@ -87,10 +87,10 @@ static int peer_connection_dtls_srtp_recv(void* ctx, unsigned char* buf, size_t 
 static int peer_connection_dtls_srtp_send(void* ctx, const uint8_t* buf, size_t len) {
   DtlsSrtp* dtls_srtp = (DtlsSrtp*)ctx;
   PeerConnection* pc = (PeerConnection*)dtls_srtp->user_data;
-  LOGD("dtls_srtp_udp_send ");
+  LOGI("dtls_srtp_udp_send ");
 
   // LOGD("send %.4x %.4x, %ld", *(uint16_t*)buf, *(uint16_t*)(buf + 2), len);
-  return agent_send(&pc->agent, buf, len);
+  return agent_send(&pc->agent, buf, len, 1);
 }
 
 static void peer_connection_incoming_rtcp(PeerConnection* pc, uint8_t* buf, size_t len) {
@@ -382,7 +382,10 @@ int peer_connection_loop(PeerConnection* pc) {
       else if (agent_create_permission(&pc->agent) < 0) {
         break;
       } 
-      else if (agent_connectivity_check(&pc->agent) == 0) {
+      else if (agent_connectivity_check(&pc->agent) < 0) {
+        break;
+      }
+      else if (agent_channel_bind(&pc->agent) == 0) {
         STATE_CHANGED(pc, PEER_CONNECTION_CONNECTED);
       }
       break;
@@ -430,8 +433,8 @@ int peer_connection_loop(PeerConnection* pc) {
       }
 #endif
 
-      if ((pc->agent_ret = agent_recv(&pc->agent, pc->agent_buf, sizeof(pc->agent_buf))) > 0) {
-        LOGD("agent_recv %d", pc->agent_ret);
+      if ((pc->agent_ret = agent_recv(&pc->agent, pc->agent_buf, sizeof(pc->agent_buf), 1)) > 0) {
+        LOGI("agent_recv %d", pc->agent_ret);
 
         if (rtcp_probe(pc->agent_buf, pc->agent_ret)) {
           LOGD("Got RTCP packet");

@@ -33,6 +33,7 @@ typedef enum StunMethod {
   STUN_METHOD_CREATE_PERMISSION = 0x0008,
   STUN_METHOD_SEND = 0x0006,
   STUN_METHOD_DATA = 0x0007,
+  STUN_METHOD_CHANNEL_BIND = 0x0009,
 
 } StunMethod;
 
@@ -57,6 +58,7 @@ typedef enum StunAttrType {
   STUN_ATTR_TYPE_SOFTWARE = 0x8022,
   // https://datatracker.ietf.org/doc/html/draft-thatcher-ice-network-cost-00
   STUN_ATTR_TYPE_NETWORK_COST = 0xc057,
+  STUN_ATTR_TYPE_CHANNEL_NUMBER = 0x000c,
 
 } StunAttrType;
 

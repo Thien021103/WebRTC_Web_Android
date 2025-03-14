@@ -66,9 +66,12 @@ struct Agent {
   Address turn_ser_addr;
   const char* turn_username;
   const char* turn_password;
+
   int turn_permission;
-  
-  int indication_sent;
+  // int indication_sent;
+  int requested;  // Sent request to client
+  int responded;  // Sent response to client
+  char channel[4];
 
   AgentMode mode;
 
@@ -85,9 +88,9 @@ void agent_gather_candidate(Agent* agent, const char* urls, const char* username
 
 void agent_get_local_description(Agent* agent, char* description, int length);
 
-int agent_send(Agent* agent, const uint8_t* buf, int len);
+int agent_send(Agent* agent, const uint8_t* buf, int len, int use_channel);
 
-int agent_recv(Agent* agent, uint8_t* buf, int len);
+int agent_recv(Agent* agent, uint8_t* buf, int len, int use_channel);
 
 void agent_set_remote_description(Agent* agent, char* description);
 
@@ -96,6 +99,8 @@ int agent_select_candidate_pair(Agent* agent);
 int agent_create_permission(Agent* agent);
 
 int agent_connectivity_check(Agent* agent);
+
+int agent_channel_bind(Agent* agent);
 
 void agent_clear_candidates(Agent* agent);
 

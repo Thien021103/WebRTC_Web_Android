@@ -421,7 +421,7 @@ int stun_msg_is_valid(uint8_t* buf, size_t size, char* password) {
   // LOGD("Fingerprint: 0x%08x", fingerprint);
 
   if (fingerprint != msg.fingerprint) {
-    // LOGE("Fingerprint does not match.");
+    LOGE("Fingerprint does not match.");
     return -1;
   } else {
     // LOGD("Fingerprint matches.");
@@ -440,7 +440,7 @@ int stun_msg_is_valid(uint8_t* buf, size_t size, char* password) {
   // LOGD("message_integrity: 0x%s", message_integrity_hex);
 
   if (memcmp(message_integrity, msg.message_integrity, 20) != 0) {
-    // LOGE("Message Integrity does not match.");
+    LOGE("Message Integrity does not match.");
     return -1;
   } else {
     // LOGD("Message Integrity matches.");
