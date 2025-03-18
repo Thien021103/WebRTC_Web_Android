@@ -47,6 +47,7 @@ int agent_create(Agent* agent) {
   agent->turn_permission = 0;
   agent->requested = 0;
   agent->responded = 0;
+  agent->use_channel = 0;
   return 0;
 }
 
@@ -325,8 +326,8 @@ void agent_get_local_description(Agent* agent, char* description, int length) {
   LOGI("local description:\n%s", description);
 }
 
-int agent_send(Agent* agent, const uint8_t* buf, int len, int use_channel) {
-  if (use_channel) {
+int agent_send(Agent* agent, const uint8_t* buf, int len) {
+  if (agent->use_channel) {
     // Send as ChannelData to TURN server
     uint8_t channel_buf[CONFIG_MTU + 128]; // Fixed-size buffer, adjust as needed
     if (len + 4 > sizeof(channel_buf)) {
@@ -489,13 +490,18 @@ void agent_process_stun_request(Agent* agent, StunMessage* stun_msg, Address* ad
 
         agent->responded = 1; // Sent response to client, switch to channel binding
 
-        agent_create_binding_response(agent, &msg, addr);
-        agent_socket_send(agent, addr, msg.buf, msg.size);
-
-        memset(&outer_msg, 0, sizeof(outer_msg));
-        agent_create_send_indication(agent, &outer_msg, addr, &msg);
-        agent_socket_send(agent, &agent->turn_ser_addr, outer_msg.buf, outer_msg.size);
-
+        if(agent->use_channel) {
+          agent_create_binding_response(agent, &msg, addr);
+          agent_send(agent, addr, msg.buf, msg.size);
+        }
+        else {
+          agent_create_binding_response(agent, &msg, addr);
+          agent_socket_send(agent, addr, msg.buf, msg.size);
+  
+          memset(&outer_msg, 0, sizeof(outer_msg));
+          agent_create_send_indication(agent, &outer_msg, addr, &msg);
+          agent_socket_send(agent, &agent->turn_ser_addr, outer_msg.buf, outer_msg.size);
+        }
         agent->binding_request_time = ports_get_epoch_time();
       }
       break;
@@ -519,15 +525,15 @@ void agent_process_stun_response(Agent* agent, StunMessage* stun_msg) {
   }
 }
 
-int agent_recv(Agent* agent, uint8_t* buf, int len, int use_channel) {
+int agent_recv(Agent* agent, uint8_t* buf, int len) {
   int ret = -1;
   StunMessage stun_msg;
   StunMessage inner_msg;
   Address addr;
   char addr_string[ADDRSTRLEN];
 
-  if (use_channel) {
-    // Receive ChannelData from TURN server
+  // Receive ChannelData from TURN server
+  if (agent->use_channel) {
     ret = agent_socket_recv(agent, &addr, buf, len);
     if (ret < 0) {
         return -1; // Receive error
@@ -545,10 +551,29 @@ int agent_recv(Agent* agent, uint8_t* buf, int len, int use_channel) {
         }
         // Extract payload (skip 4-byte header)
         memmove(buf, buf + 4, data_len);
+        // Receive STUN packets from peer in ChannelData
+        if (stun_probe(buf, len) == 0) {
+          memcpy(stun_msg.buf, buf, ret);
+          stun_msg.size = ret;
+          stun_parse_msg_buf(&stun_msg);
+          switch (stun_msg.stunclass) {
+            case STUN_CLASS_REQUEST:
+              agent_process_stun_request(agent, &stun_msg, &addr);
+              break;
+            case STUN_CLASS_RESPONSE:
+              agent_process_stun_response(agent, &stun_msg);
+              break;
+            case STUN_CLASS_ERROR:
+              break;
+            default:
+              break;
+          }
+        }
         return data_len; // Return payload length
     }
     return -1; // Not a matching ChannelData message
   }
+  // Receive STUN packets from peer
   else if ((ret = agent_socket_recv(agent, &addr, buf, len)) > 0 && stun_probe(buf, len) == 0) {
     memcpy(stun_msg.buf, buf, ret);
     stun_msg.size = ret;
@@ -557,7 +582,7 @@ int agent_recv(Agent* agent, uint8_t* buf, int len, int use_channel) {
       case STUN_CLASS_REQUEST:
         addr_to_string(&addr, addr_string, sizeof(addr_string));
         LOGD("Received binding REQUEST from address ip: %s, port: %d", addr_string, agent->nominated_pair->remote->addr.port);
-        agent_process_stun_request(agent, &stun_msg, &addr);
+        agent_process_stun_request(agent, &stun_msg, &addr, 0);
         break;
       case STUN_CLASS_RESPONSE:
         addr_to_string(&agent->nominated_pair->remote->addr, addr_string, sizeof(addr_string));
@@ -575,7 +600,7 @@ int agent_recv(Agent* agent, uint8_t* buf, int len, int use_channel) {
         // Only response when already checked with your own request first
         if (inner_msg.stunclass == STUN_CLASS_REQUEST && agent->requested) {
           LOGI("Received BINDING request in DATA INDICATION");
-          agent_process_stun_request(agent, &inner_msg, &agent->nominated_pair->remote->addr);
+          agent_process_stun_request(agent, &inner_msg, &agent->nominated_pair->remote->addr, 0);
         }
         else if(inner_msg.stunclass == STUN_CLASS_RESPONSE) {
           LOGI("Received BINDING response in DATA INDICATION");
@@ -702,14 +727,11 @@ int agent_connectivity_check(Agent* agent) {
     agent_create_binding_request(agent, &inner_msg);
     agent_socket_send(agent, &agent->nominated_pair->remote->addr, inner_msg.buf, inner_msg.size);
     
-    // if(agent->responded){
     agent_create_send_indication(agent, &outer_msg, &agent->nominated_pair->remote->addr, &inner_msg);
     agent_socket_send(agent, &agent->turn_ser_addr, outer_msg.buf, outer_msg.size);
-      // agent->indication_sent++;
-    // }
   }
 
-  agent_recv(agent, buf, sizeof(buf), 0);
+  agent_recv(agent, buf, sizeof(buf));
 
   if (agent->nominated_pair->state == ICE_CANDIDATE_STATE_SUCCEEDED && agent->responded) {
     agent->selected_pair = agent->nominated_pair;
@@ -739,11 +761,12 @@ int agent_channel_bind(Agent* agent) {
     stun_parse_msg_buf(&recv_msg);
     if (recv_msg.stunclass == STUN_CLASS_RESPONSE) {
       LOGI("Binding channel succeeded");
-      // Channel 0x4005
+      // Start using Channel 0x4005
       agent->channel[0] = 0x40;
       agent->channel[1] = 0x05;
       agent->channel[2] = 0x00;
       agent->channel[3] = 0x00;
+      agent->use_channel = 1;
       return 0;
     } else {
       LOGE("Binding channel failed");

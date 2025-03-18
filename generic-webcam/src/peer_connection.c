@@ -56,7 +56,7 @@ struct PeerConnection {
 static void peer_connection_outgoing_rtp_packet(uint8_t* data, size_t size, void* user_data) {
   PeerConnection* pc = (PeerConnection*)user_data;
   dtls_srtp_encrypt_rtp_packet(&pc->dtls_srtp, data, (int*)&size);
-  agent_send(&pc->agent, data, size, 1);
+  agent_send(&pc->agent, data, size);
 }
 
 static int peer_connection_dtls_srtp_recv(void* ctx, unsigned char* buf, size_t len) {
@@ -72,7 +72,7 @@ static int peer_connection_dtls_srtp_recv(void* ctx, unsigned char* buf, size_t 
   }
 
   while (recv_max < MAX_RECV) {
-    ret = agent_recv(&pc->agent, buf, len, 1);
+    ret = agent_recv(&pc->agent, buf, len);
 
     if (ret > 0) {
       break;
@@ -90,7 +90,7 @@ static int peer_connection_dtls_srtp_send(void* ctx, const uint8_t* buf, size_t 
   LOGI("dtls_srtp_udp_send ");
 
   // LOGD("send %.4x %.4x, %ld", *(uint16_t*)buf, *(uint16_t*)(buf + 2), len);
-  return agent_send(&pc->agent, buf, len, 1);
+  return agent_send(&pc->agent, buf, len);
 }
 
 static void peer_connection_incoming_rtcp(PeerConnection* pc, uint8_t* buf, size_t len) {
@@ -406,6 +406,7 @@ int peer_connection_loop(PeerConnection* pc) {
       break;
     case PEER_CONNECTION_COMPLETED:
 
+  /* SENDING DATA */
 #if (CONFIG_VIDEO_BUFFER_SIZE) > 0
       data = buffer_peak_head(pc->video_rb, &bytes);
       if (data) {
@@ -433,23 +434,28 @@ int peer_connection_loop(PeerConnection* pc) {
       }
 #endif
 
-      if ((pc->agent_ret = agent_recv(&pc->agent, pc->agent_buf, sizeof(pc->agent_buf), 1)) > 0) {
-        LOGI("agent_recv %d", pc->agent_ret);
+  /* RECEIVING DATA */
+      if ((pc->agent_ret = agent_recv(&pc->agent, pc->agent_buf, sizeof(pc->agent_buf))) > 0) {
+        LOGD("agent_recv %d", pc->agent_ret);
 
+        // Received RTCP packets
         if (rtcp_probe(pc->agent_buf, pc->agent_ret)) {
           LOGD("Got RTCP packet");
           dtls_srtp_decrypt_rtcp_packet(&pc->dtls_srtp, pc->agent_buf, &pc->agent_ret);
           peer_connection_incoming_rtcp(pc, pc->agent_buf, pc->agent_ret);
 
-        } else if (dtls_srtp_probe(pc->agent_buf)) {
+        } 
+        // Received SCTP packets
+        else if (dtls_srtp_probe(pc->agent_buf)) {
           int ret = dtls_srtp_read(&pc->dtls_srtp, pc->temp_buf, sizeof(pc->temp_buf));
           LOGD("Got DTLS data %d", ret);
 
           if (ret > 0) {
             sctp_incoming_data(&pc->sctp, (char*)pc->temp_buf, ret);
           }
-
-        } else if (rtp_packet_validate(pc->agent_buf, pc->agent_ret)) {
+        // Received RTP packets
+        } 
+        else if (rtp_packet_validate(pc->agent_buf, pc->agent_ret)) {
           LOGD("Got RTP packet");
 
           dtls_srtp_decrypt_rtp_packet(&pc->dtls_srtp, pc->agent_buf, &pc->agent_ret);

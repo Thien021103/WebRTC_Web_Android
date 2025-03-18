@@ -67,6 +67,7 @@ struct Agent {
   const char* turn_username;
   const char* turn_password;
 
+  int use_channel;
   int turn_permission;
   // int indication_sent;
   int requested;  // Sent request to client
@@ -88,9 +89,9 @@ void agent_gather_candidate(Agent* agent, const char* urls, const char* username
 
 void agent_get_local_description(Agent* agent, char* description, int length);
 
-int agent_send(Agent* agent, const uint8_t* buf, int len, int use_channel);
+int agent_send(Agent* agent, const uint8_t* buf, int len);
 
-int agent_recv(Agent* agent, uint8_t* buf, int len, int use_channel);
+int agent_recv(Agent* agent, uint8_t* buf, int len);
 
 void agent_set_remote_description(Agent* agent, char* description);
 
