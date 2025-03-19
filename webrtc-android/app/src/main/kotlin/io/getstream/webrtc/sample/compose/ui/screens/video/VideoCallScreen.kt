@@ -17,12 +17,15 @@
 package io.getstream.webrtc.sample.compose.ui.screens.video
 
 import android.app.Activity
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,13 +40,25 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.getstream.webrtc.sample.compose.ui.components.VideoRenderer
 import io.getstream.webrtc.sample.compose.webrtc.sessions.LocalWebRtcSessionManager
+import io.getstream.log.taggedLogger
+import kotlinx.coroutines.delay
 
 @Composable
-fun VideoCallScreen() {
+fun VideoCallScreen(
+  onCancelCall: () -> Unit
+) {
   val sessionManager = LocalWebRtcSessionManager.current
 
+  val remoteVideoTrackState by sessionManager.remoteVideoTrackFlow.collectAsState(null)
+  val remoteVideoTrack = remoteVideoTrackState
+
+  val localVideoTrackState by sessionManager.localVideoTrackFlow.collectAsState(null)
+  val localVideoTrack = localVideoTrackState
+
+  var callMediaState by remember { mutableStateOf(CallMediaState()) }
   LaunchedEffect(key1 = Unit) {
     sessionManager.onSessionScreenReady()
   }
@@ -52,37 +67,37 @@ fun VideoCallScreen() {
     modifier = Modifier.fillMaxSize()
   ) {
     var parentSize: IntSize by remember { mutableStateOf(IntSize(0, 0)) }
-
-    val remoteVideoTrackState by sessionManager.remoteVideoTrackFlow.collectAsState(null)
-    val remoteVideoTrack = remoteVideoTrackState
-
-    val localVideoTrackState by sessionManager.localVideoTrackFlow.collectAsState(null)
-    val localVideoTrack = localVideoTrackState
-
-    var callMediaState by remember { mutableStateOf(CallMediaState()) }
-
     if (remoteVideoTrack != null) {
       VideoRenderer(
         videoTrack = remoteVideoTrack,
         modifier = Modifier
           .fillMaxSize()
+          .absolutePadding(0.dp, 0.dp, 0.dp, 100.dp)
+          .clip(RoundedCornerShape(5.dp))
           .onSizeChanged { parentSize = it }
       )
     }
-
-    if (localVideoTrack != null && callMediaState.isCameraEnabled) {
-      FloatingVideoRenderer(
-        modifier = Modifier
-          .size(width = 150.dp, height = 210.dp)
-          .clip(RoundedCornerShape(16.dp))
-          .align(Alignment.TopEnd),
-        videoTrack = localVideoTrack,
-        parentBounds = parentSize,
-        paddingValues = PaddingValues(0.dp)
-      )
+// Enhanced logging for local video condition
+    if (localVideoTrack != null) {
+//      if (callMediaState.isCameraEnabled) {
+        Log.d("VideoCallScreen", "Local video track available and camera enabled")
+        FloatingVideoRenderer(
+          modifier = Modifier
+            .size(width = 150.dp, height = 210.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .align(Alignment.TopEnd),
+          videoTrack = localVideoTrack,
+          parentBounds = parentSize,
+          paddingValues = PaddingValues(0.dp)
+        )
+//      } else {
+//        Log.d ( "VideoCallScreen", "Local video track exists but camera is disabled: isCameraEnabled=${callMediaState.isCameraEnabled}" )
+//      }
+    } else {
+      Log.d ( "VideoCallScreen", "Local video track null" )
     }
 
-    val activity = (LocalContext.current as? Activity)
+//    val activity = (LocalContext.current as? Activity)
 
     VideoCallControls(
       modifier = Modifier
@@ -104,7 +119,8 @@ fun VideoCallScreen() {
           CallAction.FlipCamera -> sessionManager.flipCamera()
           CallAction.LeaveCall -> {
             sessionManager.disconnect()
-            activity?.finish()
+            onCancelCall.invoke()
+//            activity?.finish()
           }
         }
       }

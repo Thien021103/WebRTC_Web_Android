@@ -23,6 +23,7 @@ import android.hardware.camera2.CameraMetadata
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.os.Build
+import android.util.Log
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.core.content.getSystemService
@@ -197,6 +198,7 @@ class WebRtcSessionManagerImpl(
     sessionManagerScope.launch {
       // sending local video track to show local video from start
       _localVideoTrackFlow.emit(localVideoTrack)
+      Log.d ( "VideoCallScreen", "Local video track emitted" )
 
       if (offer != null) {
         sendAnswer()
@@ -240,6 +242,7 @@ class WebRtcSessionManagerImpl(
 
     // dispose signaling clients and socket.
     signalingClient.dispose()
+    peerConnection.connection.close()
   }
 
   private suspend fun sendOffer() {

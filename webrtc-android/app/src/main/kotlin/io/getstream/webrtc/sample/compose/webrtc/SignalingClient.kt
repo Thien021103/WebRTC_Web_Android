@@ -17,6 +17,7 @@
 package io.getstream.webrtc.sample.compose.webrtc
 
 import io.getstream.log.taggedLogger
+import io.getstream.webrtc.sample.compose.BuildConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -31,7 +32,7 @@ import okhttp3.Request
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 
-class SignalingClient(signalingServerIp: String) {
+class SignalingClient() {
   private val logger by taggedLogger("Call:SignalingClient")
   private val signalingScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
   private val client = OkHttpClient()
