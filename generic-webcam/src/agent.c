@@ -61,6 +61,11 @@ void agent_destroy(Agent* agent) {
     udp_socket_close(&agent->udp_sockets[1]);
   }
 #endif
+  // agent->indication_sent = 0;
+  agent->turn_permission = 0;
+  agent->requested = 0;
+  agent->responded = 0;
+  agent->use_channel = 0;
 }
 
 static int agent_socket_recv(Agent* agent, Address* addr, uint8_t* buf, int len) {
@@ -581,9 +586,12 @@ int agent_recv(Agent* agent, uint8_t* buf, int len) {
     stun_parse_msg_buf(&stun_msg);
     switch (stun_msg.stunclass) {
       case STUN_CLASS_REQUEST:
-        addr_to_string(&addr, addr_string, sizeof(addr_string));
-        LOGD("Received binding REQUEST from address ip: %s, port: %d", addr_string, agent->nominated_pair->remote->addr.port);
-        agent_process_stun_request(agent, &stun_msg, &addr);
+        // Only response when already checked with your own request first
+        if(agent->requested) {
+          addr_to_string(&addr, addr_string, sizeof(addr_string));
+          LOGD("Received binding REQUEST from address ip: %s, port: %d", addr_string, agent->nominated_pair->remote->addr.port);
+          agent_process_stun_request(agent, &stun_msg, &addr);
+        }
         break;
       case STUN_CLASS_RESPONSE:
         addr_to_string(&agent->nominated_pair->remote->addr, addr_string, sizeof(addr_string));

@@ -439,14 +439,26 @@ int peer_connection_loop(PeerConnection* pc) {
       if (agent_select_candidate_pair(&pc->agent) < 0) {
         break;
       } 
-      else if (agent_create_permission(&pc->agent) < 0) {
-        break;
-      } 
-      else if (agent_connectivity_check(&pc->agent) < 0) {
-        break;
+      // Using TURN server
+      else if (pc->agent->nominated_pair->remote->type == CANDIDATE_TYPE_RELAYED
+            || pc->agent->nominated_pair->local->type == CANDIDATE_TYPE_RELAYED) {
+        if (agent_create_permission(&pc->agent) < 0) {
+          break;
+        } 
+        else if (agent_connectivity_check(&pc->agent) < 0) {
+          break;
+        }
+        else if (agent_channel_bind(&pc->agent) == 0) {
+          STATE_CHANGED(pc, PEER_CONNECTION_CONNECTED);
+          break;
+        }
       }
-      else if (agent_channel_bind(&pc->agent) == 0) {
-        STATE_CHANGED(pc, PEER_CONNECTION_CONNECTED);
+      // Not using TURN server
+      else {
+        if (agent_connectivity_check(&pc->agent) == 0) {
+          STATE_CHANGED(pc, PEER_CONNECTION_CONNECTED);
+          break;
+        }
       }
       break;
 
