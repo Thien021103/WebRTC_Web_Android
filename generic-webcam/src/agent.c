@@ -352,7 +352,7 @@ int agent_send(Agent* agent, const uint8_t* buf, int len) {
       return -1;
     }
     else {
-      LOGI("Sent ChannelData: channel=0x%04x, data_len=%d\n", 
+      LOGD("Sent ChannelData: channel=0x%04x, data_len=%d\n", 
                (agent->channel[0] << 8) | agent->channel[1], len);
       return len;
     }
@@ -492,7 +492,7 @@ void agent_process_stun_request(Agent* agent, StunMessage* stun_msg, Address* ad
 
         if(agent->use_channel) {
           agent_create_binding_response(agent, &msg, addr);
-          agent_send(agent, addr, msg.buf, msg.size);
+          agent_send(agent, msg.buf, msg.size);
         }
         else {
           agent_create_binding_response(agent, &msg, addr);
@@ -554,10 +554,11 @@ int agent_recv(Agent* agent, uint8_t* buf, int len) {
         // Receive STUN packets from peer in ChannelData
         if (stun_probe(buf, len) == 0) {
           memcpy(stun_msg.buf, buf, ret);
-          stun_msg.size = ret;
+          stun_msg.size = data_len;
           stun_parse_msg_buf(&stun_msg);
           switch (stun_msg.stunclass) {
             case STUN_CLASS_REQUEST:
+              LOGI("Received stun binding request!!!");
               agent_process_stun_request(agent, &stun_msg, &addr);
               break;
             case STUN_CLASS_RESPONSE:
@@ -582,7 +583,7 @@ int agent_recv(Agent* agent, uint8_t* buf, int len) {
       case STUN_CLASS_REQUEST:
         addr_to_string(&addr, addr_string, sizeof(addr_string));
         LOGD("Received binding REQUEST from address ip: %s, port: %d", addr_string, agent->nominated_pair->remote->addr.port);
-        agent_process_stun_request(agent, &stun_msg, &addr, 0);
+        agent_process_stun_request(agent, &stun_msg, &addr);
         break;
       case STUN_CLASS_RESPONSE:
         addr_to_string(&agent->nominated_pair->remote->addr, addr_string, sizeof(addr_string));
@@ -600,7 +601,7 @@ int agent_recv(Agent* agent, uint8_t* buf, int len) {
         // Only response when already checked with your own request first
         if (inner_msg.stunclass == STUN_CLASS_REQUEST && agent->requested) {
           LOGI("Received BINDING request in DATA INDICATION");
-          agent_process_stun_request(agent, &inner_msg, &agent->nominated_pair->remote->addr, 0);
+          agent_process_stun_request(agent, &inner_msg, &agent->nominated_pair->remote->addr);
         }
         else if(inner_msg.stunclass == STUN_CLASS_RESPONSE) {
           LOGI("Received BINDING response in DATA INDICATION");

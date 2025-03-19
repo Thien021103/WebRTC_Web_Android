@@ -34,6 +34,7 @@ struct PeerConnection {
   void (*oniceconnectionstatechange)(PeerConnectionState state, void* user_data);
   void (*on_connected)(void* userdata);
   void (*on_receiver_packet_loss)(float fraction_loss, uint32_t total_loss, void* user_data);
+  void (*on_receiver_bitrate)(uint64_t stats, void* user_data);  // Optional
 
   uint8_t temp_buf[CONFIG_MTU];
   uint8_t agent_buf[CONFIG_MTU];
@@ -60,9 +61,10 @@ static void peer_connection_outgoing_rtp_packet(uint8_t* data, size_t size, void
 }
 
 static int peer_connection_dtls_srtp_recv(void* ctx, unsigned char* buf, size_t len) {
-  static const int MAX_RECV = 200;
+  // static const int MAX_RECV = 200;
   int recv_max = 0;
-  int ret;
+  // int ret;
+  int ret = -1;
   DtlsSrtp* dtls_srtp = (DtlsSrtp*)ctx;
   PeerConnection* pc = (PeerConnection*)dtls_srtp->user_data;
 
@@ -71,7 +73,7 @@ static int peer_connection_dtls_srtp_recv(void* ctx, unsigned char* buf, size_t 
     return pc->agent_ret;
   }
 
-  while (recv_max < MAX_RECV) {
+  while (recv_max < CONFIG_TLS_READ_TIMEOUT && pc->state == PEER_CONNECTION_CONNECTED) {
     ret = agent_recv(&pc->agent, buf, len);
 
     if (ret > 0) {
@@ -87,7 +89,7 @@ static int peer_connection_dtls_srtp_recv(void* ctx, unsigned char* buf, size_t 
 static int peer_connection_dtls_srtp_send(void* ctx, const uint8_t* buf, size_t len) {
   DtlsSrtp* dtls_srtp = (DtlsSrtp*)ctx;
   PeerConnection* pc = (PeerConnection*)dtls_srtp->user_data;
-  LOGI("dtls_srtp_udp_send ");
+  LOGD("dtls_srtp_udp_send ");
 
   // LOGD("send %.4x %.4x, %ld", *(uint16_t*)buf, *(uint16_t*)(buf + 2), len);
   return agent_send(&pc->agent, buf, len);
@@ -101,28 +103,86 @@ static void peer_connection_incoming_rtcp(PeerConnection* pc, uint8_t* buf, size
     rtcp_header = (RtcpHeader*)(buf + pos);
 
     switch (rtcp_header->type) {
-      case RTCP_RR:
-        LOGD("RTCP_PR");
+      case RTCP_RR: {
+        LOGI("RTCP_RR with %d report blocks", rtcp_header->rc);
+        
         if (rtcp_header->rc > 0) {
-// TODO: REMB, GCC ...etc
-#if 0
-          RtcpRr rtcp_rr = rtcp_parse_rr(buf);
-          uint32_t fraction = ntohl(rtcp_rr.report_block[0].flcnpl) >> 24;
-          uint32_t total = ntohl(rtcp_rr.report_block[0].flcnpl) & 0x00FFFFFF;
-          if(pc->on_receiver_packet_loss && fraction > 0) {
-
-            pc->on_receiver_packet_loss((float)fraction/256.0, total, pc->config.user_data);
+          size_t report_offset = pos + 8;
+          if (report_offset + (rtcp_header->rc * 24) > len) {
+            LOGW("Invalid RTCP RR: insufficient data");
+            break;
           }
-#endif
+
+          // Process all report blocks
+          for (uint8_t i = 0; i < rtcp_header->rc; i++) {
+            uint32_t* report_block = (uint32_t*)(buf + report_offset + (i * 24));
+            uint32_t ssrc = ntohl(report_block[0]);  // Source SSRC
+            
+            uint32_t flcnpl = ntohl(report_block[3]);
+            uint8_t fraction_lost = flcnpl >> 24;
+            uint32_t cumulative_lost = flcnpl & 0x00FFFFFF;
+            
+            uint32_t jitter = ntohl(report_block[5]);
+            uint32_t lsr = ntohl(report_block[6]);
+            uint32_t dlsr = ntohl(report_block[7]);
+            float loss_rate = (float)fraction_lost / 256.0 * 100.0;
+            LOGI("Loss rate: %.1f%%", loss_rate);
+
+            if (pc->on_receiver_packet_loss && fraction_lost > 0) {
+              float loss_rate = (float)fraction_lost / 256.0;
+              pc->on_receiver_packet_loss(loss_rate, cumulative_lost, pc->config.user_data);
+            }
+            // if (pc->on_receiver_report) {
+            //   ReceiverReport report = {
+            //     .ssrc = ssrc,
+            //     .fraction_lost = (float)fraction_lost / 256.0,
+            //     .cumulative_lost = cumulative_lost,
+            //     .jitter = jitter,
+            //     .last_sr_timestamp = lsr,
+            //     .delay_since_last_sr = dlsr
+            //   };
+            //   pc->on_receiver_report(&report, i, rtcp_header->rc, pc->config.user_data);
+            // }
+          }
         }
         break;
+      }
+// TODO: REMB, GCC ...etc
+// #if 0
+//           RtcpRr rtcp_rr = rtcp_parse_rr(buf);
+//           uint32_t fraction = ntohl(rtcp_rr.report_block[0].flcnpl) >> 24;
+//           uint32_t total = ntohl(rtcp_rr.report_block[0].flcnpl) & 0x00FFFFFF;
+//           if(pc->on_receiver_packet_loss && fraction > 0) {
+
+//             pc->on_receiver_packet_loss((float)fraction/256.0, total, pc->config.user_data);
+//           }
+// #endif
+//         }
+// break;
       case RTCP_PSFB: {
         int fmt = rtcp_header->rc;
-        LOGD("RTCP_PSFB %d", fmt);
+        LOGI("RTCP_PSFB %d", fmt);
         // PLI and FIR
         if ((fmt == 1 || fmt == 4) && pc->config.on_request_keyframe) {
           pc->config.on_request_keyframe(pc->config.user_data);
         }
+        else if (fmt == 15) {  // REMB
+          size_t packet_len = 4 * ntohs(rtcp_header->length) + 4;
+          if (pos + packet_len > len) break;
+
+          uint32_t* data = (uint32_t*)(buf + pos + 8);  // Skip header + SSRC
+          uint32_t remb = ntohl(data[1]);
+          
+          uint8_t exp = (remb >> 18) & 0x3F;    // 6-bit exponent
+          uint32_t mantissa = remb & 0x3FFFF;   // 18-bit mantissa
+          uint64_t bitrate = mantissa << exp;   // Calculate bitrate in bps
+          LOGI("Received REMB, bitrate: %llu", bitrate);
+
+          if (pc->on_receiver_bitrate) {
+            pc->on_receiver_bitrate(bitrate, pc->config.user_data);
+          }
+        }
+        break;
       }
       default:
         break;
@@ -406,7 +466,6 @@ int peer_connection_loop(PeerConnection* pc) {
       break;
     case PEER_CONNECTION_COMPLETED:
 
-  /* SENDING DATA */
 #if (CONFIG_VIDEO_BUFFER_SIZE) > 0
       data = buffer_peak_head(pc->video_rb, &bytes);
       if (data) {
@@ -434,28 +493,23 @@ int peer_connection_loop(PeerConnection* pc) {
       }
 #endif
 
-  /* RECEIVING DATA */
       if ((pc->agent_ret = agent_recv(&pc->agent, pc->agent_buf, sizeof(pc->agent_buf))) > 0) {
         LOGD("agent_recv %d", pc->agent_ret);
 
-        // Received RTCP packets
         if (rtcp_probe(pc->agent_buf, pc->agent_ret)) {
-          LOGD("Got RTCP packet");
+          LOGI("Got RTCP packet");
           dtls_srtp_decrypt_rtcp_packet(&pc->dtls_srtp, pc->agent_buf, &pc->agent_ret);
           peer_connection_incoming_rtcp(pc, pc->agent_buf, pc->agent_ret);
 
-        } 
-        // Received SCTP packets
-        else if (dtls_srtp_probe(pc->agent_buf)) {
+        } else if (dtls_srtp_probe(pc->agent_buf)) {
           int ret = dtls_srtp_read(&pc->dtls_srtp, pc->temp_buf, sizeof(pc->temp_buf));
-          LOGD("Got DTLS data %d", ret);
+          LOGI("Got DTLS data %d", ret);
 
           if (ret > 0) {
             sctp_incoming_data(&pc->sctp, (char*)pc->temp_buf, ret);
           }
-        // Received RTP packets
-        } 
-        else if (rtp_packet_validate(pc->agent_buf, pc->agent_ret)) {
+
+        } else if (rtp_packet_validate(pc->agent_buf, pc->agent_ret)) {
           LOGD("Got RTP packet");
 
           dtls_srtp_decrypt_rtp_packet(&pc->dtls_srtp, pc->agent_buf, &pc->agent_ret);
