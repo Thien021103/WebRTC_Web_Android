@@ -1,0 +1,6 @@
+[submodule "generic-webcam/third_party/libsrtp"]
+	path = generic-webcam/third_party/libsrtp
+	url = https://github.com/cisco/libsrtp.git
+[submodule "generic-webcam/third_party/third_party/cJSON"]
+	path = generic-webcam/third_party/third_party/cJSON
+	url = https://github.com/DaveGamble/cJSON.git
