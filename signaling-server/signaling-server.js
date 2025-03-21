@@ -52,6 +52,8 @@ wss.on('connection', (ws) => {
     console.log(`Client ${sessionId} disconnected`);
   });
 
+  ws.on('error', console.error);
+
   // Update session state when both clients are ready
   if (Object.keys(clients).length === 2) {
     sessionState = 'Ready';
