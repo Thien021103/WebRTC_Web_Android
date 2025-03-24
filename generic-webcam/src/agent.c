@@ -14,7 +14,7 @@
 
 #define AGENT_POLL_TIMEOUT 1
 #define AGENT_CONNCHECK_MAX 500
-#define AGENT_CONNCHECK_PERIOD 50
+#define AGENT_CONNCHECK_PERIOD 100
 #define AGENT_PERMISSION_PERIOD 250
 #define AGENT_STUN_RECV_MAXTIMES 1000
 
@@ -22,6 +22,11 @@ void agent_clear_candidates(Agent* agent) {
   agent->local_candidates_count = 0;
   agent->remote_candidates_count = 0;
   agent->candidate_pairs_num = 0;
+    // agent->indication_sent = 0;
+  agent->turn_permission = 0;
+  agent->requested = 0;
+  agent->responded = 0;
+  agent->use_channel = 0;
 }
 
 int agent_create(Agent* agent) {
@@ -43,11 +48,6 @@ int agent_create(Agent* agent) {
 #endif
 
   agent_clear_candidates(agent);
-  // agent->indication_sent = 0;
-  agent->turn_permission = 0;
-  agent->requested = 0;
-  agent->responded = 0;
-  agent->use_channel = 0;
   return 0;
 }
 
@@ -115,7 +115,7 @@ static int agent_socket_recv_attempts(Agent* agent, Address* addr, uint8_t* buf,
   int ret = -1;
   int i = 0;
   for (i = 0; i < maxtimes; i++) {
-    if ((ret = agent_socket_recv(agent, addr, buf, len)) != 0) {
+    if ((ret = agent_socket_recv(agent, addr, buf, len)) != 0 && stun_probe(buf, len) == 0) {
       break;
     }
     usleep(1000); // Sleep for 1 ms
@@ -450,18 +450,11 @@ static void agent_create_send_indication(Agent* agent, StunMessage* msg, const A
   stun_msg_finish(msg, STUN_CREDENTIAL_LONG_TERM, agent->turn_password, strlen(agent->turn_password));
 }
 
-static void agent_create_channel_bind_request(Agent* agent, StunMessage* msg, const Address* peer_addr) {
+static void agent_create_channel_bind_request(Agent* agent, StunMessage* msg, const Address* peer_addr, char* channel) {
   char xor_peer_addr[32];
   int size = 0;
   uint8_t mask[16];
-  char channel[4];
   StunHeader* header;
-
-  // Channel 0x4005
-  channel[0] = 0x40;
-  channel[1] = 0x05;
-  channel[2] = 0x00;
-  channel[3] = 0x00;
 
   stun_msg_create(msg, STUN_CLASS_REQUEST | STUN_METHOD_CHANNEL_BIND);
   header = (StunHeader*)msg->buf;
@@ -472,7 +465,7 @@ static void agent_create_channel_bind_request(Agent* agent, StunMessage* msg, co
   size = stun_set_mapped_address(xor_peer_addr, mask, peer_addr); // XOR with transaction ID (per STUN spec) 
   
   // Send channel binding request
-  stun_msg_write_attr(msg, STUN_ATTR_TYPE_CHANNEL_NUMBER, sizeof(channel), channel);
+  stun_msg_write_attr(msg, STUN_ATTR_TYPE_CHANNEL_NUMBER, 4, channel);
   stun_msg_write_attr(msg, STUN_ATTR_TYPE_XOR_PEER_ADDRESS, size, xor_peer_addr);
   stun_msg_write_attr(msg, STUN_ATTR_TYPE_USERNAME, strlen(agent->turn_username), agent->turn_username);
   stun_msg_write_attr(msg, STUN_ATTR_TYPE_REALM, strlen(agent->turn_realm), agent->turn_realm);
@@ -667,13 +660,13 @@ void agent_set_remote_description(Agent* agent, char* description) {
       }
     }
   }
-  LOGI("candidate pairs num: %d", agent->candidate_pairs_num);
+  LOGI("candidate pairs num 1: %d", agent->candidate_pairs_num);
 }
 
 int agent_create_permission(Agent* agent) {
   StunMessage cre_per_msg;
   StunMessage recv_msg;
-  uint8_t buf[512];
+  // uint8_t buf[512];
   char addr_string[ADDRSTRLEN];
   memset(&recv_msg, 0, sizeof(recv_msg));
 
@@ -729,7 +722,7 @@ int agent_connectivity_check(Agent* agent) {
   memset(&outer_msg, 0, sizeof(outer_msg));
 
   if (agent->nominated_pair->conncheck % AGENT_CONNCHECK_PERIOD == 0 && !agent->requested) {
-    LOGI("Concheck: %d", agent->nominated_pair->conncheck);
+    LOGD("Concheck: %d", agent->nominated_pair->conncheck);
     addr_to_string(&agent->nominated_pair->remote->addr, addr_string, sizeof(addr_string));
     LOGI("Sending binding REQUEST and SEND INDICATION to remote ip: %s, port: %d", addr_string, agent->nominated_pair->remote->addr.port);
 
@@ -754,14 +747,25 @@ int agent_connectivity_check(Agent* agent) {
 int agent_channel_bind(Agent* agent) {
   StunMessage chan_bind_msg;
   StunMessage recv_msg;
-  uint8_t buf[512];
-  char addr_string[ADDRSTRLEN];
+  // uint8_t buf[512];
   memset(&recv_msg, 0, sizeof(recv_msg));
 
+  char channel[4];
+  // Seed the random number generator with the current time
+  srand(time(NULL));
+  
+  // Generate a random number between 0x4000 and 0x7FFE
+  uint16_t random_channel = 0x4000 + (rand() % (0x7FFE - 0x4000 + 1));
+  
+  // Store in big-endian format
+  channel[0] = (random_channel >> 8) & 0xFF; // MSB
+  channel[1] = random_channel & 0xFF;        // LSB
+  channel[2] = 0x00;
+  channel[3] = 0x00;
+
   // Create and send the request
-  addr_to_string(&agent->nominated_pair->remote->addr, addr_string, sizeof(addr_string)); 
-  LOGI("Binding channel with remote ip %s, port: %d", addr_string, agent->nominated_pair->remote->addr.port);
-  agent_create_channel_bind_request(agent, &chan_bind_msg, &agent->nominated_pair->remote->addr);
+  LOGI("Binding channel, number: 0x%02x%02x", channel[0], channel[1]);
+  agent_create_channel_bind_request(agent, &chan_bind_msg, &agent->nominated_pair->remote->addr, channel);
   agent_socket_send(agent, &agent->turn_ser_addr, chan_bind_msg.buf, chan_bind_msg.size);
 
   // Wait for response
@@ -771,8 +775,8 @@ int agent_channel_bind(Agent* agent) {
     if (recv_msg.stunclass == STUN_CLASS_RESPONSE) {
       LOGI("Binding channel succeeded");
       // Start using Channel 0x4005
-      agent->channel[0] = 0x40;
-      agent->channel[1] = 0x05;
+      agent->channel[0] = channel[0];
+      agent->channel[1] = channel[1];
       agent->channel[2] = 0x00;
       agent->channel[3] = 0x00;
       agent->use_channel = 1;
@@ -794,6 +798,7 @@ int agent_select_candidate_pair(Agent* agent) {
   for (i = 0; i < agent->candidate_pairs_num; i++) {
     if (agent->candidate_pairs[i].state == ICE_CANDIDATE_STATE_FROZEN) {
       // nominate this pair
+      LOGI("Nominate candidate pairs 1");
       agent->nominated_pair = &agent->candidate_pairs[i];
       agent->candidate_pairs[i].conncheck = 0;
       agent->candidate_pairs[i].state = ICE_CANDIDATE_STATE_INPROGRESS;
@@ -810,6 +815,7 @@ int agent_select_candidate_pair(Agent* agent) {
       return 0;
     }
   }
+  LOGI("all candidate pairs are failed");
   // all candidate pairs are failed
   return -1;
 }

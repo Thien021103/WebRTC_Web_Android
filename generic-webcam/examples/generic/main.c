@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <unistd.h>
-#include <gst/gst.h>
-#include <gst/app/gstappsink.h> // Include this
-#include <gst/app/gstappsrc.h>
+// #include <gst/gst.h>
+// #include <gst/app/gstappsink.h> // Include this
+// #include <gst/app/gstappsrc.h>
 
 #include "peer.h"
 #include "reader.h"
@@ -15,16 +15,16 @@ int g_interrupted = 0;
 PeerConnection* g_pc = NULL;
 PeerConnectionState g_state;//alsasink sync=true device=plughw:1,0
 
-const char SPK_PIPELINE[] = "appsrc name=spk-src format=time ! audio/x-alaw ! alawdec ! audio/x-raw,format=S16LE,rate=8000,channels=1 ! alsasink sync=false device=plughw:0,0";
+// const char SPK_PIPELINE[] = "appsrc name=spk-src format=time ! audio/x-alaw ! alawdec ! audio/x-raw,format=S16LE,rate=8000,channels=1 ! alsasink sync=false device=plughw:0,0";
 
-typedef struct Media {
-  // Speaker elements
-  GstElement* spk_pipeline;
-  GstElement* spk_src;
+// typedef struct Media {
+//   // Speaker elements
+//   GstElement* spk_pipeline;
+//   GstElement* spk_src;
 
-} Media;
+// } Media;
 
-Media g_media;
+// Media g_media;
 
 static void onconnectionstatechange(PeerConnectionState state, void* data) {
   printf("state is changed: %s\n", peer_connection_state_to_string(state));
@@ -46,13 +46,13 @@ static void onmessage(char* msg, size_t len, void* user_data, uint16_t sid) {
   }
 }
 
-static void onremoteaudio(uint8_t* data, size_t size, void *userdata) {
-    // g_print("Recv remote audio\n:%d\n",(int)size);
+// static void onremoteaudio(uint8_t* data, size_t size, void *userdata) {
+//     // g_print("Recv remote audio\n:%d\n",(int)size);
 
-    GstBuffer *audio_buffer = gst_buffer_new_and_alloc(size);
-    gst_buffer_fill(audio_buffer, 0, data, size);
-    gst_app_src_push_buffer(GST_APP_SRC(g_media.spk_src), audio_buffer);
-}
+//     GstBuffer *audio_buffer = gst_buffer_new_and_alloc(size);
+//     gst_buffer_fill(audio_buffer, 0, data, size);
+//     gst_app_src_push_buffer(GST_APP_SRC(g_media.spk_src), audio_buffer);
+// }
 
 static void signal_handler(int signal) {
   g_interrupted = 1;
@@ -84,11 +84,11 @@ int main(int argc, char* argv[]) {
   uint8_t buf[524288];
   int size;
 
-  gst_init(&argc, &argv);
+  // gst_init(&argc, &argv);
 
-  g_media.spk_pipeline = gst_parse_launch(SPK_PIPELINE, NULL);
-    g_media.spk_src = gst_bin_get_by_name(GST_BIN(g_media.spk_pipeline), "spk-src");
-    g_object_set(g_media.spk_src, "emit-signals", TRUE, NULL);
+  // g_media.spk_pipeline = gst_parse_launch(SPK_PIPELINE, NULL);
+  // g_media.spk_src = gst_bin_get_by_name(GST_BIN(g_media.spk_pipeline), "spk-src");
+  // g_object_set(g_media.spk_src, "emit-signals", TRUE, NULL);
 
   pthread_t peer_singaling_thread;
   pthread_t peer_connection_thread;
@@ -96,16 +96,17 @@ int main(int argc, char* argv[]) {
   signal(SIGINT, signal_handler);
 
   PeerConfiguration config = {
-      .ice_servers = {
-         {.urls = "stun:stun.l.google.com:19302"},
-          // {.urls = "turn:192.168.0.170:3478?transport=udp",
-          //  .username="camera",
-          //  .credential="camera123"}
-      },
-      .datachannel = DATA_CHANNEL_STRING,
-      .video_codec = CODEC_H264,
-      .audio_codec = CODEC_PCMA,
-       .onaudiotrack = onremoteaudio};
+    .ice_servers = {
+        {.urls = "stun:stun.l.google.com:19302"},
+        // {.urls = "turn:192.168.0.170:3478?transport=udp",
+        //  .username="camera",
+        //  .credential="camera123"}
+    },
+    .datachannel = DATA_CHANNEL_STRING,
+    .video_codec = CODEC_H264,
+    .audio_codec = CODEC_PCMA,
+    // .onaudiotrack = onremoteaudio,
+  };
 
 
   ServiceConfiguration service_config = SERVICE_CONFIG_DEFAULT();
@@ -127,16 +128,16 @@ int main(int argc, char* argv[]) {
 
   reader_init();
 
-  gboolean isReceiveAudio = FALSE;
+  // gboolean isReceiveAudio = FALSE;
 
   while (!g_interrupted) {
     if (g_state == PEER_CONNECTION_COMPLETED) {
       curr_time = get_timestamp();
 
-      if (!isReceiveAudio) {
-          isReceiveAudio = TRUE;
-          gst_element_set_state(g_media.spk_pipeline, GST_STATE_PLAYING);
-      }
+      // if (!isReceiveAudio) {
+      //     isReceiveAudio = TRUE;
+      //     gst_element_set_state(g_media.spk_pipeline, GST_STATE_PLAYING);
+      // }
 
       // FPS 25
       if (curr_time - video_time > 7) {

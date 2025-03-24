@@ -429,19 +429,22 @@ int peer_connection_loop(PeerConnection* pc) {
     case PEER_CONNECTION_NEW:
 
       if (!pc->b_local_description_created) {
+        LOGI("New connection");
         peer_connection_state_new(pc, DTLS_SRTP_ROLE_SERVER, 1);
       }
       break;
 
     case PEER_CONNECTION_CHECKING:
       LOGD("Checking...");
-      usleep(10000);
+      usleep(5000);
       if (agent_select_candidate_pair(&pc->agent) < 0) {
         break;
       } 
       // Using TURN server
-      else if (pc->agent->nominated_pair->remote->type == CANDIDATE_TYPE_RELAYED
-            || pc->agent->nominated_pair->local->type == CANDIDATE_TYPE_RELAYED) {
+      else if (pc->agent.nominated_pair->remote->type == ICE_CANDIDATE_TYPE_RELAY
+            && pc->agent.nominated_pair->local->type == ICE_CANDIDATE_TYPE_RELAY) {
+        LOGD("Remote: %d, Local: %d", pc->agent.nominated_pair->remote->type, pc->agent.nominated_pair->local->type);
+
         if (agent_create_permission(&pc->agent) < 0) {
           break;
         } 
@@ -454,14 +457,19 @@ int peer_connection_loop(PeerConnection* pc) {
         }
       }
       // Not using TURN server
-      else {
+      else if(pc->agent.nominated_pair->remote->type != ICE_CANDIDATE_TYPE_RELAY
+            && pc->agent.nominated_pair->local->type != ICE_CANDIDATE_TYPE_RELAY) {
+        LOGD("Remote: %d, Local: %d", pc->agent.nominated_pair->remote->type, pc->agent.nominated_pair->local->type);
         if (agent_connectivity_check(&pc->agent) == 0) {
           STATE_CHANGED(pc, PEER_CONNECTION_CONNECTED);
           break;
         }
       }
+      else{
+        break;
+      }
       break;
-
+      
     case PEER_CONNECTION_CONNECTED:
 
       if (dtls_srtp_handshake(&pc->dtls_srtp, NULL) == 0) {
@@ -699,5 +707,7 @@ int peer_connection_add_ice_candidate(PeerConnection* pc, char* candidate) {
       }
   }
   agent->remote_candidates_count++;
+  LOGI("candidate pairs num 2: %d", agent->candidate_pairs_num);
+
   return 0;
 }

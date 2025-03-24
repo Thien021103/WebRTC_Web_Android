@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.1)
 project(peer)
 
 option(ENABLE_TESTS "Enable tests" OFF)
-option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 option(ADDRESS_SANITIZER "Build with AddressSanitizer." OFF)
 option(MEMORY_SANITIZER "Build with MemorySanitizer." OFF)
 option(THREAD_SANITIZER "Build with ThreadSanitizer." OFF)
@@ -15,7 +15,7 @@ include_directories(${CMAKE_BINARY_DIR}/dist/include ${CMAKE_BINARY_DIR}/dist/in
 
 link_directories(${CMAKE_BINARY_DIR}/dist/lib)
 
-set(DEP_LIBS "srtp2" "usrsctp" "mbedtls" "mbedcrypto" "mbedx509" "cjson")
+set(DEP_LIBS "srtp2" "usrsctp" "mbedtls" "mbedcrypto" "mbedx509" "cjson" "websockets")
 # Extended debug information (symbols, source code, and macro definitions)
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g3")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g3")
@@ -56,7 +56,7 @@ ExternalProject_Add(cjson
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/cJSON
   CMAKE_ARGS
     -DCMAKE_C_FLAGS="-fPIC"
-    -DBUILD_SHARED_LIBS=off
+    -DBUILD_SHARED_LIBS=OFF # Ensure static
     -DENABLE_CJSON_TEST=off
     -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/dist
     -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
@@ -68,6 +68,7 @@ ExternalProject_Add(mbedtls
     -DCMAKE_C_FLAGS="-fPIC"
     -DENABLE_TESTING=off
     -DENABLE_PROGRAMS=off
+    -DBUILD_SHARED_LIBS=OFF # Ensure static
     -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/dist
     -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
 )
@@ -80,6 +81,7 @@ ExternalProject_Add(srtp2
   CMAKE_ARGS
     -DCMAKE_C_FLAGS="-fPIC"
     -DTEST_APPS=off
+    -DBUILD_SHARED_LIBS=OFF # Ensure static
     -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/dist
     -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
 )
@@ -89,10 +91,25 @@ ExternalProject_Add(usrsctp
   CMAKE_ARGS
     -DCMAKE_C_FLAGS="-fPIC"
     -Dsctp_build_programs=off
+    -DBUILD_SHARED_LIBS=OFF # Ensure static
     -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/dist
     -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
 )
 
+ExternalProject_Add(libwebsockets
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/libwebsockets
+  CMAKE_ARGS
+    -DCMAKE_C_FLAGS="-fPIC"
+    -DBUILD_SHARED_LIBS=OFF # Ensure static
+    -DLWS_WITH_SHARED=OFF
+    -DLWS_WITH_STATIC=ON
+    -DLWS_WITH_MBEDTLS=ON    
+    -DLWS_WITH_LIBCAP=OFF
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/dist
+    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
+  DEPENDS mbedtls
+)
+
 message(STATUS "CMAKE_BINARY_DIR is: ${CMAKE_BINARY_DIR}")
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR is: ${CMAKE_CURRENT_SOURCE_DIR}")
-message(STATUS "CMAKE_SOURCE_DIR is: ${CMAKE_SOURCE_DIR}")
+message(STATUS "CMAKE_TOOLCHAIN_FILE is: ${CMAKE_TOOLCHAIN_FILE}")

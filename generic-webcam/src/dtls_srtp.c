@@ -205,7 +205,7 @@ int dtls_srtp_init(DtlsSrtp* dtls_srtp, DtlsSrtpRole role, void* user_data) {
 
   dtls_srtp_x509_digest(&dtls_srtp->cert, dtls_srtp->local_fingerprint);
 
-  LOGI("local fingerprint: %s", dtls_srtp->local_fingerprint);
+  LOGD("local fingerprint: %s", dtls_srtp->local_fingerprint);
 
   mbedtls_ssl_conf_dtls_srtp_protection_profiles(&dtls_srtp->conf, default_profiles);
 

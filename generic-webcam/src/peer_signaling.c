@@ -122,6 +122,30 @@ static const char* peer_id = "1001";
 static int retry_delay = 1000000; // Start with 1s
 static int mainloop = 1;
 
+// Embed the GTS Root R4 CA certificate as a null-terminated string
+const char *ca_pem = 
+    "-----BEGIN CERTIFICATE-----\n"
+    "MIIDejCCAmKgAwIBAgIQf+UwvzMTQ77dghYQST2KGzANBgkqhkiG9w0BAQsFADBX\n"
+    "MQswCQYDVQQGEwJCRTEZMBcGA1UEChMQR2xvYmFsU2lnbiBudi1zYTEQMA4GA1UE\n"
+    "CxMHUm9vdCBDQTEbMBkGA1UEAxMSR2xvYmFsU2lnbiBSb290IENBMB4XDTIzMTEx\n"
+    "NTAzNDMyMVoXDTI4MDEyODAwMDA0MlowRzELMAkGA1UEBhMCVVMxIjAgBgNVBAoT\n"
+    "GUdvb2dsZSBUcnVzdCBTZXJ2aWNlcyBMTEMxFDASBgNVBAMTC0dUUyBSb290IFI0\n"
+    "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE83Rzp2iLYK5DuDXFgTB7S0md+8Fhzube\n"
+    "Rr1r1WEYNa5A3XP3iZEwWus87oV8okB2O6nGuEfYKueSkWpz6bFyOZ8pn6KY019e\n"
+    "WIZlD6GEZQbR3IvJx3PIjGov5cSr0R2Ko4H/MIH8MA4GA1UdDwEB/wQEAwIBhjAd\n"
+    "BgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDwYDVR0TAQH/BAUwAwEB/zAd\n"
+    "BgNVHQ4EFgQUgEzW63T/STaj1dj8tT7FavCUHYwwHwYDVR0jBBgwFoAUYHtmGkUN\n"
+    "l8qJUC99BM00qP/8/UswNgYIKwYBBQUHAQEEKjAoMCYGCCsGAQUFBzAChhpodHRw\n"
+    "Oi8vaS5wa2kuZ29vZy9nc3IxLmNydDAtBgNVHR8EJjAkMCKgIKAehhxodHRwOi8v\n"
+    "Yy5wa2kuZ29vZy9yL2dzcjEuY3JsMBMGA1UdIAQMMAowCAYGZ4EMAQIBMA0GCSqG\n"
+    "SIb3DQEBCwUAA4IBAQAYQrsPBtYDh5bjP2OBDwmkoWhIDDkic574y04tfzHpn+cJ\n"
+    "odI2D4SseesQ6bDrarZ7C30ddLibZatoKiws3UL9xnELz4ct92vID24FfVbiI1hY\n"
+    "+SW6FoVHkNeWIP0GCbaM4C6uVdF5dTUsMVs/ZbzNnIdCp5Gxmx5ejvEau8otR/Cs\n"
+    "kGN+hr/W5GvT1tMBjgWKZ1i4//emhA1JG1BbPzoLJQvyEotc03lXjTaCzv8mEbep\n"
+    "8RqZ7a2CPsgRbuvTPBwcOMBBmuFeU88+FSBX6+7iP0il8b4Z0QFqIwwMHfs/L6K1\n"
+    "vepuoxtGzi4CZ68zJpiq1UvSqTbFJjtbD4seiMHl\n"
+    "-----END CERTIFICATE-----";
+
 enum AppState {
     APP_STATE_UNKNOWN = 0,
     APP_STATE_ERROR = 1, /* generic error */
@@ -245,6 +269,7 @@ static int websocket_write_back(struct lws* wsi_in, char* str, int str_size_in) 
             value++; // Move past the space
             if (strcmp(value, "Impossible") == 0) {
                 signaling_state = Impossible;
+                peer_connection_close(g_ps.pc); // Close old connection when client out 
                 LOGI("Waiting for a client to signal...");
             } else if (strcmp(value, "Active") == 0) {
                 signaling_state = Active;
@@ -282,6 +307,7 @@ static int websocket_write_back(struct lws* wsi_in, char* str, int str_size_in) 
                 char converted_candidate[1024];
                 char *candidate = strstr(value, "candidate");
                 snprintf(converted_candidate, strlen(candidate), "a=%s", candidate);
+                LOGI("Adding client candidates");
                 peer_connection_add_ice_candidate(g_ps.pc, converted_candidate);
                 
             }
@@ -351,7 +377,7 @@ static int callback_janus(struct lws* wsi, enum lws_callback_reasons reason, voi
 {
     struct lws_client_connect_info i;
 
-    LOGD("\tcallback_janus %d", reason);
+    LOGI("\tcallback_janus %d", reason);
     switch (reason)
     {
     case LWS_CALLBACK_CLIENT_ESTABLISHED:
@@ -530,12 +556,15 @@ void peer_signaling_set_config(ServiceConfiguration* service_config) {
 void disconnect_websocket() {
     mainloop = 0;  // Set flag to interrupt the loop
     if (web_socket) {
+        LOGI("CLOSING");
+        // lws_close_reason(web_socket, LWS_CLOSE_STATUS_NORMAL, (unsigned char *)"Normal closure", strlen("Normal closure"));
         lws_callback_on_writable(web_socket);  // Trigger writable callback for closure
     }
 }
 
 void connect_to_janus_server()
 {
+    // lws_set_log_level(LLL_ERR | LLL_WARN | LLL_NOTICE | LLL_INFO | LLL_DEBUG | LLL_PARSER | LLL_HEADER | LLL_EXT | LLL_CLIENT, NULL);
     struct lws_context_creation_info info;
     memset(&info, 0, sizeof(info));
 
@@ -543,7 +572,9 @@ void connect_to_janus_server()
     info.port = CONTEXT_PORT_NO_LISTEN;
     info.protocols = protocols;
     info.fd_limit_per_thread = 3;
-
+    // info.client_ssl_ca_filepath = "/home/thien-gay/WebRTC_Web_Android/generic-webcam/src/ca.cert";
+    info.client_ssl_ca_mem = ca_pem;
+    info.client_ssl_ca_mem_len = strlen(ca_pem);
     lws_context = lws_create_context(&info);
     if (!lws_context) {
         lwsl_err("lws init failed!\n");
