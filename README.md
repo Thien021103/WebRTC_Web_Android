@@ -24,4 +24,28 @@ const websocket = new WebSocket('ws://127.0.0.1:8000/');
 - Bấm vào `Ready to start session`
 
 # V. Build:
-- Go to generic-webcam/third_party/libwebsockets/lib/core/context.c
+- Go to `generic-webcam/third_party/libwebsockets/lib/core/context.c`
+  - Change:
+  ```
+  #if defined(MBEDTLS_VERSION_C)
+  ```
+  ---> To below:
+  ```  
+  #if 0
+  ```
+- Go to `generic-webcam/third_party/libwebsockets/lib/tls/mbedtls/wrapper/platform/ssl_pm.c`
+  - Change:
+  ```
+  mbedtls_net_init(&ssl_pm->fd);
+  mbedtls_net_init(&ssl_pm->cl_fd);
+  ```
+  ---> To below:
+  ```  
+  ssl_pm->fd.fd = -1;
+  ssl_pm->cl_fd.fd = -1;
+  ```
+- Go to `/generic-camera`, run
+  ```
+  cmake -S . -B build
+  cmake --build build
+  ```
