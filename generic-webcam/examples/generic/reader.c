@@ -12,8 +12,8 @@ static uint8_t* g_audio_buf = NULL;
 int reader_init() {
   FILE* video_fp = NULL;
   FILE* audio_fp = NULL;
-  char videofile[] = "720.bin";
-  char audiofile[] = "alaw08m.wav";
+  char videofile[] = "/home/thien-gay/testLibpeer2/videos/1080.bin";
+  char audiofile[] = "/home/thien-gay/testLibpeer2/videos/1080.raw";
 
   video_fp = fopen(videofile, "rb");
 
@@ -63,6 +63,8 @@ uint8_t* reader_h264_find_nalu(uint8_t* buf_start, uint8_t* buf_end) {
 }
 
 int reader_get_video_frame(uint8_t* buf, int* size) {
+  printf("\n get frame\n");
+
   int ret = -1;
 
   static uint8_t pps_frame[128];
@@ -100,7 +102,7 @@ int reader_get_video_frame(uint8_t* buf, int* size) {
           || ((pstart[2] & 0x1f) == 0x01 && (pstart[3] & 0x1f) == 0x05)) {
     *size = sps_size + pps_size + nalu_size;
 
-    // printf("\n before cpy to buf: %zu \n", nalu_size);
+    printf("\n before cpy to buf: %zu \n", nalu_size);
 
     memcpy(buf, sps_frame, sps_size);
     memcpy(buf + sps_size, pps_frame, pps_size);

@@ -604,7 +604,7 @@ void peer_connection_set_remote_description(PeerConnection* pc, const char* sdp_
 
     if ((val_start = strstr(buf, "a=ssrc:")) && ssrc) {
       *ssrc = strtoul(val_start + 7, NULL, 10);
-      LOGI("SSRC: %" PRIu32, *ssrc);
+      LOGD("SSRC: %" PRIu32, *ssrc);
     }
 
     start = line + 2;

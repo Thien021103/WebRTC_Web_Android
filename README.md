@@ -22,3 +22,6 @@ const websocket = new WebSocket('ws://127.0.0.1:8000/');
 - Nhập địa chỉ IP của máy đang chạy signaling server vào trong TextField hiện ra
 - Bấm vào `Start Signaling`
 - Bấm vào `Ready to start session`
+
+# V. Build:
+- Go to generic-webcam/third_party/libwebsockets/lib/core/context.c

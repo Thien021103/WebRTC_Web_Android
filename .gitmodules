@@ -11,6 +11,3 @@
 [submodule "generic-webcam/third_party/mbedtls"]
 	path = generic-webcam/third_party/mbedtls
 	url = https://github.com/Mbed-TLS/mbedtls.git
-[submodule "generic-webcam/third_party/libwebsockets"]
-	path = generic-webcam/third_party/libwebsockets
-	url = https://github.com/warmcat/libwebsockets.git
