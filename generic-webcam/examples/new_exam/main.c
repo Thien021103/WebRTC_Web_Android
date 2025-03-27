@@ -185,11 +185,11 @@ int main(int argc, char* argv[]) {
   PeerConfiguration config = {
       .ice_servers = 
           {
-            // {.urls = "stun:stun.l.google.com:19302"},
-            {.urls= "turn:global.relay.metered.ca:80",
-             .username="ed7eefc8221803e03314328d",
-             .credential="8u02WYPAgcyPhfuN"
-            }
+            {.urls = "stun:stun.l.google.com:19302"},
+            // {.urls= "turn:global.relay.metered.ca:80",
+            //  .username="ed7eefc8221803e03314328d",
+            //  .credential="8u02WYPAgcyPhfuN"
+            // }
           },
       .datachannel = DATA_CHANNEL_STRING,
       .video_codec = CODEC_H264,

@@ -495,10 +495,13 @@ void agent_process_stun_request(Agent* agent, StunMessage* stun_msg, Address* ad
         else {
           agent_create_binding_response(agent, &msg, addr);
           agent_socket_send(agent, addr, msg.buf, msg.size);
-  
-          memset(&outer_msg, 0, sizeof(outer_msg));
-          agent_create_send_indication(agent, &outer_msg, addr, &msg);
-          agent_socket_send(agent, &agent->turn_ser_addr, outer_msg.buf, outer_msg.size);
+          
+            // Indication are used with turn server
+          if (agent->nominated_pair->remote->type == ICE_CANDIDATE_TYPE_RELAY) {
+                memset(&outer_msg, 0, sizeof(outer_msg));
+                agent_create_send_indication(agent, &outer_msg, addr, &msg);
+                agent_socket_send(agent, &agent->turn_ser_addr, outer_msg.buf, outer_msg.size);
+          }
         }
         agent->binding_request_time = ports_get_epoch_time();
       }
@@ -724,13 +727,16 @@ int agent_connectivity_check(Agent* agent) {
   if (agent->nominated_pair->conncheck % AGENT_CONNCHECK_PERIOD == 0 && !agent->requested) {
     LOGD("Concheck: %d", agent->nominated_pair->conncheck);
     addr_to_string(&agent->nominated_pair->remote->addr, addr_string, sizeof(addr_string));
-    LOGI("Sending binding REQUEST and SEND INDICATION to remote ip: %s, port: %d", addr_string, agent->nominated_pair->remote->addr.port);
+    LOGI("Sending binding REQUEST to remote ip: %s, port: %d", addr_string, agent->nominated_pair->remote->addr.port);
 
     agent_create_binding_request(agent, &inner_msg);
     agent_socket_send(agent, &agent->nominated_pair->remote->addr, inner_msg.buf, inner_msg.size);
     
-    agent_create_send_indication(agent, &outer_msg, &agent->nominated_pair->remote->addr, &inner_msg);
-    agent_socket_send(agent, &agent->turn_ser_addr, outer_msg.buf, outer_msg.size);
+    // Indication are used with turn server
+    if (agent->nominated_pair->remote->type == ICE_CANDIDATE_TYPE_RELAY) {
+      agent_create_send_indication(agent, &outer_msg, &agent->nominated_pair->remote->addr, &inner_msg);
+      agent_socket_send(agent, &agent->turn_ser_addr, outer_msg.buf, outer_msg.size);
+    }
   }
 
   agent_recv(agent, buf, sizeof(buf));
