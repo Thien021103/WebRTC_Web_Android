@@ -78,24 +78,24 @@ fun VideoCallScreen(
       )
     }
 // Enhanced logging for local video condition
-    if (localVideoTrack != null) {
-//      if (callMediaState.isCameraEnabled) {
-        Log.d("VideoCallScreen", "Local video track available and camera enabled")
-        FloatingVideoRenderer(
-          modifier = Modifier
-            .size(width = 150.dp, height = 210.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .align(Alignment.TopEnd),
-          videoTrack = localVideoTrack,
-          parentBounds = parentSize,
-          paddingValues = PaddingValues(0.dp)
-        )
-//      } else {
-//        Log.d ( "VideoCallScreen", "Local video track exists but camera is disabled: isCameraEnabled=${callMediaState.isCameraEnabled}" )
-//      }
-    } else {
-      Log.d ( "VideoCallScreen", "Local video track null" )
-    }
+//    if (localVideoTrack != null) {
+////      if (callMediaState.isCameraEnabled) {
+//        Log.d("VideoCallScreen", "Local video track available and camera enabled")
+//        FloatingVideoRenderer(
+//          modifier = Modifier
+//            .size(width = 150.dp, height = 210.dp)
+//            .clip(RoundedCornerShape(16.dp))
+//            .align(Alignment.TopEnd),
+//          videoTrack = localVideoTrack,
+//          parentBounds = parentSize,
+//          paddingValues = PaddingValues(0.dp)
+//        )
+////      } else {
+////        Log.d ( "VideoCallScreen", "Local video track exists but camera is disabled: isCameraEnabled=${callMediaState.isCameraEnabled}" )
+////      }
+//    } else {
+//      Log.d ( "VideoCallScreen", "Local video track null" )
+//    }
 
 //    val activity = (LocalContext.current as? Activity)
 

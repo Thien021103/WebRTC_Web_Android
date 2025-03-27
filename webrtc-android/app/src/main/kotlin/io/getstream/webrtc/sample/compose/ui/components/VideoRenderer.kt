@@ -30,7 +30,7 @@ import org.webrtc.RendererCommon
 import org.webrtc.VideoTrack
 
 /**
- * Renders a single video track based on the call state.
+ * Renders a single video track based on the call state and always records it to a file.
  *
  * @param videoTrack The track containing the video stream for a given participant.
  * @param modifier Modifier for styling.
@@ -45,6 +45,8 @@ fun VideoRenderer(
 
   DisposableEffect(videoTrack) {
     onDispose {
+      // Stop recording and clean up when the Composable is disposed
+      view?.stopRecording()
       cleanTrack(view, trackState)
     }
   }
@@ -57,7 +59,6 @@ fun VideoRenderer(
           sessionManager.peerConnectionFactory.eglBaseContext,
           object : RendererCommon.RendererEvents {
             override fun onFirstFrameRendered() = Unit
-
             override fun onFrameResolutionChanged(p0: Int, p1: Int, p2: Int) = Unit
           }
         )
