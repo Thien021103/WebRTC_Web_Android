@@ -25,8 +25,9 @@ const char CAMERA_PIPELINE[] = "v4l2src device=/dev/video0 ! queue ! video/x-raw
 
 //v4l2src device="/dev/video" ! queue ! v4l2convert ! video/x-raw,format=I420,width=640,height=480,framerate=30/1 ! v4l2h264enc ! h264parse ! video/x-h264,stream-format=byte-stream,alignment=au,width=640,height=480,framerate=30/1,profile=baseline,level=(string)4 ! appsink sync=TRUE emit-signals=TRUE name=appsink-video
 
+/* Alway a possibility of incorrect device !!! */
 // const char MIC_PIPELINE[] = "alsasrc device=plughw:seeed2micvoicec,0 ! audio/x-raw,format=S16LE,rate=8000,channels=1 ! alawenc ! appsink name=mic-sink";
-const char MIC_PIPELINE[] = "alsasrc latency-time=20000 device=plughw:0,6 ! audio/x-raw,format=S16LE,rate=8000,channels=1 ! alawenc ! appsink name=mic-sink";
+const char MIC_PIPELINE[] = "alsasrc latency-time=20000 device=plughw:1,6 ! audio/x-raw,format=S16LE,rate=8000,channels=1 ! alawenc ! appsink name=mic-sink";
 
 const char SPK_PIPELINE[] = "appsrc name=spk-src format=time ! audio/x-alaw ! alawdec ! audio/x-raw,format=S16LE,rate=8000,channels=1 ! alsasink sync=false device=plughw:1,0";
 //const char SPK_PIPELINE[] = "appsrc name=spk-src format=time ! alawdec ! audio/x-raw,format=S16LE,rate=8000,channels=1 ! alsasink sync=false device=plughw:seeed2micvoicec,0";

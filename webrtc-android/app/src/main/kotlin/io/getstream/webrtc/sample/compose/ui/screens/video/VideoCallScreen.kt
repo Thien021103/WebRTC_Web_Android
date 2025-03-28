@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import io.getstream.webrtc.sample.compose.ui.components.VideoRenderer
 import io.getstream.webrtc.sample.compose.webrtc.sessions.LocalWebRtcSessionManager
 import io.getstream.log.taggedLogger
+import io.getstream.webrtc.sample.compose.ui.components.AudioRecorder
 import kotlinx.coroutines.delay
 
 @Composable
@@ -55,8 +56,12 @@ fun VideoCallScreen(
   val remoteVideoTrackState by sessionManager.remoteVideoTrackFlow.collectAsState(null)
   val remoteVideoTrack = remoteVideoTrackState
 
-  val localVideoTrackState by sessionManager.localVideoTrackFlow.collectAsState(null)
-  val localVideoTrack = localVideoTrackState
+//  val localVideoTrackState by sessionManager.localVideoTrackFlow.collectAsState(null)
+//  val localVideoTrack = localVideoTrackState
+
+  val remoteAudioTrackState by sessionManager.remoteAudioTrackFlow.collectAsState(initial = null)
+  val remoteAudioTrack = remoteAudioTrackState
+
 
   var callMediaState by remember { mutableStateOf(CallMediaState()) }
   LaunchedEffect(key1 = Unit) {
@@ -76,6 +81,9 @@ fun VideoCallScreen(
           .clip(RoundedCornerShape(5.dp))
           .onSizeChanged { parentSize = it }
       )
+    }
+    if(remoteAudioTrack != null) {
+      AudioRecorder(audioTrack = remoteAudioTrack)
     }
 // Enhanced logging for local video condition
 //    if (localVideoTrack != null) {

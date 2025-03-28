@@ -77,6 +77,10 @@ class WebRtcSessionManagerImpl(
   private val _remoteVideoTrackFlow = MutableSharedFlow<VideoTrack>()
   override val remoteVideoTrackFlow: SharedFlow<VideoTrack> = _remoteVideoTrackFlow
 
+  // used to send remote audio track to the sender
+  private val _remoteAudioTrackFlow = MutableSharedFlow<AudioTrack>()
+  override val remoteAudioTrackFlow: SharedFlow<AudioTrack> = _remoteAudioTrackFlow
+
   // declaring video constraints and setting OfferToReceiveVideo to true
   // this step is mandatory to create valid offer and answer
   private val mediaConstraints = MediaConstraints().apply {
@@ -171,6 +175,12 @@ class WebRtcSessionManagerImpl(
           val videoTrack = track as VideoTrack
           sessionManagerScope.launch {
             _remoteVideoTrackFlow.emit(videoTrack)
+          }
+        }
+        if(track.kind() == MediaStreamTrack.AUDIO_TRACK_KIND) {
+          val audioTrack = track as AudioTrack
+          sessionManagerScope.launch {
+            _remoteAudioTrackFlow.emit(audioTrack)
           }
         }
       }
