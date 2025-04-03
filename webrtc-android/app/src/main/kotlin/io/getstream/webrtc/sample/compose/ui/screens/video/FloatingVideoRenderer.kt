@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import io.getstream.webrtc.sample.compose.ui.components.RecordingManager
 import io.getstream.webrtc.sample.compose.ui.components.VideoRenderer
 import org.webrtc.VideoTrack
 
@@ -56,6 +57,7 @@ fun FloatingVideoRenderer(
   videoTrack: VideoTrack,
   parentBounds: IntSize,
   paddingValues: PaddingValues,
+  recordingManager: RecordingManager,
   modifier: Modifier = Modifier
 ) {
   var videoSize by remember { mutableStateOf(IntSize(0, 0)) }
@@ -118,7 +120,8 @@ fun FloatingVideoRenderer(
       modifier = Modifier
         .fillMaxSize()
         .clip(RoundedCornerShape(16.dp)),
-      videoTrack = videoTrack
+      videoTrack = videoTrack,
+      recordingManager = recordingManager,
     )
   }
 }

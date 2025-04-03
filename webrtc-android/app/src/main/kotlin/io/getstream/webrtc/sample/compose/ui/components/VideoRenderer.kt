@@ -38,6 +38,7 @@ import org.webrtc.VideoTrack
 @Composable
 fun VideoRenderer(
   videoTrack: VideoTrack,
+  recordingManager: RecordingManager,
   modifier: Modifier = Modifier
 ) {
   val trackState: MutableState<VideoTrack?> = remember { mutableStateOf(null) }
@@ -46,8 +47,9 @@ fun VideoRenderer(
   DisposableEffect(videoTrack) {
     onDispose {
       // Stop recording and clean up when the Composable is disposed
-      view?.stopRecording()
+//      recordingManager.stopRecording()
       cleanTrack(view, trackState)
+      videoTrack.removeSink(recordingManager)
     }
   }
 
@@ -62,11 +64,11 @@ fun VideoRenderer(
             override fun onFrameResolutionChanged(p0: Int, p1: Int, p2: Int) = Unit
           }
         )
-        setupVideo(trackState, videoTrack, this)
+        setupVideo(trackState, videoTrack, this, recordingManager)
         view = this
       }
     },
-    update = { v -> setupVideo(trackState, videoTrack, v) },
+    update = { v -> setupVideo(trackState, videoTrack, v, recordingManager) },
     modifier = modifier
   )
 }
@@ -82,7 +84,8 @@ private fun cleanTrack(
 private fun setupVideo(
   trackState: MutableState<VideoTrack?>,
   track: VideoTrack,
-  renderer: VideoTextureViewRenderer
+  renderer: VideoTextureViewRenderer,
+  recordingManager: RecordingManager
 ) {
   if (trackState.value == track) {
     return
@@ -92,4 +95,5 @@ private fun setupVideo(
 
   trackState.value = track
   track.addSink(renderer)
+  track.addSink(recordingManager)
 }

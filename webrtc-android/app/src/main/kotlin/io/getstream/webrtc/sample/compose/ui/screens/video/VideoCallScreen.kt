@@ -17,6 +17,7 @@
 package io.getstream.webrtc.sample.compose.ui.screens.video
 
 import android.app.Activity
+import android.media.MediaMuxer
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -27,6 +28,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -45,13 +47,19 @@ import io.getstream.webrtc.sample.compose.ui.components.VideoRenderer
 import io.getstream.webrtc.sample.compose.webrtc.sessions.LocalWebRtcSessionManager
 import io.getstream.log.taggedLogger
 import io.getstream.webrtc.sample.compose.ui.components.AudioRecorder
+import io.getstream.webrtc.sample.compose.ui.components.RecordingManager
 import kotlinx.coroutines.delay
+import java.io.File
 
 @Composable
 fun VideoCallScreen(
   onCancelCall: () -> Unit
 ) {
   val sessionManager = LocalWebRtcSessionManager.current
+  val context = LocalContext.current
+  val outputFilePath = "${context.getExternalFilesDir(null)}/recorded${System.currentTimeMillis()}.mp4"
+  val mediaMuxer = remember { MediaMuxer(outputFilePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4) }
+  val recordingManager = remember { RecordingManager(context, mediaMuxer) }
 
   val remoteVideoTrackState by sessionManager.remoteVideoTrackFlow.collectAsState(null)
   val remoteVideoTrack = remoteVideoTrackState
@@ -68,6 +76,12 @@ fun VideoCallScreen(
     sessionManager.onSessionScreenReady()
   }
 
+  DisposableEffect(remoteVideoTrack, remoteAudioTrack) {
+    onDispose {
+      recordingManager.stopRecording()
+    }
+  }
+
   Box(
     modifier = Modifier.fillMaxSize()
   ) {
@@ -75,6 +89,7 @@ fun VideoCallScreen(
     if (remoteVideoTrack != null) {
       VideoRenderer(
         videoTrack = remoteVideoTrack,
+        recordingManager = recordingManager,
         modifier = Modifier
           .fillMaxSize()
           .absolutePadding(0.dp, 0.dp, 0.dp, 100.dp)
@@ -83,7 +98,10 @@ fun VideoCallScreen(
       )
     }
     if(remoteAudioTrack != null) {
-      AudioRecorder(audioTrack = remoteAudioTrack)
+      AudioRecorder(
+        audioTrack = remoteAudioTrack,
+        recordingManager = recordingManager
+      )
     }
 // Enhanced logging for local video condition
 //    if (localVideoTrack != null) {
@@ -128,7 +146,7 @@ fun VideoCallScreen(
           CallAction.LeaveCall -> {
             sessionManager.disconnect()
             onCancelCall.invoke()
-//            activity?.finish()
+            recordingManager.stopRecording()
           }
         }
       }

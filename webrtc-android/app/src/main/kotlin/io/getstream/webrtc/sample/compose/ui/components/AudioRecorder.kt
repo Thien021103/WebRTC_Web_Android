@@ -10,17 +10,16 @@ import androidx.compose.ui.platform.LocalContext
 import org.webrtc.AudioTrack
 
 @Composable
-fun AudioRecorder(audioTrack: AudioTrack) {
-  val context = LocalContext.current
-  val audioSink = remember { RecordingAudioSink(context) }
-
+fun AudioRecorder(
+  audioTrack: AudioTrack,
+  recordingManager: RecordingManager
+) {
   DisposableEffect(audioTrack) {
-    audioSink.startRecording()
-    audioTrack.addSink(audioSink)
+    audioTrack.addSink(recordingManager)
 
     onDispose {
-      audioTrack.removeSink(audioSink)
-      audioSink.stopRecording()
+      audioTrack.removeSink(recordingManager)
+//      recordingManager.stopRecording()
     }
   }
 }
