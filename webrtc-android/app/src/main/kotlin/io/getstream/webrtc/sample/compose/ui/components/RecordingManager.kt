@@ -86,15 +86,15 @@ class RecordingManager (
             val normalizedTimestampUs = currentTimestampUs // Already in µs
             Log.d("AudioRecordingManager", "timestamp: $normalizedTimestampUs")
             recordAudioData(ByteBuffer.wrap(audioBuffer, 0, 2048), normalizedTimestampUs)
-            currentTimestampUs += (1024 * 1_000_000L / 48000)
+            currentTimestampUs += (bufferOffset/2 * 1_000_000L / 48000)
             bufferOffset = 0 // Reset buffer
           } catch (e: Exception) {
             Log.e("AudioRecordingManager", "Error recording audio data", e)
           }
         } else {
-          val normalizedTimestampUs = currentTimestampUs + (80 * 1_000_000L / sampleRate) // Already in µs
+          val normalizedTimestampUs = currentTimestampUs + (80 * 1_000_000L / 48000) // Already in µs
           val paddedBuffer = ByteArray(160)
-          System.arraycopy(audioBuffer, 0, paddedBuffer, 0, 160)
+//          System.arraycopy(audioBuffer, 0, paddedBuffer, 0, 160)
           recordAudioData(ByteBuffer.wrap(paddedBuffer, 0, 160), normalizedTimestampUs)
         }
       }

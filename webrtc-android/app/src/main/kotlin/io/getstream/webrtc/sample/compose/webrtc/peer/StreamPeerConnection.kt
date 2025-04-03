@@ -60,7 +60,7 @@ class StreamPeerConnection(
   private val onStreamAdded: ((MediaStream) -> Unit)?,
   private val onNegotiationNeeded: ((StreamPeerConnection, StreamPeerType) -> Unit)?,
   private val onIceCandidate: ((IceCandidate, StreamPeerType) -> Unit)?,
-  private val onVideoTrack: ((RtpTransceiver?) -> Unit)?
+  private val onTrack: ((RtpTransceiver?) -> Unit)?
 ) : PeerConnection.Observer {
 
   private val typeTag = type.stringify()
@@ -290,7 +290,7 @@ class StreamPeerConnection(
 
   override fun onTrack(transceiver: RtpTransceiver?) {
     logger.i { "[onTrack] #sfu; #$typeTag; transceiver: $transceiver" }
-    onVideoTrack?.invoke(transceiver)
+    onTrack?.invoke(transceiver)
   }
 
   /**

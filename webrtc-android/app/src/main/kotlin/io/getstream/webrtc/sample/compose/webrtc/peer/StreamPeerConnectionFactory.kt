@@ -202,7 +202,7 @@ class StreamPeerConnectionFactory constructor(
     onStreamAdded: ((MediaStream) -> Unit)? = null,
     onNegotiationNeeded: ((StreamPeerConnection, StreamPeerType) -> Unit)? = null,
     onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)? = null,
-    onVideoTrack: ((RtpTransceiver?) -> Unit)? = null
+    onTrack: ((RtpTransceiver?) -> Unit)? = null
   ): StreamPeerConnection {
     val peerConnection = StreamPeerConnection(
       coroutineScope = coroutineScope,
@@ -211,7 +211,7 @@ class StreamPeerConnectionFactory constructor(
       onStreamAdded = onStreamAdded,
       onNegotiationNeeded = onNegotiationNeeded,
       onIceCandidate = onIceCandidateRequest,
-      onVideoTrack = onVideoTrack
+      onTrack = onTrack
     )
     val connection = makePeerConnectionInternal(
       configuration = configuration,

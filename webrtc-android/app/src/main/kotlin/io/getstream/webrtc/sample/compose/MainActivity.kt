@@ -17,14 +17,18 @@
 package io.getstream.webrtc.sample.compose
 
 import android.Manifest
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
@@ -32,6 +36,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -41,8 +46,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.getstream.webrtc.sample.compose.ui.screens.list.VideoListScreen
+import io.getstream.webrtc.sample.compose.ui.screens.list.VideoListViewModel
 import io.getstream.webrtc.sample.compose.ui.screens.stage.StageScreen
 import io.getstream.webrtc.sample.compose.ui.screens.video.VideoCallScreen
 import io.getstream.webrtc.sample.compose.ui.theme.WebrtcSampleComposeTheme
@@ -52,11 +60,19 @@ import io.getstream.webrtc.sample.compose.webrtc.sessions.LocalWebRtcSessionMana
 import io.getstream.webrtc.sample.compose.webrtc.sessions.WebRtcSessionManager
 import io.getstream.webrtc.sample.compose.webrtc.sessions.WebRtcSessionManagerImpl
 
+sealed class Screen {
+  object Main : Screen()
+  object Videos : Screen()
+  object Signalling : Screen()
+}
+
 class MainActivity : ComponentActivity() {
+  @RequiresApi(Build.VERSION_CODES.Q)
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    requestPermissions(arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO), 0)
+    val permissions = arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_EXTERNAL_STORAGE)
+    requestPermissions(permissions, 0)
 
     setContent {
       WebrtcSampleComposeTheme {
@@ -64,67 +80,86 @@ class MainActivity : ComponentActivity() {
           modifier = Modifier.fillMaxSize(),
           color = MaterialTheme.colors.background
         ) {
-          // UI Layout for IP input and call screen
-          Column(
-            modifier = Modifier
-              .fillMaxSize()
-              .padding(16.dp),
-            verticalArrangement = Arrangement.Center
-          ) {
-            // Initialize with default values null (will be updated after user input)
-//            var signalingServerIp by remember { mutableStateOf("") }
-            var startedSignalling by remember { mutableStateOf(false) }
-            var sessionManager by remember { mutableStateOf<WebRtcSessionManager?>(null) }
-
-//            TextField(
-//              value = signalingServerIp,
-//              onValueChange = { signalingServerIp = it },
-//              label = { Text("Signaling Server IP, do not enter wrong!") },
-//              modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(5.dp)),
-//              textStyle = TextStyle(fontSize = 20.sp), // Custom text size here
-//            )
-
-            Button(
-              onClick = {
-                try {
-                  // Initialize sessionManager with the user-provided IP
-                  sessionManager = WebRtcSessionManagerImpl(
-                    context = this@MainActivity,
-                    signalingClient = SignalingClient(),
-                    peerConnectionFactory = StreamPeerConnectionFactory(this@MainActivity)
-                  )
-                  // Allow StageScreen and VideoCallScreen
-                  startedSignalling = true
-                } catch(e: Exception) {
-                  // Handle any exceptions and notify the user
-                  Toast.makeText(this@MainActivity, "Error starting signaling: ${e.message}", Toast.LENGTH_LONG).show()
-                }
-              },
-              modifier = Modifier.fillMaxWidth(),
-            ) {
-              Text(
-                text = "Start Signalling",
-                fontSize = 20.sp
-              )
-            }
-            if(startedSignalling) {
-              CompositionLocalProvider(LocalWebRtcSessionManager provides sessionManager!!) {
-                var onCallScreen by remember { mutableStateOf(false) }
-                val state by sessionManager!!.signalingClient.sessionStateFlow.collectAsState()
-
-                if (!onCallScreen) {
-                  StageScreen(state = state) { onCallScreen = true }
-                } else {
-                  VideoCallScreen() {
-                    startedSignalling = false
-                    onCallScreen = false
-                  }
-                }
-              }
-            }
+          var currentScreen by remember { mutableStateOf<Screen>(Screen.Main) }
+          when (currentScreen) {
+            Screen.Main -> MainScreen(
+              onVideosClick = { currentScreen = Screen.Videos },
+              onSignallingClick = { currentScreen = Screen.Signalling }
+            )
+            Screen.Videos -> VideoListScreen(
+              viewModel = VideoListViewModel(this),
+              onBack = { currentScreen = Screen.Main }
+            )
+            Screen.Signalling -> SignallingScreen(
+              onBack = { currentScreen = Screen.Main }
+            )
           }
         }
       }
+    }
+  }
+}
+
+@Composable
+fun MainScreen(onVideosClick: () -> Unit, onSignallingClick: () -> Unit) {
+  Column(
+    modifier = Modifier.fillMaxSize().padding(16.dp),
+    verticalArrangement = Arrangement.Center
+  ) {
+    Button(onClick = onVideosClick, modifier = Modifier.fillMaxWidth()) {
+      Text("View Videos", fontSize = 20.sp)
+    }
+    Spacer(modifier = Modifier.height(16.dp))
+    Button(onClick = onSignallingClick, modifier = Modifier.fillMaxWidth()) {
+      Text("Start Signalling", fontSize = 20.sp)
+    }
+  }
+}
+
+@Composable
+fun SignallingScreen(onBack: () -> Unit) {
+  var startedSignalling by remember { mutableStateOf(false) }
+  var sessionManager by remember { mutableStateOf<WebRtcSessionManager?>(null) }
+  val context = LocalContext.current
+  Column(
+    modifier = Modifier.fillMaxSize().padding(16.dp),
+    verticalArrangement = Arrangement.Center
+  ) {
+    if (!startedSignalling) {
+      Button(
+        onClick = {
+            sessionManager = WebRtcSessionManagerImpl(
+              context = context,
+              signalingClient = SignalingClient(),
+              peerConnectionFactory = StreamPeerConnectionFactory(context)
+            )
+            startedSignalling = true
+        },
+        modifier = Modifier.fillMaxWidth()
+      ) {
+        Text("Start Signalling", fontSize = 20.sp)
+      }
+    }
+    if (startedSignalling && sessionManager != null) {
+      CompositionLocalProvider(LocalWebRtcSessionManager provides sessionManager!!) {
+        var onCallScreen by remember { mutableStateOf(false) }
+        val state by sessionManager!!.signalingClient.sessionStateFlow.collectAsState()
+        if (!onCallScreen) {
+          StageScreen(state = state) {
+            onCallScreen = true
+          }
+        } else {
+          VideoCallScreen() {
+            onCallScreen = false
+            startedSignalling = false
+            sessionManager = null
+          }
+        }
+      }
+    }
+    Spacer(modifier = Modifier.height(16.dp))
+    Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
+      Text("Back", fontSize = 20.sp)
     }
   }
 }

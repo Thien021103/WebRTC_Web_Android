@@ -169,7 +169,7 @@ class WebRtcSessionManagerImpl(
           "${iceCandidate.sdpMid}$ICE_SEPARATOR${iceCandidate.sdpMLineIndex}$ICE_SEPARATOR${iceCandidate.sdp}"
         )
       },
-      onVideoTrack = { rtpTransceiver ->
+      onTrack = { rtpTransceiver ->
         val track = rtpTransceiver?.receiver?.track() ?: return@makePeerConnection
         if (track.kind() == MediaStreamTrack.VIDEO_TRACK_KIND) {
           val videoTrack = track as VideoTrack
