@@ -70,9 +70,11 @@ static void onconnectionstatechange(PeerConnectionState state, void* data) {
 }
 
 static void onopen(void* user_data) {
+  printf("Datachannel on\n");
 }
 
 static void onclose(void* user_data) {
+  printf("Datachannel off\n");
 }
 
 static void onmessage(char* msg, size_t len, void* user_data, uint16_t sid) {

@@ -1,6 +1,5 @@
 #ifndef DISABLE_PEER_SIGNALING
 #include <assert.h>
-#include <cJSON.h>
 #include <signal.h>
 #include <string.h>
 #include <unistd.h>
@@ -313,52 +312,6 @@ static int websocket_write_back(struct lws* wsi_in, char* str, int str_size_in) 
             }
         }
     }
-    // // Parse the JSON string
-    // cJSON *root = cJSON_Parse(str);
-    // if (root == NULL) {
-    //     LOGW("Failed to parse JSON: %s", str);
-    //     return -1;
-    // }
-
-    // // Check required fields
-    // cJSON *type_item = cJSON_GetObjectItem(root, "type");
-    // cJSON *id_item = cJSON_GetObjectItem(root, "id");
-    // if (!cJSON_IsString(type_item) || !cJSON_IsString(id_item)) {
-    //     LOGW("Invalid JSON: Missing 'type' or 'id' fields");
-    //     cJSON_Delete(root);
-    //     return -1;
-    // }
-
-    // const char *type = type_item->valuestring;
-    // const char *id = id_item->valuestring;
-    // LOGI("Message received: type=%s, id=%s", type, id);
-
-    // if (strcmp(type, "request") == 0) {
-    //     LOGI("Received a new request: %s", id);
-    //     if (state == PEER_CONNECTION_CLOSED ||
-    //         state == PEER_CONNECTION_NEW    ||
-    //         state == PEER_CONNECTION_FAILED ||
-    //         state == PEER_CONNECTION_DISCONNECTED) {
-    //         g_ps.id = strdup(id); // Save the request ID
-    //         peer_connection_create_offer(g_ps.pc);
-    //     }
-    // } else if (strcmp(type, "answer") == 0) {
-    //     cJSON *sdp_item = cJSON_GetObjectItem(root, "sdp");
-    //     if (cJSON_IsString(sdp_item)) {
-    //         const char *sdp = sdp_item->valuestring;
-    //         LOGI("Received an answer SDP: %s", sdp);
-    //         if (state == PEER_CONNECTION_NEW) {
-    //             peer_connection_set_remote_description(g_ps.pc, sdp);
-    //         }
-    //     } else {
-    //         LOGW("Missing or invalid 'sdp' in answer");
-    //     }
-    // } else {
-    //     LOGW("Unknown message type: %s", type);
-    // }
-
-    // cJSON_Delete(root); // Free the JSON object
-
     return 0;
 }
 
@@ -466,12 +419,6 @@ static int callback_janus(struct lws* wsi, enum lws_callback_reasons reason, voi
 
 static void peer_signaling_onicecandidate(char* description, void* userdata) {
     // LOGI("Making initial offer:\n%s\n", description);
-
-    // // Create JSON object for the offer
-    // cJSON *jsepOffer = cJSON_CreateObject();
-    // cJSON_AddStringToObject(jsepOffer, "id", g_ps.id); // Use the global peer state ID
-    // cJSON_AddStringToObject(jsepOffer, "type", "offer");
-
     // Remove host candidates from SDP
     char sdp_without_host_candidate[5000];
     memset(sdp_without_host_candidate, 0, sizeof(sdp_without_host_candidate));
@@ -486,24 +433,11 @@ static void peer_signaling_onicecandidate(char* description, void* userdata) {
     }
     strcpy(description, sdp_without_host_candidate);
 
-    // Add the modified SDP to the JSON object
-    // cJSON_AddStringToObject(jsepOffer, "sdp", description);
-
-    // Convert the JSON object to a string
-    // char *text = cJSON_PrintUnformatted(jsepOffer);
     char offer[5000];
     // int a = strlen(description);
     // LOGI("%d", a);
 
     snprintf(offer, strlen(description), "OFFER %s \n ", description);
-
-    // LOGI("Sending modified offer:\n%s", offer);
-
-    // if (text == NULL) {
-    //     LOGW("Error creating JSON string\n");
-    //     cJSON_Delete(jsepOffer);
-    //     return;
-    // }
 
     // Send the offer over WebSocket
     lws_websocket_connection_send_text(web_socket, offer, JANUS_MSS_SDP_OFFER);

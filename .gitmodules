@@ -1,9 +1,6 @@
 [submodule "generic-webcam/third_party/libsrtp"]
 	path = generic-webcam/third_party/libsrtp
 	url = https://github.com/cisco/libsrtp.git
-[submodule "generic-webcam/third_party/usrsctp"]
-	path = generic-webcam/third_party/usrsctp
-	url = https://github.com/sctplab/usrsctp.git
 [submodule "generic-webcam/third_party/mbedtls"]
 	path = generic-webcam/third_party/mbedtls
 	url = https://github.com/Mbed-TLS/mbedtls.git

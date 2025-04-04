@@ -91,7 +91,6 @@ static int peer_connection_dtls_srtp_send(void* ctx, const uint8_t* buf, size_t 
   PeerConnection* pc = (PeerConnection*)dtls_srtp->user_data;
   LOGD("dtls_srtp_udp_send ");
 
-  // LOGD("send %.4x %.4x, %ld", *(uint16_t*)buf, *(uint16_t*)(buf + 2), len);
   return agent_send(&pc->agent, buf, len);
 }
 
@@ -473,7 +472,7 @@ int peer_connection_loop(PeerConnection* pc) {
     case PEER_CONNECTION_CONNECTED:
 
       if (dtls_srtp_handshake(&pc->dtls_srtp, NULL) == 0) {
-        LOGD("DTLS-SRTP handshake done");
+        LOGI("DTLS-SRTP handshake done");
 
         if (pc->config.datachannel) {
           LOGI("SCTP create socket");
@@ -517,7 +516,7 @@ int peer_connection_loop(PeerConnection* pc) {
         LOGD("agent_recv %d", pc->agent_ret);
 
         if (rtcp_probe(pc->agent_buf, pc->agent_ret)) {
-          LOGI("Got RTCP packet");
+          LOGD("Got RTCP packet");
           dtls_srtp_decrypt_rtcp_packet(&pc->dtls_srtp, pc->agent_buf, &pc->agent_ret);
           peer_connection_incoming_rtcp(pc, pc->agent_buf, pc->agent_ret);
 

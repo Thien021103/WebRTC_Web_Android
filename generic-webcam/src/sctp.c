@@ -3,7 +3,7 @@
 
 #include "sctp.h"
 #if CONFIG_USE_USRSCTP
-#include <usrsctp.h>
+// #include <usrsctp.h>
 #endif
 
 #include "dtls_srtp.h"
@@ -104,19 +104,19 @@ static int sctp_outgoing_data_cb(void* userdata, void* buf, size_t len, uint8_t 
 
 int sctp_outgoing_data(Sctp* sctp, char* buf, size_t len, SctpDataPpid ppid, uint16_t sid) {
 #if CONFIG_USE_USRSCTP
-  int res;
-  struct sctp_sendv_spa spa = {0};
+  // int res;
+  // struct sctp_sendv_spa spa = {0};
 
-  spa.sendv_flags = SCTP_SEND_SNDINFO_VALID;
+  // spa.sendv_flags = SCTP_SEND_SNDINFO_VALID;
 
-  spa.sendv_sndinfo.snd_sid = sid;
-  spa.sendv_sndinfo.snd_flags = SCTP_EOR;
-  spa.sendv_sndinfo.snd_ppid = htonl(ppid);
+  // spa.sendv_sndinfo.snd_sid = sid;
+  // spa.sendv_sndinfo.snd_flags = SCTP_EOR;
+  // spa.sendv_sndinfo.snd_ppid = htonl(ppid);
 
-  res = usrsctp_sendv(sctp->sock, buf, len, NULL, 0, &spa, sizeof(spa), SCTP_SENDV_SPA, 0);
-  if (res < 0)
-    LOGE("sctp sendv error %d %s", errno, strerror(errno));
-  return res;
+  // res = usrsctp_sendv(sctp->sock, buf, len, NULL, 0, &spa, sizeof(spa), SCTP_SENDV_SPA, 0);
+  // if (res < 0)
+  //   LOGE("sctp sendv error %d %s", errno, strerror(errno));
+  // return res;
 #else
   size_t padding_len = 0;
   size_t payload_max = SCTP_MTU - sizeof(SctpPacket) - sizeof(SctpDataChunk);
@@ -223,8 +223,8 @@ void sctp_incoming_data(Sctp* sctp, char* buf, size_t len) {
     return;
 
 #if CONFIG_USE_USRSCTP
-  sctp_handle_sctp_packet(sctp, buf, len);
-  usrsctp_conninput(sctp, buf, len, 0);
+  // sctp_handle_sctp_packet(sctp, buf, len);
+  // usrsctp_conninput(sctp, buf, len, 0);
 #else
   size_t length = 0;
   size_t pos = sizeof(SctpHeader);
@@ -261,7 +261,7 @@ void sctp_incoming_data(Sctp* sctp, char* buf, size_t len) {
       case SCTP_DATA:
 
         data_chunk = (SctpDataChunk*)(buf + pos);
-        LOGD("SCTP_DATA. ppid = %ld", ntohl(data_chunk->ppid));
+        LOGI("SCTP_DATA. ppid = %ld", ntohl(data_chunk->ppid));
 
 // XXX: not check DATA_CHANNEL_OPEN?
 #if 0
@@ -285,7 +285,7 @@ void sctp_incoming_data(Sctp* sctp, char* buf, size_t len) {
         pos = len;  // Do not handle other msg
         break;
       case SCTP_INIT:
-        LOGD("SCTP_INIT");
+        LOGI("SCTP_INIT");
 
         SctpInitChunk* init_chunk;
         init_chunk = (SctpInitChunk*)in_packet->chunks;
@@ -310,6 +310,7 @@ void sctp_incoming_data(Sctp* sctp, char* buf, size_t len) {
         length = ntohs(init_ack->common.length) + sizeof(SctpHeader);
         break;
       case SCTP_SACK:
+        LOGI("SCTP_SACK");
 #if 0
         LOGD("SCTP_SACK");
         sack = (SctpSackChunk*)in_packet->chunks;
@@ -342,7 +343,7 @@ void sctp_incoming_data(Sctp* sctp, char* buf, size_t len) {
 #endif
         break;
       case SCTP_COOKIE_ECHO:
-        LOGD("SCTP_COOKIE_ECHO");
+        LOGI("SCTP_COOKIE_ECHO");
         SctpChunkCommon* common = (SctpChunkCommon*)out_packet->chunks;
         common->type = SCTP_COOKIE_ACK;
         common->length = htons(4);
@@ -358,10 +359,14 @@ void sctp_incoming_data(Sctp* sctp, char* buf, size_t len) {
         }
         break;
       case SCTP_ABORT:
+        LOGI("SCTP_ABORT");
         sctp->connected = 0;
         if (sctp->onclose) {
           sctp->onclose(sctp->userdata);
         }
+        break;
+      case SCTP_HEARTBEAT:
+        LOGI("SCTP_HEARTBEAT");
         break;
       default:
         LOGI("Unknown chunk type %d", chunk_common->type);
@@ -389,79 +394,79 @@ void sctp_incoming_data(Sctp* sctp, char* buf, size_t len) {
 
 static int sctp_handle_incoming_data(Sctp* sctp, char* data, size_t len, uint32_t ppid, uint16_t sid, int flags) {
 #if CONFIG_USE_USRSCTP
-  switch (ppid) {
-    case DATA_CHANNEL_PPID_CONTROL:
-      break;
+  // switch (ppid) {
+  //   case DATA_CHANNEL_PPID_CONTROL:
+  //     break;
 
-    case DATA_CHANNEL_PPID_DOMSTRING:
-    case DATA_CHANNEL_PPID_BINARY:
-    case DATA_CHANNEL_PPID_DOMSTRING_PARTIAL:
-    case DATA_CHANNEL_PPID_BINARY_PARTIAL:
+  //   case DATA_CHANNEL_PPID_DOMSTRING:
+  //   case DATA_CHANNEL_PPID_BINARY:
+  //   case DATA_CHANNEL_PPID_DOMSTRING_PARTIAL:
+  //   case DATA_CHANNEL_PPID_BINARY_PARTIAL:
 
-      LOGD("Got message (size = %ld)", len);
-      if (sctp->onmessage) {
-        sctp->onmessage(data, len, sctp->userdata, sid);
-      }
-      break;
+  //     LOGD("Got message (size = %ld)", len);
+  //     if (sctp->onmessage) {
+  //       sctp->onmessage(data, len, sctp->userdata, sid);
+  //     }
+  //     break;
 
-    default:
-      break;
-  }
+  //   default:
+  //     break;
+  // }
 #endif
   return 0;
 }
 
 #if CONFIG_USE_USRSCTP
 
-static void sctp_process_notification(Sctp* sctp, union sctp_notification* notification, size_t len) {
-  if (notification->sn_header.sn_length != (uint32_t)len) {
-    return;
-  }
+// static void sctp_process_notification(Sctp* sctp, union sctp_notification* notification, size_t len) {
+//   if (notification->sn_header.sn_length != (uint32_t)len) {
+//     return;
+//   }
 
-  switch (notification->sn_header.sn_type) {
-    case SCTP_ASSOC_CHANGE:
+//   switch (notification->sn_header.sn_type) {
+//     case SCTP_ASSOC_CHANGE:
 
-      switch (notification->sn_assoc_change.sac_state) {
-        case SCTP_COMM_UP:
+//       switch (notification->sn_assoc_change.sac_state) {
+//         case SCTP_COMM_UP:
 
-          sctp->connected = 1;
-          if (sctp->onopen) {
-            sctp->onopen(sctp->userdata);
-          }
+//           sctp->connected = 1;
+//           if (sctp->onopen) {
+//             sctp->onopen(sctp->userdata);
+//           }
 
-          break;
+//           break;
 
-        case SCTP_COMM_LOST:
-        case SCTP_SHUTDOWN_COMP:
-          sctp->connected = 0;
-          if (sctp->onclose) {
-            sctp->onclose(sctp->userdata);
-          }
-        default:
-          break;
-      }
-      break;
-    default:
-      break;
-  }
-}
+//         case SCTP_COMM_LOST:
+//         case SCTP_SHUTDOWN_COMP:
+//           sctp->connected = 0;
+//           if (sctp->onclose) {
+//             sctp->onclose(sctp->userdata);
+//           }
+//         default:
+//           break;
+//       }
+//       break;
+//     default:
+//       break;
+//   }
+// }
 
-static int sctp_incoming_data_cb(struct socket* sock, union sctp_sockstore addr, void* data, size_t len, struct sctp_rcvinfo recv_info, int flags, void* userdata) {
-  Sctp* sctp = (Sctp*)userdata;
-  LOGD("Data of length %u received on stream %u with SSN %u, TSN %u, PPID %u",
-       (uint32_t)len,
-       recv_info.rcv_sid,
-       recv_info.rcv_ssn,
-       recv_info.rcv_tsn,
-       ntohl(recv_info.rcv_ppid));
-  if (flags & MSG_NOTIFICATION) {
-    sctp_process_notification(sctp, (union sctp_notification*)data, len);
-  } else {
-    sctp_handle_incoming_data(sctp, data, len, ntohl(recv_info.rcv_ppid), recv_info.rcv_sid, flags);
-  }
-  free(data);  // we need to free the memory that usrsctp allocates
-  return 0;
-}
+// static int sctp_incoming_data_cb(struct socket* sock, union sctp_sockstore addr, void* data, size_t len, struct sctp_rcvinfo recv_info, int flags, void* userdata) {
+//   Sctp* sctp = (Sctp*)userdata;
+//   LOGD("Data of length %u received on stream %u with SSN %u, TSN %u, PPID %u",
+//        (uint32_t)len,
+//        recv_info.rcv_sid,
+//        recv_info.rcv_ssn,
+//        recv_info.rcv_tsn,
+//        ntohl(recv_info.rcv_ppid));
+//   if (flags & MSG_NOTIFICATION) {
+//     sctp_process_notification(sctp, (union sctp_notification*)data, len);
+//   } else {
+//     sctp_handle_incoming_data(sctp, data, len, ntohl(recv_info.rcv_ppid), recv_info.rcv_sid, flags);
+//   }
+//   free(data);  // we need to free the memory that usrsctp allocates
+//   return 0;
+// }
 #endif
 
 int sctp_create_socket(Sctp* sctp, DtlsSrtp* dtls_srtp) {
@@ -470,29 +475,29 @@ int sctp_create_socket(Sctp* sctp, DtlsSrtp* dtls_srtp) {
   sctp->remote_port = 5000;
   sctp->tsn = 1234;
 #if CONFIG_USE_USRSCTP
-  int ret = -1;
-  usrsctp_init(0, sctp_outgoing_data_cb, NULL);
-  usrsctp_sysctl_set_sctp_ecn_enable(0);
-  usrsctp_register_address(sctp);
+  // int ret = -1;
+  // usrsctp_init(0, sctp_outgoing_data_cb, NULL);
+  // usrsctp_sysctl_set_sctp_ecn_enable(0);
+  // usrsctp_register_address(sctp);
 
-  struct socket* sock = usrsctp_socket(AF_CONN, SOCK_STREAM, IPPROTO_SCTP,
-                                       sctp_incoming_data_cb, NULL, 0, sctp);
+  // struct socket* sock = usrsctp_socket(AF_CONN, SOCK_STREAM, IPPROTO_SCTP,
+  //                                      sctp_incoming_data_cb, NULL, 0, sctp);
 
-  if (!sock) {
-    LOGE("usrsctp_socket failed");
-    return -1;
-  }
+  // if (!sock) {
+  //   LOGE("usrsctp_socket failed");
+  //   return -1;
+  // }
 
-  do {
-    if (usrsctp_set_non_blocking(sock, 1) < 0) {
-      LOGE("usrsctp_set_non_blocking failed");
-      break;
-    }
+  // do {
+  //   if (usrsctp_set_non_blocking(sock, 1) < 0) {
+  //     LOGE("usrsctp_set_non_blocking failed");
+  //     break;
+  //   }
 
-    struct linger lopt;
-    lopt.l_onoff = 1;
-    lopt.l_linger = 0;
-    usrsctp_setsockopt(sock, SOL_SOCKET, SO_LINGER, &lopt, sizeof(lopt));
+  //   struct linger lopt;
+  //   lopt.l_onoff = 1;
+  //   lopt.l_linger = 0;
+  //   usrsctp_setsockopt(sock, SOL_SOCKET, SO_LINGER, &lopt, sizeof(lopt));
 
 #if 0
     struct sctp_paddrparams peer_param;
@@ -502,70 +507,70 @@ int sctp_create_socket(Sctp* sctp, DtlsSrtp* dtls_srtp) {
     usrsctp_setsockopt(s, IPPROTO_SCTP, SCTP_PEER_ADDR_PARAMS, &peer_param, sizeof peer_param);
 #endif
 
-    struct sctp_assoc_value av;
-    av.assoc_id = SCTP_ALL_ASSOC;
-    av.assoc_value = SCTP_ENABLE_RESET_STREAM_REQ | SCTP_ENABLE_CHANGE_ASSOC_REQ;
-    usrsctp_setsockopt(sock, IPPROTO_SCTP, SCTP_ENABLE_STREAM_RESET, &av, sizeof(av));
+  //   struct sctp_assoc_value av;
+  //   av.assoc_id = SCTP_ALL_ASSOC;
+  //   av.assoc_value = SCTP_ENABLE_RESET_STREAM_REQ | SCTP_ENABLE_CHANGE_ASSOC_REQ;
+  //   usrsctp_setsockopt(sock, IPPROTO_SCTP, SCTP_ENABLE_STREAM_RESET, &av, sizeof(av));
 
-    uint32_t nodelay = 1;
-    usrsctp_setsockopt(sock, IPPROTO_SCTP, SCTP_NODELAY, &nodelay, sizeof(nodelay));
+  //   uint32_t nodelay = 1;
+  //   usrsctp_setsockopt(sock, IPPROTO_SCTP, SCTP_NODELAY, &nodelay, sizeof(nodelay));
 
-    static uint16_t event_types[] = {
-        SCTP_ASSOC_CHANGE,
-        SCTP_PEER_ADDR_CHANGE,
-        SCTP_REMOTE_ERROR,
-        SCTP_SHUTDOWN_EVENT,
-        SCTP_ADAPTATION_INDICATION,
-        SCTP_SEND_FAILED_EVENT,
-        SCTP_SENDER_DRY_EVENT,
-        SCTP_STREAM_RESET_EVENT,
-        SCTP_STREAM_CHANGE_EVENT};
+  //   static uint16_t event_types[] = {
+  //       SCTP_ASSOC_CHANGE,
+  //       SCTP_PEER_ADDR_CHANGE,
+  //       SCTP_REMOTE_ERROR,
+  //       SCTP_SHUTDOWN_EVENT,
+  //       SCTP_ADAPTATION_INDICATION,
+  //       SCTP_SEND_FAILED_EVENT,
+  //       SCTP_SENDER_DRY_EVENT,
+  //       SCTP_STREAM_RESET_EVENT,
+  //       SCTP_STREAM_CHANGE_EVENT};
 
-    struct sctp_event event;
-    memset(&event, 0, sizeof(event));
-    event.se_assoc_id = SCTP_ALL_ASSOC;
-    event.se_on = 1;
-    for (int i = 0; i < sizeof(event_types) / sizeof(uint16_t); i++) {
-      event.se_type = event_types[i];
-      usrsctp_setsockopt(sock, IPPROTO_SCTP, SCTP_EVENT, &event, sizeof(event));
-    }
+  //   struct sctp_event event;
+  //   memset(&event, 0, sizeof(event));
+  //   event.se_assoc_id = SCTP_ALL_ASSOC;
+  //   event.se_on = 1;
+  //   for (int i = 0; i < sizeof(event_types) / sizeof(uint16_t); i++) {
+  //     event.se_type = event_types[i];
+  //     usrsctp_setsockopt(sock, IPPROTO_SCTP, SCTP_EVENT, &event, sizeof(event));
+  //   }
 
-    struct sctp_initmsg init_msg;
-    memset(&init_msg, 0, sizeof init_msg);
-    init_msg.sinit_num_ostreams = 300;
-    init_msg.sinit_max_instreams = 300;
-    usrsctp_setsockopt(sock, IPPROTO_SCTP, SCTP_INITMSG, &init_msg, sizeof init_msg);
+  //   struct sctp_initmsg init_msg;
+  //   memset(&init_msg, 0, sizeof init_msg);
+  //   init_msg.sinit_num_ostreams = 300;
+  //   init_msg.sinit_max_instreams = 300;
+  //   usrsctp_setsockopt(sock, IPPROTO_SCTP, SCTP_INITMSG, &init_msg, sizeof init_msg);
 
-    struct sockaddr_conn sconn;
-    memset(&sconn, 0, sizeof(sconn));
-    sconn.sconn_family = AF_CONN;
-    sconn.sconn_port = htons(sctp->local_port);
-    sconn.sconn_addr = (void*)sctp;
-    ret = usrsctp_bind(sock, (struct sockaddr*)&sconn, sizeof(sconn));
+  //   struct sockaddr_conn sconn;
+  //   memset(&sconn, 0, sizeof(sconn));
+  //   sconn.sconn_family = AF_CONN;
+  //   sconn.sconn_port = htons(sctp->local_port);
+  //   sconn.sconn_addr = (void*)sctp;
+  //   ret = usrsctp_bind(sock, (struct sockaddr*)&sconn, sizeof(sconn));
 
-    struct sockaddr_conn rconn;
+  //   struct sockaddr_conn rconn;
 
-    memset(&rconn, 0, sizeof(struct sockaddr_conn));
-    rconn.sconn_family = AF_CONN;
-    rconn.sconn_port = htons(sctp->remote_port);
-    rconn.sconn_addr = (void*)sctp;
-    ret = usrsctp_connect(sock, (struct sockaddr*)&rconn, sizeof(struct sockaddr_conn));
+  //   memset(&rconn, 0, sizeof(struct sockaddr_conn));
+  //   rconn.sconn_family = AF_CONN;
+  //   rconn.sconn_port = htons(sctp->remote_port);
+  //   rconn.sconn_addr = (void*)sctp;
+  //   ret = usrsctp_connect(sock, (struct sockaddr*)&rconn, sizeof(struct sockaddr_conn));
 
-    if (ret < 0 && errno != EINPROGRESS) {
-      LOGE("connect error");
-      break;
-    }
+  //   if (ret < 0 && errno != EINPROGRESS) {
+  //     LOGE("connect error");
+  //     break;
+  //   }
 
-    ret = 0;
+  //   ret = 0;
 
-  } while (0);
+  // } while (0);
 
-  if (ret < 0) {
-    sctp_destroy_socket(sctp);
-    return -1;
-  }
+  // if (ret < 0) {
+  //   sctp_destroy_socket(sctp);
+  //   return -1;
+  // }
 
-  sctp->sock = sock;
+  // sctp->sock = sock;
 #endif
 
   return 0;
@@ -573,11 +578,11 @@ int sctp_create_socket(Sctp* sctp, DtlsSrtp* dtls_srtp) {
 
 void sctp_destroy_socket(Sctp* sctp) {
 #if CONFIG_USE_USRSCTP
-  if (sctp && sctp->sock) {
-    usrsctp_shutdown(sctp->sock, SHUT_RDWR);
-    usrsctp_close(sctp->sock);
-    sctp->sock = NULL;
-  }
+  // if (sctp && sctp->sock) {
+  //   usrsctp_shutdown(sctp->sock, SHUT_RDWR);
+  //   usrsctp_close(sctp->sock);
+  //   sctp->sock = NULL;
+  // }
 #endif
 }
 

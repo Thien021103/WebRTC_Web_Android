@@ -15,31 +15,31 @@
 #include "socket.h"
 #include "utils.h"
 
-int dtls_srtp_udp_send(void* ctx, const uint8_t* buf, size_t len) {
-  DtlsSrtp* dtls_srtp = (DtlsSrtp*)ctx;
-  UdpSocket* udp_socket = (UdpSocket*)dtls_srtp->user_data;
+// int dtls_srtp_udp_send(void* ctx, const uint8_t* buf, size_t len) {
+//   DtlsSrtp* dtls_srtp = (DtlsSrtp*)ctx;
+//   UdpSocket* udp_socket = (UdpSocket*)dtls_srtp->user_data;
 
-  int ret = udp_socket_sendto(udp_socket, dtls_srtp->remote_addr, buf, len);
+//   int ret = udp_socket_sendto(udp_socket, dtls_srtp->remote_addr, buf, len);
 
-  LOGI("dtls_srtp_udp_send (%d)", ret);
+//   LOGI("dtls_srtp_udp_send (%d)", ret);
 
-  return ret;
-}
+//   return ret;
+// }
 
-int dtls_srtp_udp_recv(void* ctx, uint8_t* buf, size_t len) {
-  DtlsSrtp* dtls_srtp = (DtlsSrtp*)ctx;
-  UdpSocket* udp_socket = (UdpSocket*)dtls_srtp->user_data;
+// int dtls_srtp_udp_recv(void* ctx, uint8_t* buf, size_t len) {
+//   DtlsSrtp* dtls_srtp = (DtlsSrtp*)ctx;
+//   UdpSocket* udp_socket = (UdpSocket*)dtls_srtp->user_data;
 
-  int ret;
+//   int ret;
 
-  while ((ret = udp_socket_recvfrom(udp_socket, &udp_socket->bind_addr, buf, len)) <= 0) {
-    ports_sleep_ms(1);
-  }
+//   while ((ret = udp_socket_recvfrom(udp_socket, &udp_socket->bind_addr, buf, len)) <= 0) {
+//     ports_sleep_ms(1);
+//   }
 
-  LOGI("dtls_srtp_udp_recv (%d)", ret);
+//   LOGI("dtls_srtp_udp_recv (%d)", ret);
 
-  return ret;
-}
+//   return ret;
+// }
 
 static void dtls_srtp_x509_digest(const mbedtls_x509_crt* crt, char* buf) {
   int i;

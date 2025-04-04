@@ -11,11 +11,11 @@ option(UNDEFINED_BEHAVIOR_SANITIZER "Build with UndefinedBehaviorSanitizer." OFF
 
 include(ExternalProject)
 
-include_directories(${CMAKE_BINARY_DIR}/dist/include ${CMAKE_BINARY_DIR}/dist/include/cjson)
+include_directories(${CMAKE_BINARY_DIR}/dist/include)
 
 link_directories(${CMAKE_BINARY_DIR}/dist/lib)
 
-set(DEP_LIBS "srtp2" "usrsctp" "mbedtls" "mbedcrypto" "mbedx509" "cjson" "websockets")
+set(DEP_LIBS "srtp2" "mbedtls" "mbedcrypto" "mbedx509" "websockets")
 # Extended debug information (symbols, source code, and macro definitions)
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g3")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g3")
@@ -52,16 +52,6 @@ if(ENABLE_TESTS)
   add_subdirectory(tests)
 endif()
 
-ExternalProject_Add(cjson
-  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/cJSON
-  CMAKE_ARGS
-    -DCMAKE_C_FLAGS="-fPIC"
-    -DBUILD_SHARED_LIBS=OFF # Ensure static
-    -DENABLE_CJSON_TEST=off
-    -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/dist
-    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
-)
-
 ExternalProject_Add(mbedtls
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/mbedtls
   CMAKE_ARGS
@@ -86,15 +76,15 @@ ExternalProject_Add(srtp2
     -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
 )
 
-ExternalProject_Add(usrsctp
-  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/usrsctp
-  CMAKE_ARGS
-    -DCMAKE_C_FLAGS="-fPIC"
-    -Dsctp_build_programs=off
-    -DBUILD_SHARED_LIBS=OFF # Ensure static
-    -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/dist
-    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
-)
+# ExternalProject_Add(usrsctp
+#   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/usrsctp
+#   CMAKE_ARGS
+#     -DCMAKE_C_FLAGS="-fPIC"
+#     -Dsctp_build_programs=off
+#     -DBUILD_SHARED_LIBS=OFF # Ensure static
+#     -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/dist
+#     -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
+# )
 
 ExternalProject_Add(libwebsockets
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/libwebsockets

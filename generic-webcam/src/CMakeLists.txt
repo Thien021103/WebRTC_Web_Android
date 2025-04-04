@@ -8,7 +8,7 @@ add_library(peer
   ${SRCS}
 )
 
-add_dependencies(peer cjson mbedtls usrsctp srtp2 libwebsockets)
+add_dependencies(peer mbedtls srtp2 libwebsockets)
 
 find_package(PkgConfig REQUIRED)
 

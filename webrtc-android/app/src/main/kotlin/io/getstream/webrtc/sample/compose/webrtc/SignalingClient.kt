@@ -17,7 +17,6 @@
 package io.getstream.webrtc.sample.compose.webrtc
 
 import io.getstream.log.taggedLogger
-import io.getstream.webrtc.sample.compose.BuildConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

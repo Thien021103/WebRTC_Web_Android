@@ -27,7 +27,7 @@
 #endif
 
 #ifndef CONFIG_USE_USRSCTP
-#define CONFIG_USE_USRSCTP 1
+#define CONFIG_USE_USRSCTP 0
 #endif
 
 #ifndef CONFIG_VIDEO_BUFFER_SIZE

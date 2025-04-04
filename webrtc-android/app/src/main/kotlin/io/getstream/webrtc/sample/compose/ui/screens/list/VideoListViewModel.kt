@@ -1,10 +1,6 @@
 package io.getstream.webrtc.sample.compose.ui.screens.list
 
-import android.content.ContentResolver
-import android.content.ContentUris
 import android.content.Context
-import android.net.Uri
-import android.provider.MediaStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
