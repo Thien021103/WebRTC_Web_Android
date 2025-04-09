@@ -143,6 +143,7 @@ function handleOffer(message) {
 
   // Tạo message mới bằng cách thay thế phần đầu
   const forwardMessage = `OFFER${sdpData}`;
+  console.log(forwardMessage);
 
   // Forward OFFER đến User
   if (group.clients.user && group.clients.user.readyState === WebSocket.OPEN) {
