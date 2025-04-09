@@ -88,7 +88,7 @@ function handleConnect(message, client) {
   }
 
   // Check for Readiness
-  if (group.clients.camera && group.clients.user && group.clients.controller) {
+  if (group.clients.camera && group.clients.user /*&& group.clients.controller*/) {
     group.state = 'Ready';
     notifyStateUpdate(id);
     console.log(`Group ${id} is Ready with Camera, User, Controller`);
