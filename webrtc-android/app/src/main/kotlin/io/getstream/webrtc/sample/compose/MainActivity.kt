@@ -54,6 +54,7 @@ import io.getstream.webrtc.sample.compose.webrtc.peer.StreamPeerConnectionFactor
 import io.getstream.webrtc.sample.compose.webrtc.sessions.LocalWebRtcSessionManager
 import io.getstream.webrtc.sample.compose.webrtc.sessions.WebRtcSessionManager
 import io.getstream.webrtc.sample.compose.webrtc.sessions.WebRtcSessionManagerImpl
+import com.google.firebase.messaging.FirebaseMessaging
 
 sealed class Screen {
   object Main : Screen()
@@ -66,8 +67,12 @@ class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
+    FirebaseMessaging.getInstance().subscribeToTopic("doorbell")
+
     val permissions = arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_EXTERNAL_STORAGE)
     requestPermissions(permissions, 0)
+
+    val id = 123
 
     setContent {
       WebrtcSampleComposeTheme {
@@ -75,7 +80,13 @@ class MainActivity : ComponentActivity() {
           modifier = Modifier.fillMaxSize(),
           color = MaterialTheme.colors.background
         ) {
-          var currentScreen by remember { mutableStateOf<Screen>(Screen.Main) }
+          val initialScreen = if (intent.getBooleanExtra("SHOW_SIGNALLING", false)) {
+            Screen.Signalling
+          } else {
+            Screen.Main
+          }
+          var currentScreen by remember { mutableStateOf<Screen>(initialScreen) }
+
           when (currentScreen) {
             Screen.Main -> MainScreen(
               onVideosClick = { currentScreen = Screen.Videos },
@@ -86,6 +97,7 @@ class MainActivity : ComponentActivity() {
               onBack = { currentScreen = Screen.Main }
             )
             Screen.Signalling -> SignallingScreen(
+              id = id,
               onBack = { currentScreen = Screen.Main }
             )
           }
@@ -112,7 +124,7 @@ fun MainScreen(onVideosClick: () -> Unit, onSignallingClick: () -> Unit) {
 }
 
 @Composable
-fun SignallingScreen(onBack: () -> Unit) {
+fun SignallingScreen(id: Int, onBack: () -> Unit) {
   var startedSignalling by remember { mutableStateOf(false) }
   var sessionManager by remember { mutableStateOf<WebRtcSessionManager?>(null) }
   val context = LocalContext.current
@@ -125,7 +137,7 @@ fun SignallingScreen(onBack: () -> Unit) {
         onClick = {
             sessionManager = WebRtcSessionManagerImpl(
               context = context,
-              signalingClient = SignalingClient(),
+              signalingClient = SignalingClient(id),
               peerConnectionFactory = StreamPeerConnectionFactory(context)
             )
             startedSignalling = true

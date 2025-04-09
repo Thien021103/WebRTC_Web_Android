@@ -31,7 +31,7 @@ import okhttp3.Request
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 
-class SignalingClient() {
+class SignalingClient(private val id: Int) {
   private val logger by taggedLogger("Call:SignalingClient")
   private val signalingScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
   private val client = OkHttpClient()
@@ -53,7 +53,7 @@ class SignalingClient() {
 
   fun sendCommand(signalingCommand: SignalingCommand, message: String) {
     logger.d { "[sendCommand] $signalingCommand $message" }
-    ws.send("$signalingCommand $message")
+    ws.send("$signalingCommand user $id\n$message")
   }
 
   private inner class SignalingWebSocketListener : WebSocketListener() {
