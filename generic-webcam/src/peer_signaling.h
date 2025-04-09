@@ -10,6 +10,7 @@ extern "C" {
 #ifndef DISABLE_PEER_SIGNALING
 
 typedef struct ServiceConfiguration {
+  const int id;
   const char* mqtt_url;
   int mqtt_port;
   const char* client_id;

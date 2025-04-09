@@ -54,7 +54,7 @@ typedef struct PeerSignaling {
     char pubtopic[TOPIC_SIZE];
 
     uint16_t packet_id;
-    char *id;
+    int id;
 
     int mqtt_port;
     int http_port;
@@ -192,60 +192,33 @@ static int lws_websocket_connection_send_text(struct lws* wsi_in, char* str, enu
 
     switch (msgtype) {
     case JANUS_MSS_ICE_CANDIDATE_GATHERED:
-        n = sprintf((char*)p, "{\"janus\":\"trickle\",\"transaction\":\"%s\",\"session_id\":%lld,\"handle_id\":%lld,\"candidate\":{\"completed\":true}}", rand_string(transaction, 12), session_id, handle_id/*, str*/);
-        LOGI("Sent: %s\n", (char*)p);
-        lws_write(wsi_in, p, n, LWS_WRITE_TEXT);
         break;
     case JANUS_MSS_ICE_CANDIDATE:
-        n = sprintf((char*)p, "{\"janus\":\"trickle\",\"transaction\":\"%s\",\"session_id\":%lld,\"handle_id\":%lld,\"candidate\":%s}", rand_string(transaction, 12), session_id, handle_id, str);
-        ("Sent: %s\n", (char*)p);
-        lws_write(wsi_in, p, n, LWS_WRITE_TEXT);
         break;
     case JANUS_MSS_SDP_OFFER:
-//      n = sprintf((char*)p, "{\"janus\":\"message\",\"transaction\":\"%s\",\"session_id\":%lld,\"handle_id\":%lld,\"body\":{\"request\":\"configure\",\"audio\":true,\"video\":true},\"jsep\":%s}", rand_string(transaction, 12), session_id, handle_id, str);
         n = sprintf((char*)p, "%s", str);
         LOGI("Sent: %s\n", (char*)p);
         lws_write(wsi_in, p, n, LWS_WRITE_TEXT);
         break;
     case JANUS_MSS_SDP_ANSWER:
-        n = sprintf((char*)p, "{\"janus\":\"message\",\"transaction\":\"%s\",\"session_id\":%lld,\"handle_id\":%lld,\"body\":{\"request\":\"configure\",\"audio\":true,\"video\":true},\"jsep\":%s}", rand_string(transaction, 12), session_id, handle_id, str);
-        LOGI("Sent: %s\n", (char*)p);
-        lws_write(wsi_in, p, n, LWS_WRITE_TEXT);
         break;
     case JANUS_MSS_REGISTER:
-        n = sprintf((char*)p, "{\"janus\":\"attach\",\"transaction\":\"%s\",\"plugin\":\"janus.plugin.videoroom\",\"opaque_id\":\"videoroomtest-wBYXgNGJGa11\",\"session_id\":%lld}", rand_string(transaction, 12), session_id);
+        n = sprintf((char*)p, "%s", str);
         LOGI("Sent: %s\n", (char*)p);
         lws_write(wsi_in, p, n, LWS_WRITE_TEXT);
         break;
     case JANUS_MSS_REGISTER_WITH_SERVER:
-        n = sprintf((char*)p, "{\"janus\":\"create\",\"transaction\":\"%s\"}", rand_string(transaction, 12));
+        n = sprintf((char*)p, "%s", str);
         LOGI("Sent: %s\n", (char*)p);
         lws_write(wsi_in, p, n, LWS_WRITE_TEXT);
         break;
     case JANUS_MSS_ROOM_REQUEST:
-        n = sprintf((char*)p, "{\"janus\":\"message\",\"transaction\":\"%s\",\"session_id\":%lld,\"handle_id\":%lld,\"body\":{\"request\":\"join\",\"room\":%s,\"ptype\":\"publisher\",\"display\":\"%s\",\"pin\":\"%s\"}}", rand_string(transaction, 12), session_id, handle_id, room, peer_id, token);
-        LOGI("Sent: %s\n", (char*)p);
-        lws_write(wsi_in, p, n, LWS_WRITE_TEXT);
         break;
     case JANUS_MSS_KEEP_ALIVE:
-        n = sprintf((char*)p, "{\"janus\":\"keepalive\",\"transaction\":\"%s\",\"session_id\":%lld}", rand_string(transaction, 12), session_id);
-        LOGI("Sent: %s\n", (char*)p);
-        lws_write(wsi_in, p, n, LWS_WRITE_TEXT);
         break;
-        ///////////////////////////////////////////////////////////////////
     case JANUS_MSS_ROOM_PARTICIPANTS:
-        n = sprintf((char*)p, "{\"janus\":\"message\",\"transaction\":\"%s\",\"session_id\":%lld,\"handle_id\":%lld,\"body\":{\"request\" : \"listparticipants\",\"room\":%s}}", rand_string(transaction, 12), session_id, handle_id, room);
-        LOGI("Sent: %s\n", (char*)p);
-        lws_write(wsi_in, p, n, LWS_WRITE_TEXT);
         break;
-        ///////////////////////////////////////////////////////////////////
     case JANUS_MSS_ROOM_CALL:
-        //        if (already == 1) {
-        n = sprintf((char*)p, "{\"janus\":\"message\",\"transaction\":\"%s\",\"session_id\":%lld,\"handle_id\":%lld,\"body\":{\"request\":\"join\",\"room\":%s,\"ptype\":\"subscriber\",\"feed\":%lld,\"pin\":\"%s\"}}", rand_string(transaction, 12), session_id, handle_id, room, feed_id, token);
-        //			n = sprintf((char*)p, "{\"janus\":\"message\",\"transaction\":\"%s\",\"session_id\":%"G_GINT64_FORMAT",\"handle_id\":%"G_GINT64_FORMAT",\"body\":{\"request\":\"join\",\"room\":%s,\"ptype\":\"subscriber\",\"feed\":%"G_GINT64_FORMAT",\"private_id\":%s,\"pin\":\"%s\"}}", rand_string(transaction, 12), session_id, handle_id, room, feed_id, rand_string(transaction, 9), token);
-        LOGI("Sent: %s\n", (char*)p);
-        lws_write(wsi_in, p, n, LWS_WRITE_TEXT);
-        //        }
         break;
     default:
         break;
@@ -290,26 +263,19 @@ static int websocket_write_back(struct lws* wsi_in, char* str, int str_size_in) 
                 LOGI("Offline");
             }
         }
-    } else if (strncmp(str, "ANSWER ", 7) == 0) {
-        const char *value = strchr(str, ' '); // Find the first space
-        if (value) {
-            value++;
-            if (state == PEER_CONNECTION_NEW) {
-                peer_connection_set_remote_description(g_ps.pc, value);
-            }
+    } else if (strncmp(str, "ANSWER\n", 7) == 0) {
+        const char *value = str + 7; // Skip "ANSWER\n"
+        if (state == PEER_CONNECTION_NEW) {
+            peer_connection_set_remote_description(g_ps.pc, value);
         }
-    } else if (strncmp(str, "ICE ", 4) == 0) {
-        const char *value = strchr(str, ' '); // Find the first space
-        if (value) {
-            value++;
-            if (state == PEER_CONNECTION_CHECKING) {
-                char converted_candidate[1024];
-                char *candidate = strstr(value, "candidate");
-                snprintf(converted_candidate, strlen(candidate), "a=%s", candidate);
-                LOGI("Adding client candidates");
-                peer_connection_add_ice_candidate(g_ps.pc, converted_candidate);
-                
-            }
+    } else if (strncmp(str, "ICE\n", 4) == 0) {
+        const char *value = str + 4; // Skip "ICE\n"
+        if (state == PEER_CONNECTION_CHECKING) {
+            char converted_candidate[1024];
+            char *candidate = strstr(value, "candidate");
+            snprintf(converted_candidate, sizeof(converted_candidate), "a=%s", candidate);
+            LOGI("Adding client candidates");
+            peer_connection_add_ice_candidate(g_ps.pc, converted_candidate);
         }
     }
     return 0;
@@ -358,7 +324,11 @@ static int callback_janus(struct lws* wsi, enum lws_callback_reasons reason, voi
     case LWS_CALLBACK_CLIENT_WRITEABLE:
     {
         app_state = SERVER_REGISTERED;
-        // lws_websocket_connection_send_text(web_socket,(char*)"",JANUS_MSS_REGISTER_WITH_SERVER);
+        char message[100];
+
+        snprintf(message, sizeof(message), "CONNECT user %d", g_ps.id);
+
+        lws_websocket_connection_send_text(web_socket, message, JANUS_MSS_REGISTER_WITH_SERVER);
         break;
     }
     case LWS_CALLBACK_CLOSED:
@@ -437,7 +407,7 @@ static void peer_signaling_onicecandidate(char* description, void* userdata) {
     // int a = strlen(description);
     // LOGI("%d", a);
 
-    snprintf(offer, strlen(description), "OFFER %s \n ", description);
+    snprintf(offer, sizeof(offer), "OFFER user %d\n%s \n ", g_ps.id, description);
 
     // Send the offer over WebSocket
     lws_websocket_connection_send_text(web_socket, offer, JANUS_MSS_SDP_OFFER);
@@ -470,6 +440,8 @@ void peer_signaling_set_config(ServiceConfiguration* service_config) {
     } while (0);
 
     // Username, password, id
+
+    g_ps.id = service_config->id;
     if (service_config->client_id != NULL && strlen(service_config->client_id) > 0) {
         strncpy(g_ps.client_id, service_config->client_id, CRED_LEN);
     }

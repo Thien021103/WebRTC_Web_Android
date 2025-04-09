@@ -204,7 +204,7 @@ int main(int argc, char* argv[]) {
   ServiceConfiguration service_config = SERVICE_CONFIG_DEFAULT();
   service_config.ws_url = "webrtc-websocket-lc03.onrender.com";
   service_config.ws_port = 8188;
-
+  service_config.id = 123;
 
   printf("open https://sepfy.github.io/webrtc?deviceId=%s\n", argv[1]);
 
