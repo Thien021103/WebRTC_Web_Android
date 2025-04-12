@@ -1,4 +1,5 @@
 #include <arpa/inet.h>
+#include <string.h>
 // #include <gstreamer-1.0/gst/gst.h>
 // #include <gstreamer-1.0/gst/app/gstappsink.h>
 // #include <gstreamer-1.0/gst/app/gstappsrc.h>
@@ -180,6 +181,9 @@ static uint64_t get_timestamp() {
 }
 
 int main(int argc, char* argv[]) {
+  char id[10];
+  memset(id, 0, 10);
+
   pthread_t peer_singaling_thread;
   pthread_t peer_connection_thread;
 
@@ -202,11 +206,6 @@ int main(int argc, char* argv[]) {
   };
       
   ServiceConfiguration service_config = SERVICE_CONFIG_DEFAULT();
-  service_config.ws_url = "webrtc-websocket-lc03.onrender.com";
-  service_config.ws_port = 8188;
-  service_config.id = 123;
-
-  printf("open https://sepfy.github.io/webrtc?deviceId=%s\n", argv[1]);
 
   gst_init(&argc, &argv);
 
@@ -230,8 +229,13 @@ int main(int argc, char* argv[]) {
   peer_connection_oniceconnectionstatechange(g_pc, onconnectionstatechange);
   peer_connection_ondatachannel(g_pc, onmessage, onopen, onclose);
 
+  printf("argc = %d, argv[1] = %s\n", argc, argv[1]);
+  snprintf(id, 10, "%s", argv[1]);
+
+  service_config.id = id;
   service_config.client_id = argv[1];
   service_config.pc = g_pc;
+
   peer_signaling_set_config(&service_config);
   // peer_signaling_join_channel();
 

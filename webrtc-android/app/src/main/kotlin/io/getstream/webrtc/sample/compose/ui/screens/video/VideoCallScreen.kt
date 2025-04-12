@@ -137,12 +137,12 @@ fun VideoCallScreen(
             callMediaState = callMediaState.copy(isMicrophoneEnabled = enabled)
             sessionManager.enableMicrophone(enabled)
           }
-          is CallAction.ToggleCamera -> {
-            val enabled = callMediaState.isCameraEnabled.not()
-            callMediaState = callMediaState.copy(isCameraEnabled = enabled)
-            sessionManager.enableCamera(enabled)
-          }
-          CallAction.FlipCamera -> sessionManager.flipCamera()
+//          is CallAction.ToggleCamera -> {
+//            val enabled = callMediaState.isCameraEnabled.not()
+//            callMediaState = callMediaState.copy(isCameraEnabled = enabled)
+//            sessionManager.enableCamera(enabled)
+//          }
+//          CallAction.FlipCamera -> sessionManager.flipCamera()
           CallAction.LeaveCall -> {
             sessionManager.disconnect()
             onCancelCall.invoke()

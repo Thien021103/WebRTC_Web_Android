@@ -29,11 +29,11 @@ sealed class CallAction {
     val isEnabled: Boolean
   ) : CallAction()
 
-  data class ToggleCamera(
-    val isEnabled: Boolean
-  ) : CallAction()
+//  data class ToggleCamera(
+//    val isEnabled: Boolean
+//  ) : CallAction()
 
-  object FlipCamera : CallAction()
+//  object FlipCamera : CallAction()
 
   object LeaveCall : CallAction()
 }
@@ -58,13 +58,13 @@ fun buildDefaultCallControlActions(
       }
     )
 
-  val cameraIcon = painterResource(
-    id = if (callMediaState.isCameraEnabled) {
-      R.drawable.ic_videocam_on
-    } else {
-      R.drawable.ic_videocam_off
-    }
-  )
+//  val cameraIcon = painterResource(
+//    id = if (callMediaState.isCameraEnabled) {
+//      R.drawable.ic_videocam_on
+//    } else {
+//      R.drawable.ic_videocam_off
+//    }
+//  )
 
   return listOf(
     VideoCallControlAction(
@@ -73,18 +73,18 @@ fun buildDefaultCallControlActions(
       background = Primary,
       callAction = CallAction.ToggleMicroPhone(callMediaState.isMicrophoneEnabled)
     ),
-    VideoCallControlAction(
-      icon = cameraIcon,
-      iconTint = Color.White,
-      background = Primary,
-      callAction = CallAction.ToggleCamera(callMediaState.isCameraEnabled)
-    ),
-    VideoCallControlAction(
-      icon = painterResource(id = R.drawable.ic_camera_flip),
-      iconTint = Color.White,
-      background = Primary,
-      callAction = CallAction.FlipCamera
-    ),
+//    VideoCallControlAction(
+//      icon = cameraIcon,
+//      iconTint = Color.White,
+//      background = Primary,
+//      callAction = CallAction.ToggleCamera(callMediaState.isCameraEnabled)
+//    ),
+//    VideoCallControlAction(
+//      icon = painterResource(id = R.drawable.ic_camera_flip),
+//      iconTint = Color.White,
+//      background = Primary,
+//      callAction = CallAction.FlipCamera
+//    ),
     VideoCallControlAction(
       icon = painterResource(id = R.drawable.ic_call_end),
       iconTint = Color.White,

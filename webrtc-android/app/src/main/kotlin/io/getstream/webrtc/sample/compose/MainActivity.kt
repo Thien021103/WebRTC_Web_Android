@@ -44,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+//import com.google.firebase.FirebaseApp
 import io.getstream.webrtc.sample.compose.ui.screens.list.VideoListScreen
 import io.getstream.webrtc.sample.compose.ui.screens.list.VideoListViewModel
 import io.getstream.webrtc.sample.compose.ui.screens.stage.StageScreen
@@ -54,7 +55,7 @@ import io.getstream.webrtc.sample.compose.webrtc.peer.StreamPeerConnectionFactor
 import io.getstream.webrtc.sample.compose.webrtc.sessions.LocalWebRtcSessionManager
 import io.getstream.webrtc.sample.compose.webrtc.sessions.WebRtcSessionManager
 import io.getstream.webrtc.sample.compose.webrtc.sessions.WebRtcSessionManagerImpl
-import com.google.firebase.messaging.FirebaseMessaging
+//import com.google.firebase.messaging.FirebaseMessaging
 
 sealed class Screen {
   object Main : Screen()
@@ -67,7 +68,8 @@ class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    FirebaseMessaging.getInstance().subscribeToTopic("doorbell")
+//    FirebaseApp.initializeApp(this)
+//    FirebaseMessaging.getInstance().subscribeToTopic("doorbell")
 
     val permissions = arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_EXTERNAL_STORAGE)
     requestPermissions(permissions, 0)
@@ -80,12 +82,12 @@ class MainActivity : ComponentActivity() {
           modifier = Modifier.fillMaxSize(),
           color = MaterialTheme.colors.background
         ) {
-          val initialScreen = if (intent.getBooleanExtra("SHOW_SIGNALLING", false)) {
-            Screen.Signalling
-          } else {
-            Screen.Main
-          }
-          var currentScreen by remember { mutableStateOf<Screen>(initialScreen) }
+//          val initialScreen = if (intent.getBooleanExtra("SHOW_SIGNALLING", false)) {
+//            Screen.Signalling
+//          } else {
+//            Screen.Main
+//          }
+          var currentScreen by remember { mutableStateOf<Screen>(Screen.Main) }
 
           when (currentScreen) {
             Screen.Main -> MainScreen(

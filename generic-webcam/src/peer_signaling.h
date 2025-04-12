@@ -10,7 +10,7 @@ extern "C" {
 #ifndef DISABLE_PEER_SIGNALING
 
 typedef struct ServiceConfiguration {
-  const int id;
+  char* id;
   const char* mqtt_url;
   int mqtt_port;
   const char* client_id;
@@ -23,16 +23,18 @@ typedef struct ServiceConfiguration {
   PeerConnection* pc;
 } ServiceConfiguration;
 
-#define SERVICE_CONFIG_DEFAULT()  \
-  {                               \
-    .mqtt_url = "broker.emqx.io", \
-    .mqtt_port = 8883,            \
-    .client_id = "peer",          \
-    .http_url = "",               \
-    .http_port = 443,             \
-    .username = "",               \
-    .password = "",               \
-    .pc = NULL                    \
+#define SERVICE_CONFIG_DEFAULT()                    \
+  {                                                 \
+    .mqtt_url = "broker.emqx.io",                   \
+    .mqtt_port = 8883,                              \
+    .ws_url = "webrtc-websocket-lc03.onrender.com", \
+    .ws_port = 443,                                 \
+    .client_id = "peer",                            \
+    .http_url = "",                                 \
+    .http_port = 443,                               \
+    .username = "",                                 \
+    .password = "",                                 \
+    .pc = NULL                                      \
   }
 
 void peer_signaling_set_config(ServiceConfiguration* config);

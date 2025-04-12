@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 
@@ -52,8 +53,14 @@ class SignalingClient(private val id: Int) {
   val signalingCommandFlow: SharedFlow<Pair<SignalingCommand, String>> = _signalingCommandFlow
 
   fun sendCommand(signalingCommand: SignalingCommand, message: String) {
-    logger.d { "[sendCommand] $signalingCommand $message" }
-    ws.send("$signalingCommand user $id\n$message")
+    if(signalingCommand === SignalingCommand.CONNECT) {
+      logger.d { "[sendCommand] $signalingCommand $message" }
+      ws.send("$signalingCommand user $id$message")
+    }
+    else {
+      logger.d { "[sendCommand] $signalingCommand $message" }
+      ws.send("$signalingCommand user $id\n$message")
+    }
   }
 
   private inner class SignalingWebSocketListener : WebSocketListener() {
@@ -69,6 +76,11 @@ class SignalingClient(private val id: Int) {
           handleSignalingCommand(SignalingCommand.ICE, text)
       }
     }
+
+    override fun onOpen(webSocket: WebSocket, response: Response) {
+      super.onOpen(webSocket, response)
+      sendCommand(SignalingCommand.CONNECT, "")
+    }
   }
 
   private fun handleStateMessage(message: String) {
@@ -78,7 +90,7 @@ class SignalingClient(private val id: Int) {
   }
 
   private fun handleSignalingCommand(command: SignalingCommand, text: String) {
-    val value = getSeparatedMessage(text)
+    val value = getNextLineMessage(text)
     logger.d { "received signaling: $command $value" }
     signalingScope.launch {
       _signalingCommandFlow.emit(command to value)
@@ -86,6 +98,8 @@ class SignalingClient(private val id: Int) {
   }
 
   private fun getSeparatedMessage(text: String) = text.substringAfter(' ')
+  private fun getNextLineMessage(text: String) = text.substringAfter('\n')
+
 
   fun dispose() {
     _sessionStateFlow.value = WebRTCSessionState.Offline
@@ -106,5 +120,6 @@ enum class SignalingCommand {
   STATE, // Command for WebRTCSessionState
   OFFER, // to send or receive offer
   ANSWER, // to send or receive answer
-  ICE // to send and receive ice candidates
+  ICE, // to send and receive ice candidates
+  CONNECT // to connect to server
 }

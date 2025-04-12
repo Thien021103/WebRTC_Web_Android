@@ -11,7 +11,6 @@
 #include "utils.h"
 #include <libwebsockets.h>
 #include "agent.h"
-// #include <json-glib/json-glib.h>
 
 #define KEEP_ALIVE_TIMEOUT_SECONDS 60
 #define CONNACK_RECV_TIMEOUT_MS 1000
@@ -19,14 +18,14 @@
 #define TOPIC_SIZE 128
 #define HOST_LEN 64
 #define CRED_LEN 128
-#define PEER_ID_SIZE 100
+#define PEER_ID_SIZE 80
 
 // #define RPC_VERSION "2.0"
 
-#define RPC_METHOD_STATE "state"
-#define RPC_METHOD_OFFER "offer"
-#define RPC_METHOD_ANSWER "answer"
-#define RPC_METHOD_CLOSE "close"
+// #define RPC_METHOD_STATE "state"
+// #define RPC_METHOD_OFFER "offer"
+// #define RPC_METHOD_ANSWER "answer"
+// #define RPC_METHOD_CLOSE "close"
 
 // #define RPC_ERROR_PARSE_ERROR "{\"code\":-32700,\"message\":\"Parse error\"}"
 // #define RPC_ERROR_INVALID_REQUEST "{\"code\":-32600,\"message\":\"Invalid Request\"}"
@@ -54,7 +53,7 @@ typedef struct PeerSignaling {
     char pubtopic[TOPIC_SIZE];
 
     uint16_t packet_id;
-    int id;
+    char id[PEER_ID_SIZE];
 
     int mqtt_port;
     int http_port;
@@ -326,7 +325,7 @@ static int callback_janus(struct lws* wsi, enum lws_callback_reasons reason, voi
         app_state = SERVER_REGISTERED;
         char message[100];
 
-        snprintf(message, sizeof(message), "CONNECT user %d", g_ps.id);
+        snprintf(message, sizeof(message), "CONNECT camera %s", g_ps.id);
 
         lws_websocket_connection_send_text(web_socket, message, JANUS_MSS_REGISTER_WITH_SERVER);
         break;
@@ -341,11 +340,11 @@ static int callback_janus(struct lws* wsi, enum lws_callback_reasons reason, voi
 
         memset(&i, 0 , sizeof(i));
         i.context = lws_context;
-        i.port = 443;
-        i.address = "webrtc-websocket-lc03.onrender.com";
+        i.port = g_ps.ws_port;
+        i.address = g_ps.ws_host;
         i.path = "/";
-        i.host = "webrtc-websocket-lc03.onrender.com";
-        i.origin = "webrtc-websocket-lc03.onrender.com";
+        i.host = g_ps.ws_host;
+        i.origin = g_ps.ws_host;
         i.ssl_connection = LCCSCF_USE_SSL;
         i.protocol = protocols[0].name;
         i.local_protocol_name = protocols[0].name;
@@ -365,11 +364,11 @@ static int callback_janus(struct lws* wsi, enum lws_callback_reasons reason, voi
         
         memset(&i, 0 , sizeof(i));
         i.context = lws_context;
-        i.port = 443;
-        i.address = "webrtc-websocket-lc03.onrender.com";
+        i.port = g_ps.ws_port;
+        i.address = g_ps.ws_host;
         i.path = "/";
-        i.host = "webrtc-websocket-lc03.onrender.com";
-        i.origin = "webrtc-websocket-lc03.onrender.com";
+        i.host = g_ps.ws_host;
+        i.origin = g_ps.ws_host;
         i.ssl_connection = LCCSCF_USE_SSL;
         i.protocol = protocols[0].name;
         i.local_protocol_name = protocols[0].name;
@@ -404,10 +403,8 @@ static void peer_signaling_onicecandidate(char* description, void* userdata) {
     strcpy(description, sdp_without_host_candidate);
 
     char offer[5000];
-    // int a = strlen(description);
-    // LOGI("%d", a);
 
-    snprintf(offer, sizeof(offer), "OFFER user %d\n%s \n ", g_ps.id, description);
+    snprintf(offer, sizeof(offer), "OFFER camera %s\n%s", g_ps.id, description);
 
     // Send the offer over WebSocket
     lws_websocket_connection_send_text(web_socket, offer, JANUS_MSS_SDP_OFFER);
@@ -441,7 +438,10 @@ void peer_signaling_set_config(ServiceConfiguration* service_config) {
 
     // Username, password, id
 
-    g_ps.id = service_config->id;
+    if (service_config->id != NULL && strlen(service_config->id) > 0) {
+        strncpy(g_ps.id, service_config->id, PEER_ID_SIZE);
+    }
+
     if (service_config->client_id != NULL && strlen(service_config->client_id) > 0) {
         strncpy(g_ps.client_id, service_config->client_id, CRED_LEN);
     }
@@ -455,6 +455,7 @@ void peer_signaling_set_config(ServiceConfiguration* service_config) {
     }
 
     g_ps.pc = service_config->pc;
+
     peer_connection_onicecandidate(g_ps.pc, peer_signaling_onicecandidate);
 }
 #endif  // DISABLE_PEER_SIGNALING
@@ -462,7 +463,7 @@ void peer_signaling_set_config(ServiceConfiguration* service_config) {
 void disconnect_websocket() {
     mainloop = 0;  // Set flag to interrupt the loop
     if (web_socket) {
-        LOGI("CLOSING");
+        LOGI("--- CLOSING ---");
         // lws_close_reason(web_socket, LWS_CLOSE_STATUS_NORMAL, (unsigned char *)"Normal closure", strlen("Normal closure"));
         lws_callback_on_writable(web_socket);  // Trigger writable callback for closure
     }
@@ -478,7 +479,6 @@ void connect_to_janus_server()
     info.port = CONTEXT_PORT_NO_LISTEN;
     info.protocols = protocols;
     info.fd_limit_per_thread = 3;
-    // info.client_ssl_ca_filepath = "/home/thien-gay/WebRTC_Web_Android/generic-webcam/src/ca.cert";
     info.client_ssl_ca_mem = ca_pem;
     info.client_ssl_ca_mem_len = strlen(ca_pem);
     lws_context = lws_create_context(&info);
@@ -491,11 +491,11 @@ void connect_to_janus_server()
     memset(&i, 0 , sizeof(i));
 
     i.context = lws_context;
-    i.port = 443;
-    i.address = "webrtc-websocket-lc03.onrender.com";
+    i.port = g_ps.ws_port;
+    i.address = g_ps.ws_host;
     i.path = "/";
-    i.host = "webrtc-websocket-lc03.onrender.com";
-    i.origin = "webrtc-websocket-lc03.onrender.com";
+    i.host = g_ps.ws_host;
+    i.origin = g_ps.ws_host;
     i.ssl_connection = LCCSCF_USE_SSL;
     i.protocol = protocols[0].name;
     i.local_protocol_name = protocols[0].name;
