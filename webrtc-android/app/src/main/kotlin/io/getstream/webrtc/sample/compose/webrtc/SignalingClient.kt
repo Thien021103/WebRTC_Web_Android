@@ -38,7 +38,7 @@ class SignalingClient(private val id: Int) {
   private val client = OkHttpClient()
   private val request = Request
     .Builder()
-    .url("wss://webrtc-websocket-lc03.onrender.com")
+    .url("wss://thientranduc.id.vn:444")
     .build()
 
   // opening web socket with signaling server
