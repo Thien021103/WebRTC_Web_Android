@@ -80,11 +80,11 @@ class RecordingManager (
         }
 
         // Queue when buffer has 2048 bytes (1024 samples)
-        Log.d("AudioRecordingManager", "bufferOffset: $bufferOffset")
+//        Log.d("AudioRecordingManager", "bufferOffset: $bufferOffset")
         if (bufferOffset >= 1900) {
           try {
             val normalizedTimestampUs = currentTimestampUs // Already in µs
-            Log.d("AudioRecordingManager", "timestamp: $normalizedTimestampUs")
+//            Log.d("AudioRecordingManager", "timestamp: $normalizedTimestampUs")
             recordAudioData(ByteBuffer.wrap(audioBuffer, 0, 2048), normalizedTimestampUs)
             currentTimestampUs += (bufferOffset/2 * 1_000_000L / 48000)
             bufferOffset = 0 // Reset buffer
@@ -134,7 +134,7 @@ class RecordingManager (
       } else {
         try {
           val normalizedTimestampUs = videoFrame.timestampNs/1000 - offsetTimestampUs
-          Log.d("VideoRecordingManager", "timestamp: $normalizedTimestampUs")
+//          Log.d("VideoRecordingManager", "timestamp: $normalizedTimestampUs")
           recordVideoFrame(videoFrame, normalizedTimestampUs)
         } catch (e: Exception) {
           Log.e("VideoRecordingManager", "Error recording video frame", e)

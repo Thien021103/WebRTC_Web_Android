@@ -552,7 +552,7 @@ int peer_connection_loop(PeerConnection* pc) {
         STATE_CHANGED(pc, PEER_CONNECTION_CLOSED);
       }
       else {
-        LOGI("%d",last);
+        LOGD("%d",last);
       }
 
       break;
