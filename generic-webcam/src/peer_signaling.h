@@ -27,8 +27,8 @@ typedef struct ServiceConfiguration {
   {                                                 \
     .mqtt_url = "broker.emqx.io",                   \
     .mqtt_port = 8883,                              \
-    .ws_url = "webrtc-websocket-lc03.onrender.com", \
-    .ws_port = 443,                                 \
+    .ws_url = "thientranduc.id.vn",                 \
+    .ws_port = 444,                                 \
     .client_id = "peer",                            \
     .http_url = "",                                 \
     .http_port = 443,                               \
