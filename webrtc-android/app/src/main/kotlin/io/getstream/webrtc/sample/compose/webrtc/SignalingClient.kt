@@ -103,6 +103,7 @@ class SignalingClient(private val id: Int) {
 
   fun dispose() {
     _sessionStateFlow.value = WebRTCSessionState.Offline
+    ws.close(1000,"")
     signalingScope.cancel()
     ws.cancel()
   }

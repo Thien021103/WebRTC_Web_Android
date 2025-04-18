@@ -62,9 +62,9 @@ class StreamPeerConnectionFactory constructor(
     arrayListOf(
       // adding google's standard server, adding turn
 //       PeerConnection.IceServer.builder("stun:stun.l.google.com:19302").createIceServer()
-      PeerConnection.IceServer.builder("turn:global.relay.metered.ca:80")
-        .setUsername("d54dbe88b788dc089f29ce06")
-        .setPassword("5F6lD3GnBi7j8OjK")
+      PeerConnection.IceServer.builder("turn:103.149.28.136:3478")
+        .setUsername("user1")
+        .setPassword("password2")
         .createIceServer()
     )
   ).apply {
