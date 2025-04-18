@@ -72,7 +72,7 @@ struct Agent {
   // int indication_sent;
   int requested;  // Sent request to client
   int responded;  // Sent response to client
-  char channel[4];
+  unsigned char channel[4];
 
   AgentMode mode;
 

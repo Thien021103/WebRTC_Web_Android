@@ -75,12 +75,10 @@ static int peer_connection_dtls_srtp_recv(void* ctx, unsigned char* buf, size_t 
 
   while (recv_max < CONFIG_TLS_READ_TIMEOUT && pc->state == PEER_CONNECTION_CONNECTED) {
     ret = agent_recv(&pc->agent, buf, len);
-
+    LOGD("dtls_srtp_udp_recv (%d)", ret);
     if (ret > 0) {
       break;
     }
-    LOGD("dtls_srtp_udp_recv (%d)", ret);
-
     recv_max++;
   }
   return ret;
@@ -441,7 +439,8 @@ int peer_connection_loop(PeerConnection* pc) {
       } 
       // Using TURN server
       else if (pc->agent.nominated_pair->remote->type == ICE_CANDIDATE_TYPE_RELAY
-            && pc->agent.nominated_pair->local->type == ICE_CANDIDATE_TYPE_RELAY) {
+            && pc->agent.nominated_pair->local->type == ICE_CANDIDATE_TYPE_RELAY
+      ) {
         LOGD("Remote: %d, Local: %d", pc->agent.nominated_pair->remote->type, pc->agent.nominated_pair->local->type);
 
         if (agent_create_permission(&pc->agent) < 0) {
@@ -547,9 +546,13 @@ int peer_connection_loop(PeerConnection* pc) {
         }
       }
 
-      if (CONFIG_KEEPALIVE_TIMEOUT > 0 && (ports_get_epoch_time() - pc->agent.binding_request_time) > CONFIG_KEEPALIVE_TIMEOUT) {
+      int last = ports_get_epoch_time() - pc->agent.binding_request_time;
+      if (CONFIG_KEEPALIVE_TIMEOUT > 0 && last > CONFIG_KEEPALIVE_TIMEOUT) {
         LOGI("binding request timeout");
         STATE_CHANGED(pc, PEER_CONNECTION_CLOSED);
+      }
+      else {
+        LOGI("%d",last);
       }
 
       break;

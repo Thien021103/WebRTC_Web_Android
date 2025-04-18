@@ -38,7 +38,7 @@ int buffer_push_tail(Buffer* rb, const uint8_t* data, int size) {
   int align_size = ALIGN32(size + 4);
 
   if (align_size > free_space) {
-    LOGE("no enough space");
+    LOGE("no enough space:, size: %d", align_size);
     return -1;
   }
 
@@ -46,7 +46,7 @@ int buffer_push_tail(Buffer* rb, const uint8_t* data, int size) {
 
   if (tail_end < rb->tail) {
     if (rb->head < align_size) {
-      LOGE("no enough space");
+      LOGE("no enough space, size: %d", align_size);
       return -1;
     }
 

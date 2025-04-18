@@ -13,9 +13,9 @@
 #include "utils.h"
 
 #define AGENT_POLL_TIMEOUT 1
-#define AGENT_CONNCHECK_MAX 500
+#define AGENT_CONNCHECK_MAX 200
 #define AGENT_CONNCHECK_PERIOD 100
-#define AGENT_PERMISSION_PERIOD 250
+#define AGENT_PERMISSION_PERIOD 50
 #define AGENT_STUN_RECV_MAXTIMES 1000
 
 void agent_clear_candidates(Agent* agent) {
@@ -491,6 +491,7 @@ void agent_process_stun_request(Agent* agent, StunMessage* stun_msg, Address* ad
         if(agent->use_channel) {
           agent_create_binding_response(agent, &msg, addr);
           agent_send(agent, msg.buf, msg.size);
+          LOGI("Sent");
         }
         else {
           agent_create_binding_response(agent, &msg, addr);
@@ -537,10 +538,14 @@ int agent_recv(Agent* agent, uint8_t* buf, int len) {
   if (agent->use_channel) {
     ret = agent_socket_recv(agent, &addr, buf, len);
     if (ret < 0) {
-        return -1; // Receive error
+      LOGE("Error received");
+      return -1; // Receive error
     }
-    if (ret < 4) {
-        return -1; // Too short for ChannelData
+    else if (ret == 0) {
+      return -1; // Receive nothing
+    }
+    else if (ret < 4) {
+      return -1; // Too short for ChannelData
     }
     // Check if it's ChannelData with 0x4005
     uint16_t received_channel = ntohs(*(uint16_t*)buf);
@@ -548,7 +553,7 @@ int agent_recv(Agent* agent, uint8_t* buf, int len) {
     if (received_channel == expected_channel) {
         uint16_t data_len = ntohs(*(uint16_t*)(buf + 2));
         if (ret < 4 + data_len) {
-            return -1; // Incomplete message
+          return -1; // Incomplete message
         }
         // Extract payload (skip 4-byte header)
         memmove(buf, buf + 4, data_len);
@@ -573,6 +578,7 @@ int agent_recv(Agent* agent, uint8_t* buf, int len) {
         }
         return data_len; // Return payload length
     }
+    LOGE("No matching channel");
     return -1; // Not a matching ChannelData message
   }
   // Receive STUN packets from peer
@@ -676,7 +682,7 @@ int agent_create_permission(Agent* agent) {
   if(agent->turn_permission) return 0;
 
   if (agent->nominated_pair->conncheck % AGENT_PERMISSION_PERIOD == 0) {
-    LOGI("Concheck: %d", agent->nominated_pair->conncheck);
+    LOGD("Concheck: %d", agent->nominated_pair->conncheck);
 
   // Create and send the request
     addr_to_string(&agent->nominated_pair->remote->addr, addr_string, sizeof(addr_string)); 
@@ -684,25 +690,30 @@ int agent_create_permission(Agent* agent) {
     agent_create_permission_request(agent, &cre_per_msg, &agent->nominated_pair->remote->addr);
     agent_socket_send(agent, &agent->turn_ser_addr, cre_per_msg.buf, cre_per_msg.size);
 
-  // Wait for response
-    int ret = agent_socket_recv_attempts(agent, NULL, recv_msg.buf, sizeof(recv_msg.buf), AGENT_STUN_RECV_MAXTIMES); 
-    if (ret > 0) {
-      stun_parse_msg_buf(&recv_msg);
-      if (recv_msg.stunclass == STUN_CLASS_RESPONSE) {
-        LOGI("CreatePermission succeeded");
-        agent->turn_permission = 1;
-        return 0;
-      } else {
-        LOGE("CreatePermission failed");
+    // Wait for response
+    while (1) {
+      int ret = agent_socket_recv_attempts(agent, NULL, recv_msg.buf, sizeof(recv_msg.buf), AGENT_STUN_RECV_MAXTIMES);
+      // Got response, check:
+      if (ret > 0) {
+        stun_parse_msg_buf(&recv_msg);
+        if (recv_msg.stunclass == STUN_CLASS_RESPONSE && recv_msg.stunmethod == STUN_METHOD_CREATE_PERMISSION) {
+          LOGI("CreatePermission succeeded");
+          agent->turn_permission = 1;
+          return 0;
+        } else if (recv_msg.stunclass == STUN_CLASS_ERROR) {
+          LOGE("CreatePermission failed");
+          return -1;
+        } else {} // Redo if got wrong type of response
+      }
+      // No response after maxtimes
+      else {
+        LOGE("No response from TURN server");
         return -1;
       }
     }
-    else {
-      LOGE("No response from TURN server");
-      return -1;
-    }
+
   }
-  return 0;
+  return -1;
 }
 
 int agent_connectivity_check(Agent* agent) {
@@ -756,13 +767,13 @@ int agent_channel_bind(Agent* agent) {
   // uint8_t buf[512];
   memset(&recv_msg, 0, sizeof(recv_msg));
 
-  char channel[4];
+  unsigned char channel[4];
   // Seed the random number generator with the current time
   srand(time(NULL));
   
   // Generate a random number between 0x4000 and 0x7FFE
   uint16_t random_channel = 0x4000 + (rand() % (0x7FFE - 0x4000 + 1));
-  
+
   // Store in big-endian format
   channel[0] = (random_channel >> 8) & 0xFF; // MSB
   channel[1] = random_channel & 0xFF;        // LSB
@@ -771,16 +782,16 @@ int agent_channel_bind(Agent* agent) {
 
   // Create and send the request
   LOGI("Binding channel, number: 0x%02x%02x", channel[0], channel[1]);
-  agent_create_channel_bind_request(agent, &chan_bind_msg, &agent->nominated_pair->remote->addr, channel);
+  agent_create_channel_bind_request(agent, &chan_bind_msg, &agent->nominated_pair->remote->addr, (char*) channel);
   agent_socket_send(agent, &agent->turn_ser_addr, chan_bind_msg.buf, chan_bind_msg.size);
 
   // Wait for response
   int ret = agent_socket_recv_attempts(agent, NULL, recv_msg.buf, sizeof(recv_msg.buf), AGENT_STUN_RECV_MAXTIMES);
   if (ret > 0) {
     stun_parse_msg_buf(&recv_msg);
-    if (recv_msg.stunclass == STUN_CLASS_RESPONSE) {
+    if (recv_msg.stunclass == STUN_CLASS_RESPONSE && recv_msg.stunmethod == STUN_METHOD_CHANNEL_BIND) {
       LOGI("Binding channel succeeded");
-      // Start using Channel 0x4005
+      // Start using Channel
       agent->channel[0] = channel[0];
       agent->channel[1] = channel[1];
       agent->channel[2] = 0x00;
@@ -803,11 +814,19 @@ int agent_select_candidate_pair(Agent* agent) {
   int i;
   for (i = 0; i < agent->candidate_pairs_num; i++) {
     if (agent->candidate_pairs[i].state == ICE_CANDIDATE_STATE_FROZEN) {
-      // nominate this pair
-      LOGI("Nominate candidate pairs 1");
+      // Nominate this pair
       agent->nominated_pair = &agent->candidate_pairs[i];
       agent->candidate_pairs[i].conncheck = 0;
       agent->candidate_pairs[i].state = ICE_CANDIDATE_STATE_INPROGRESS;
+      
+      if  (agent->nominated_pair->remote->type == ICE_CANDIDATE_TYPE_RELAY
+        && agent->nominated_pair->local->type == ICE_CANDIDATE_TYPE_RELAY
+      ) {
+        LOGI("Nominate candidate pairs <relay>");
+      }
+      else {
+        LOGI("Nominate candidate pairs <normal>");
+      }
       return 0;
     } else if (agent->candidate_pairs[i].state == ICE_CANDIDATE_STATE_INPROGRESS) {
       agent->candidate_pairs[i].conncheck++;

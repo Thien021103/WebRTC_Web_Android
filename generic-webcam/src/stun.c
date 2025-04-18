@@ -178,15 +178,21 @@ void stun_parse_msg_buf(StunMessage* msg) {
   } else if ((msg->stunclass & STUN_CLASS_REQUEST) == STUN_CLASS_REQUEST) {
     msg->stunclass = STUN_CLASS_REQUEST;
   }
+  LOGD("Class  Type: 0x%04x", msg->stunclass);
 
   msg->stunmethod = ntohs(header->type) & 0x0FFF;
-  if ((msg->stunmethod & STUN_METHOD_ALLOCATE) == STUN_METHOD_ALLOCATE) {
+  if ((msg->stunmethod & STUN_METHOD_CHANNEL_BIND) == STUN_METHOD_CHANNEL_BIND) {
+    msg->stunmethod = STUN_METHOD_CHANNEL_BIND;
+  } else if ((msg->stunmethod & STUN_METHOD_CREATE_PERMISSION) == STUN_METHOD_CREATE_PERMISSION) {
+    msg->stunmethod = STUN_METHOD_CREATE_PERMISSION;
+  } else if ((msg->stunmethod & STUN_METHOD_DATA) == STUN_METHOD_DATA) {
+    msg->stunmethod = STUN_METHOD_DATA;
+  } else if ((msg->stunmethod & STUN_METHOD_ALLOCATE) == STUN_METHOD_ALLOCATE) {
     msg->stunmethod = STUN_METHOD_ALLOCATE;
   } else if ((msg->stunmethod & STUN_METHOD_BINDING) == STUN_METHOD_BINDING) {
     msg->stunmethod = STUN_METHOD_BINDING;
-  } else if ((msg->stunmethod & STUN_METHOD_DATA) == STUN_METHOD_DATA) {
-    msg->stunmethod = STUN_METHOD_DATA;
-  } 
+  }
+  LOGD("Method Type: 0x%04x", msg->stunmethod);
 
   while (pos < length) {
     StunAttribute* attr = (StunAttribute*)(msg->buf + pos);
@@ -262,6 +268,7 @@ void stun_parse_msg_buf(StunMessage* msg) {
       case STUN_ATTR_TYPE_ICE_CONTROLLING:
       case STUN_ATTR_TYPE_NETWORK_COST:
       case STUN_ATTR_TYPE_SOFTWARE:
+      case STUN_ATTR_TYPE_FORBIDDEN:
         // Do nothing
         break;
       default:

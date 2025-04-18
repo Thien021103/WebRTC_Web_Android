@@ -1,2 +1,5 @@
 **/build/
 .vscode
+**/pps_dua/
+**/examples/static_cam/
+**/toolchain.cmake

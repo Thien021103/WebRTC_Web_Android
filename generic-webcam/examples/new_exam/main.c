@@ -54,12 +54,12 @@ typedef struct Media {
 
 Media g_media;
 
-static uint64_t get_timestamp();
+// static uint64_t get_timestamp();
 
 static void onconnectionstatechange(PeerConnectionState state, void* data) {
     printf("state is changed: %s\n", peer_connection_state_to_string(state));
     g_state = state;
-    if (g_state == PEER_CONNECTION_CONNECTED) {
+    if (g_state == PEER_CONNECTION_COMPLETED) {
         gst_element_set_state(g_media.camera_pipeline, GST_STATE_PLAYING);
         gst_element_set_state(g_media.mic_pipeline, GST_STATE_PLAYING);
         gst_element_set_state(g_media.spk_pipeline, GST_STATE_PLAYING);
@@ -174,11 +174,11 @@ static void* peer_connection_task(void* data) {
   pthread_exit(NULL);
 }
 
-static uint64_t get_timestamp() {
-  struct timeval tv;
-  gettimeofday(&tv, NULL);
-  return tv.tv_sec * 1000 + tv.tv_usec / 1000;
-}
+// static uint64_t get_timestamp() {
+//   struct timeval tv;
+//   gettimeofday(&tv, NULL);
+//   return tv.tv_sec * 1000 + tv.tv_usec / 1000;
+// }
 
 int main(int argc, char* argv[]) {
   char id[10];
@@ -192,11 +192,11 @@ int main(int argc, char* argv[]) {
   PeerConfiguration config = {
       .ice_servers = 
           {
-            {.urls = "stun:stun.l.google.com:19302"},
-            // {.urls= "turn:global.relay.metered.ca:80",
-            //  .username="ed7eefc8221803e03314328d",
-            //  .credential="8u02WYPAgcyPhfuN"
-            // }
+            // {.urls = "stun:stun.l.google.com:19302"},
+            {.urls= "turn:103.149.28.136:3478",
+             .username="camera1",
+             .credential="password1"
+            }
           },
       .datachannel = DATA_CHANNEL_STRING,
       .video_codec = CODEC_H264,

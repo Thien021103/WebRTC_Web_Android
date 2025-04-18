@@ -1,5 +1,17 @@
 cmake_minimum_required(VERSION 3.1)
 
+# -------------------------------------------------------------------------------------
+
+# Config Toolchain
+# set(CMAKE_CXX_STANDARD 11)
+# set(CMAKE_C_STANDARD 99)
+# set(CMAKE_C_COMPILER    "/opt/mips-gcc472-glibc216-64bit/bin/mips-linux-uclibc-gnu-gcc")
+# set(CMAKE_CXX_COMPILER  "/opt/mips-gcc472-glibc216-64bit/bin/mips-linux-uclibc-gnu-g++")
+
+# set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/toolchain.cmake)
+
+# -------------------------------------------------------------------------------------
+
 project(peer)
 
 option(ENABLE_TESTS "Enable tests" OFF)
@@ -43,7 +55,7 @@ if(UNDEFINED_BEHAVIOR_SANITIZER)
   enableSanitizer("undefined")
 endif()
 
-add_definitions("-Wunused-variable -Werror=sequence-point -Werror=pointer-sign -Werror=return-type -Werror=sizeof-pointer-memaccess -Wincompatible-pointer-types -DHTTP_DO_NOT_USE_CUSTOM_CONFIG -DMQTT_DO_NOT_USE_CUSTOM_CONFIG")
+add_definitions("-Wunused-variable -Werror=sequence-point -Werror=pointer-sign -Werror=return-type -DHTTP_DO_NOT_USE_CUSTOM_CONFIG -DMQTT_DO_NOT_USE_CUSTOM_CONFIG")
 
 add_subdirectory(src)
 add_subdirectory(examples)
@@ -76,25 +88,19 @@ ExternalProject_Add(srtp2
     -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
 )
 
-# ExternalProject_Add(usrsctp
-#   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/usrsctp
-#   CMAKE_ARGS
-#     -DCMAKE_C_FLAGS="-fPIC"
-#     -Dsctp_build_programs=off
-#     -DBUILD_SHARED_LIBS=OFF # Ensure static
-#     -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/dist
-#     -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
-# )
-
 ExternalProject_Add(libwebsockets
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/libwebsockets
   CMAKE_ARGS
-    -DCMAKE_C_FLAGS="-fPIC"
+    -DCMAKE_C_FLAGS="-fPIC" #-D_POSIX_C_SOURCE=200112L -D_REENTRANT -D_UCLIBC_ -D_XOPEN_SOURCE=700 -D_GNU_SOURCE -std=c99 -DIFA_FLAGS=8 -Wno-error=sign-conversion"
+    # -DCMAKE_INCLUDE_PATH=${CMAKE_BINARY_DIR}/dist/include
+    # -DLWS_MBEDTLS_INCLUDE_DIRS=${CMAKE_BINARY_DIR}/dist/include ${CMAKE_BINARY_DIR}/dist/include/mbedtls 
+    # -DLWS_MBEDTLS_LIBRARIES=${CMAKE_BINARY_DIR}/dist/lib/libmbedcrypto.a ${CMAKE_BINARY_DIR}/dist/lib/libmbedx509.a ${CMAKE_BINARY_DIR}/dist/lib/libmbedtls.a 
     -DBUILD_SHARED_LIBS=OFF # Ensure static
     -DLWS_WITH_SHARED=OFF
     -DLWS_WITH_STATIC=ON
     -DLWS_WITH_MBEDTLS=ON    
     -DLWS_WITH_LIBCAP=OFF
+    -DLWS_HAVE_LINUX_IPV6_H=OFF
     -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/dist
     -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
   DEPENDS mbedtls
