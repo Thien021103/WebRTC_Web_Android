@@ -6,6 +6,12 @@ plugins {
   id(libs.plugins.android.application.get().pluginId)
   id(libs.plugins.kotlin.android.get().pluginId)
   id(libs.plugins.compose.compiler.get().pluginId)
+
+  // Add the ID of the plugin for Firebase
+  id("com.google.gms.google-services")
+  id("com.google.firebase.appdistribution")
+  id("com.google.firebase.crashlytics")
+  id("com.google.firebase.firebase-perf")
 }
 
 val localProperties = Properties()
@@ -76,4 +82,6 @@ dependencies {
   implementation(libs.androidx.media3.ui)
   implementation(libs.androidx.media3.exoplayer)
   implementation(libs.firebase.messaging.ktx)
+
+  implementation(platform(libs.firebase.bom))
 }

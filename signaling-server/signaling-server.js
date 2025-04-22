@@ -1,5 +1,10 @@
 const http = require('http');
 const WebSocket = require('ws');
+const admin = require("firebase-admin");
+
+/** FCM setup **/
+const serviceAccount = require('./firebase-admin-sdk.json');
+const registrationToken = 'fL9GEwT9QoKekNVV6j3BZY:APA91bGVMIObkbbROcivQ8iDtO-eDEfsL9GtRd8nKnsalNJejYG6OzmlJcZm_QoMGYOBU4oKlsQBAoDdhhnI_HlNp8LgVkwuOEywPPa-qDDEeBmZnJrHig4'; // Thay bằng FCM token từ logcat (tạm thời hardcode)
 
 /**  Groups are stored as JSON: 
 { id,
@@ -12,6 +17,26 @@ const WebSocket = require('ws');
 }
 **/
 const groups = new Map();
+
+const app = admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
+// Hàm gửi thông báo FCM
+async function sendFCMNotification(token) {
+  try {
+    const message = {
+      data: {
+        show_signalling: 'true'
+      },
+      token: token
+    };
+    const response = await admin.messaging(app).send(message);
+    console.log('FCM notification sent:', response);
+  } catch (error) {
+    console.error('Error sending FCM notification:', error.message);
+  }
+}
 
 // Utility để thông báo trạng thái đến tất cả client trong cùng nhóm
 function notifyStateUpdate(groupId) {
@@ -85,6 +110,11 @@ function handleConnect(message, client) {
     client._groupId = id; // groupId for WebSocket instance
     client._type = type;  // type of WebSocket instance
     console.log(`${type} connected with ID: ${id}`);
+  }
+
+  // Gửi thông báo FCM khi Controller kết nối
+  if (type === 'controller') {
+    sendFCMNotification(registrationToken);
   }
 
   // Check for Readiness

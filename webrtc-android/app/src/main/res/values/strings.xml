@@ -27,4 +27,5 @@
   <string name="button_join_session">Join session</string>
 
   <string name="button_end_session">End Session</string>
+  <string name="default_notification_channel_id">channel_id</string>
 </resources>

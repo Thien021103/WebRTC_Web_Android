@@ -3,3 +3,5 @@
 **/pps_dua/
 **/examples/static_cam/
 **/toolchain.cmake
+**/node_modules/
+firebase-admin-sdk.json

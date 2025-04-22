@@ -19,6 +19,7 @@ package io.getstream.webrtc.sample.compose
 import android.Manifest
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
@@ -44,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.messaging.FirebaseMessaging
 //import com.google.firebase.FirebaseApp
 import io.getstream.webrtc.sample.compose.ui.screens.list.VideoListScreen
 import io.getstream.webrtc.sample.compose.ui.screens.list.VideoListViewModel
@@ -55,7 +57,10 @@ import io.getstream.webrtc.sample.compose.webrtc.peer.StreamPeerConnectionFactor
 import io.getstream.webrtc.sample.compose.webrtc.sessions.LocalWebRtcSessionManager
 import io.getstream.webrtc.sample.compose.webrtc.sessions.WebRtcSessionManager
 import io.getstream.webrtc.sample.compose.webrtc.sessions.WebRtcSessionManagerImpl
-//import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 sealed class Screen {
   object Main : Screen()
@@ -71,7 +76,12 @@ class MainActivity : ComponentActivity() {
 //    FirebaseApp.initializeApp(this)
 //    FirebaseMessaging.getInstance().subscribeToTopic("doorbell")
 
-    val permissions = arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_EXTERNAL_STORAGE)
+    val permissions = arrayOf(
+      Manifest.permission.CAMERA,
+      Manifest.permission.RECORD_AUDIO,
+      Manifest.permission.READ_EXTERNAL_STORAGE,
+      Manifest.permission.POST_NOTIFICATIONS
+    )
     requestPermissions(permissions, 0)
 
     val id = 123
@@ -82,12 +92,12 @@ class MainActivity : ComponentActivity() {
           modifier = Modifier.fillMaxSize(),
           color = MaterialTheme.colors.background
         ) {
-//          val initialScreen = if (intent.getBooleanExtra("SHOW_SIGNALLING", false)) {
-//            Screen.Signalling
-//          } else {
-//            Screen.Main
-//          }
-          var currentScreen by remember { mutableStateOf<Screen>(Screen.Main) }
+          val initialScreen = if (intent.getBooleanExtra("SHOW_SIGNALLING", false)) {
+            Screen.Signalling
+          } else {
+            Screen.Main
+          }
+          var currentScreen by remember { mutableStateOf(initialScreen) }
 
           when (currentScreen) {
             Screen.Main -> MainScreen(
@@ -111,6 +121,15 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen(onVideosClick: () -> Unit, onSignallingClick: () -> Unit) {
+  CoroutineScope(Dispatchers.IO).launch {
+    try {
+      val token = FirebaseMessaging.getInstance().token.await()
+      Log.d("FCM Token", "$token")
+    } catch (e: Exception) {
+      println("Failed to get FCM token: $e")
+    }
+  }
+
   Column(
     modifier = Modifier.fillMaxSize().padding(16.dp),
     verticalArrangement = Arrangement.Center

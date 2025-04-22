@@ -1,6 +1,14 @@
 buildscript {
   repositories {
     google()
+    mavenCentral()  // Maven Central repository
+  }
+  dependencies {
+    // Add the Maven coordinates and latest version of the plugin
+    classpath ("com.google.gms:google-services:4.4.2")
+    classpath ("com.google.firebase:firebase-appdistribution-gradle:5.1.1")
+    classpath ("com.google.firebase:firebase-crashlytics-gradle:3.0.3")
+    classpath ("com.google.firebase:perf-plugin:1.4.2")
   }
 }
 
@@ -11,6 +19,7 @@ plugins {
   alias(libs.plugins.kotlin.serialization) apply false
   alias(libs.plugins.compose.compiler) apply false
   alias(libs.plugins.spotless) apply false
+  id("com.google.gms.google-services") version "4.4.2" apply false
 }
 
 subprojects {
