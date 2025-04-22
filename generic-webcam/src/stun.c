@@ -168,7 +168,7 @@ void stun_parse_msg_buf(StunMessage* msg) {
   uint8_t mask[16];
 
   msg->stunclass = ntohs(header->type);
-  LOGD("Header Type: 0x%04x", ntohs(header->type));
+  // LOGD("Header Type: 0x%04x", ntohs(header->type));
   if ((msg->stunclass & STUN_CLASS_ERROR) == STUN_CLASS_ERROR) {
     msg->stunclass = STUN_CLASS_ERROR;
   } else if ((msg->stunclass & STUN_CLASS_INDICATION) == STUN_CLASS_INDICATION) {
@@ -178,7 +178,7 @@ void stun_parse_msg_buf(StunMessage* msg) {
   } else if ((msg->stunclass & STUN_CLASS_REQUEST) == STUN_CLASS_REQUEST) {
     msg->stunclass = STUN_CLASS_REQUEST;
   }
-  LOGD("Class  Type: 0x%04x", msg->stunclass);
+  // LOGD("Class  Type: 0x%04x", msg->stunclass);
 
   msg->stunmethod = ntohs(header->type) & 0x0FFF;
   if ((msg->stunmethod & STUN_METHOD_CHANNEL_BIND) == STUN_METHOD_CHANNEL_BIND) {
@@ -192,7 +192,7 @@ void stun_parse_msg_buf(StunMessage* msg) {
   } else if ((msg->stunmethod & STUN_METHOD_BINDING) == STUN_METHOD_BINDING) {
     msg->stunmethod = STUN_METHOD_BINDING;
   }
-  LOGD("Method Type: 0x%04x", msg->stunmethod);
+  // LOGD("Method Type: 0x%04x", msg->stunmethod);
 
   while (pos < length) {
     StunAttribute* attr = (StunAttribute*)(msg->buf + pos);
@@ -225,29 +225,29 @@ void stun_parse_msg_buf(StunMessage* msg) {
       case STUN_ATTR_TYPE_REALM:
         memset(msg->realm, 0, sizeof(msg->realm));
         memcpy(msg->realm, attr->value, ntohs(attr->length));
-        LOGD("Realm %s", msg->realm);
+        // LOGD("Realm %s", msg->realm);
         break;
       case STUN_ATTR_TYPE_NONCE:
         memset(msg->nonce, 0, sizeof(msg->nonce));
         memcpy(msg->nonce, attr->value, ntohs(attr->length));
-        LOGD("Nonce %s", msg->nonce);
+        // LOGD("Nonce %s", msg->nonce);
         break;
       case STUN_ATTR_TYPE_XOR_RELAYED_ADDRESS:
         *((uint32_t*)mask) = htonl(MAGIC_COOKIE);
         memcpy(mask + 4, header->transaction_id, sizeof(header->transaction_id));
-        LOGD("XOR Relayed Address");
+        // LOGD("XOR Relayed Address");
         stun_get_mapped_address(attr->value, mask, &msg->relayed_addr);
         break;
       case STUN_ATTR_TYPE_XOR_MAPPED_ADDRESS:
         *((uint32_t*)mask) = htonl(MAGIC_COOKIE);
         memcpy(mask + 4, header->transaction_id, sizeof(header->transaction_id));
-        LOGD("XOR Mapped Address");
+        // LOGD("XOR Mapped Address");
         stun_get_mapped_address(attr->value, mask, &msg->mapped_addr);
         break;
       case STUN_ATTR_TYPE_XOR_PEER_ADDRESS:
         *((uint32_t*)mask) = htonl(MAGIC_COOKIE);
         memcpy(mask + 4, header->transaction_id, sizeof(header->transaction_id));
-        LOGD("XOR Peer Address");
+        // LOGD("XOR Peer Address");
         stun_get_mapped_address(attr->value, mask, &msg->peer_addr);
         break;
       case STUN_ATTR_TYPE_PRIORITY:
@@ -272,7 +272,7 @@ void stun_parse_msg_buf(StunMessage* msg) {
         // Do nothing
         break;
       default:
-        LOGE("Unknown Attribute Type: 0x%04x", ntohs(attr->type));
+        // LOGE("Unknown Attribute Type: 0x%04x", ntohs(attr->type));
         break;
     }
 
@@ -338,7 +338,7 @@ int stun_msg_finish(StunMessage* msg, StunCredential credential, const char* pas
   switch (credential) {
     case STUN_CREDENTIAL_LONG_TERM:
       snprintf(key, sizeof(key), "%s:%s:%s", msg->username, msg->realm, password);
-      LOGD("key: %s", key);
+      // LOGD("key: %s", key);
       utils_get_md5(key, strlen(key), (unsigned char*)hash_key);
       password = hash_key;
       password_len = 16;

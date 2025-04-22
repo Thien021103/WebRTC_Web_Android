@@ -75,7 +75,7 @@ static int peer_connection_dtls_srtp_recv(void* ctx, unsigned char* buf, size_t 
 
   while (recv_max < CONFIG_TLS_READ_TIMEOUT && pc->state == PEER_CONNECTION_CONNECTED) {
     ret = agent_recv(&pc->agent, buf, len);
-    LOGD("dtls_srtp_udp_recv (%d)", ret);
+    // LOGD("dtls_srtp_udp_recv (%d)", ret);
     if (ret > 0) {
       break;
     }
@@ -87,7 +87,7 @@ static int peer_connection_dtls_srtp_recv(void* ctx, unsigned char* buf, size_t 
 static int peer_connection_dtls_srtp_send(void* ctx, const uint8_t* buf, size_t len) {
   DtlsSrtp* dtls_srtp = (DtlsSrtp*)ctx;
   PeerConnection* pc = (PeerConnection*)dtls_srtp->user_data;
-  LOGD("dtls_srtp_udp_send ");
+  // LOGD("dtls_srtp_udp_send ");
 
   return agent_send(&pc->agent, buf, len);
 }
@@ -101,7 +101,7 @@ static void peer_connection_incoming_rtcp(PeerConnection* pc, uint8_t* buf, size
 
     switch (rtcp_header->type) {
       case RTCP_RR: {
-        LOGI("RTCP_RR with %d report blocks", rtcp_header->rc);
+        // LOGI("RTCP_RR with %d report blocks", rtcp_header->rc);
         
         if (rtcp_header->rc > 0) {
           size_t report_offset = pos + 8;
@@ -123,7 +123,7 @@ static void peer_connection_incoming_rtcp(PeerConnection* pc, uint8_t* buf, size
             uint32_t lsr = ntohl(report_block[6]);
             uint32_t dlsr = ntohl(report_block[7]);
             float loss_rate = (float)fraction_lost / 256.0 * 100.0;
-            LOGI("Loss rate: %.1f%%", loss_rate);
+            // LOGI("Loss rate: %.1f%%", loss_rate);
 
             if (pc->on_receiver_packet_loss && fraction_lost > 0) {
               float loss_rate = (float)fraction_lost / 256.0;
@@ -158,7 +158,7 @@ static void peer_connection_incoming_rtcp(PeerConnection* pc, uint8_t* buf, size
 // break;
       case RTCP_PSFB: {
         int fmt = rtcp_header->rc;
-        LOGI("RTCP_PSFB %d", fmt);
+        // LOGI("RTCP_PSFB %d", fmt);
         // PLI and FIR
         if ((fmt == 1 || fmt == 4) && pc->config.on_request_keyframe) {
           pc->config.on_request_keyframe(pc->config.user_data);
@@ -173,7 +173,7 @@ static void peer_connection_incoming_rtcp(PeerConnection* pc, uint8_t* buf, size
           uint8_t exp = (remb >> 18) & 0x3F;    // 6-bit exponent
           uint32_t mantissa = remb & 0x3FFFF;   // 18-bit mantissa
           uint64_t bitrate = mantissa << exp;   // Calculate bitrate in bps
-          LOGI("Received REMB, bitrate: %llu", bitrate);
+          // LOGI("Received REMB, bitrate: %llu", bitrate);
 
           if (pc->on_receiver_bitrate) {
             pc->on_receiver_bitrate(bitrate, pc->config.user_data);
@@ -432,7 +432,7 @@ int peer_connection_loop(PeerConnection* pc) {
       break;
 
     case PEER_CONNECTION_CHECKING:
-      LOGD("Checking...");
+      // LOGD("Checking...");
       usleep(5000);
       if (agent_select_candidate_pair(&pc->agent) < 0) {
         break;
@@ -441,7 +441,7 @@ int peer_connection_loop(PeerConnection* pc) {
       else if (pc->agent.nominated_pair->remote->type == ICE_CANDIDATE_TYPE_RELAY
             && pc->agent.nominated_pair->local->type == ICE_CANDIDATE_TYPE_RELAY
       ) {
-        LOGD("Remote: %d, Local: %d", pc->agent.nominated_pair->remote->type, pc->agent.nominated_pair->local->type);
+        // LOGD("Remote: %d, Local: %d", pc->agent.nominated_pair->remote->type, pc->agent.nominated_pair->local->type);
 
         if (agent_create_permission(&pc->agent) < 0) {
           break;
@@ -457,7 +457,7 @@ int peer_connection_loop(PeerConnection* pc) {
       // Not using TURN server
       else if(pc->agent.nominated_pair->remote->type != ICE_CANDIDATE_TYPE_RELAY
             && pc->agent.nominated_pair->local->type != ICE_CANDIDATE_TYPE_RELAY) {
-        LOGD("Remote: %d, Local: %d", pc->agent.nominated_pair->remote->type, pc->agent.nominated_pair->local->type);
+        // LOGD("Remote: %d, Local: %d", pc->agent.nominated_pair->remote->type, pc->agent.nominated_pair->local->type);
         if (agent_connectivity_check(&pc->agent) == 0) {
           STATE_CHANGED(pc, PEER_CONNECTION_CONNECTED);
           break;
@@ -512,23 +512,23 @@ int peer_connection_loop(PeerConnection* pc) {
 #endif
 
       if ((pc->agent_ret = agent_recv(&pc->agent, pc->agent_buf, sizeof(pc->agent_buf))) > 0) {
-        LOGD("agent_recv %d", pc->agent_ret);
+        // LOGD("agent_recv %d", pc->agent_ret);
 
         if (rtcp_probe(pc->agent_buf, pc->agent_ret)) {
-          LOGD("Got RTCP packet");
+          // LOGD("Got RTCP packet");
           dtls_srtp_decrypt_rtcp_packet(&pc->dtls_srtp, pc->agent_buf, &pc->agent_ret);
           peer_connection_incoming_rtcp(pc, pc->agent_buf, pc->agent_ret);
 
         } else if (dtls_srtp_probe(pc->agent_buf)) {
           int ret = dtls_srtp_read(&pc->dtls_srtp, pc->temp_buf, sizeof(pc->temp_buf));
-          LOGI("Got DTLS data %d", ret);
+          // LOGI("Got DTLS data %d", ret);
 
           if (ret > 0) {
             sctp_incoming_data(&pc->sctp, (char*)pc->temp_buf, ret);
           }
 
         } else if (rtp_packet_validate(pc->agent_buf, pc->agent_ret)) {
-          LOGD("Got RTP packet");
+          // LOGD("Got RTP packet");
 
           dtls_srtp_decrypt_rtp_packet(&pc->dtls_srtp, pc->agent_buf, &pc->agent_ret);
 
@@ -552,7 +552,7 @@ int peer_connection_loop(PeerConnection* pc) {
         STATE_CHANGED(pc, PEER_CONNECTION_CLOSED);
       }
       else {
-        LOGD("%d",last);
+        // LOGD("%d",last);
       }
 
       break;
@@ -709,7 +709,7 @@ int peer_connection_add_ice_candidate(PeerConnection* pc, char* candidate) {
       }
   }
   agent->remote_candidates_count++;
-  LOGI("candidate pairs num 2: %d", agent->candidate_pairs_num);
+  // LOGI("candidate pairs num 2: %d", agent->candidate_pairs_num);
 
   return 0;
 }
