@@ -57,7 +57,7 @@ fun VideoCallScreen(
 ) {
   val sessionManager = LocalWebRtcSessionManager.current
   val context = LocalContext.current
-  val outputFilePath = "${context.getExternalFilesDir(null)}/recorded${System.currentTimeMillis()}.mp4"
+  val outputFilePath = "${context.getExternalFilesDir(null)}/recorded24-4:${System.currentTimeMillis()}.mp4"
   val mediaMuxer = remember { MediaMuxer(outputFilePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4) }
   val recordingManager = remember { RecordingManager(context, mediaMuxer) }
 

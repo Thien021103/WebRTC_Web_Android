@@ -173,9 +173,13 @@ fun SignallingScreen(id: Int, onBack: () -> Unit) {
         var onCallScreen by remember { mutableStateOf(false) }
         val state by sessionManager!!.signalingClient.sessionStateFlow.collectAsState()
         if (!onCallScreen) {
-          StageScreen(state = state) {
-            onCallScreen = true
-          }
+          StageScreen(state = state,
+            onJoinCall = { onCallScreen = true},
+            onBack = {
+              startedSignalling = false
+              sessionManager!!.disconnect()
+            }
+          )
         } else {
           VideoCallScreen() {
             onCallScreen = false

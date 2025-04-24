@@ -86,14 +86,14 @@ class RecordingManager (
             val normalizedTimestampUs = currentTimestampUs // Already in µs
 //            Log.d("AudioRecordingManager", "timestamp: $normalizedTimestampUs")
             recordAudioData(ByteBuffer.wrap(audioBuffer, 0, 2048), normalizedTimestampUs)
-            currentTimestampUs += (bufferOffset/2 * 1_000_000L / 48000)
+            currentTimestampUs += (bufferOffset * 4 * 1_000_000L / 48000)
             bufferOffset = 0 // Reset buffer
           } catch (e: Exception) {
             Log.e("AudioRecordingManager", "Error recording audio data", e)
           }
         } else {
-          val normalizedTimestampUs = currentTimestampUs + (80 * 1_000_000L / 48000) // Already in µs
-          val paddedBuffer = ByteArray(160)
+          val normalizedTimestampUs = currentTimestampUs + (bufferOffset * 4 * 1_000_000L / 48000) // Already in µs
+          val paddedBuffer = ByteArray(2048)
 //          System.arraycopy(audioBuffer, 0, paddedBuffer, 0, 160)
           recordAudioData(ByteBuffer.wrap(paddedBuffer, 0, 160), normalizedTimestampUs)
         }
@@ -231,7 +231,7 @@ class RecordingManager (
           }
         }
         if(isMuxerStarted) {
-          Log.d("VideoRecordingManager", "Writing sample video, output_ts=${bufferInfo.presentationTimeUs}, size=${bufferInfo.size}")
+          Log.d("VideoRecordingManager", "Writing sample video, input_ts=${timestamp}, output_ts=${bufferInfo.presentationTimeUs}, size=${bufferInfo.size}")
           mediaMuxer.writeSampleData(videoTrackIndex, outputBuffer, bufferInfo)
         }
         videoMediaCodec?.releaseOutputBuffer(outputBufferIndex, false)
