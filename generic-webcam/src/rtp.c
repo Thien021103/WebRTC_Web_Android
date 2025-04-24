@@ -189,7 +189,7 @@ void rtp_encoder_init(RtpEncoder* rtp_encoder, MediaCodec codec, RtpOnPacket on_
     case CODEC_H264:
       rtp_encoder->type = PT_H264;
       rtp_encoder->ssrc = SSRC_H264;
-      rtp_encoder->timestamp_increment = 90000 / 30;  // 30 FPS.
+      rtp_encoder->timestamp_increment = 90000 / 20;  // 20 FPS.
       rtp_encoder->encode_func = rtp_encoder_encode_h264;
       break;
     case CODEC_PCMA:

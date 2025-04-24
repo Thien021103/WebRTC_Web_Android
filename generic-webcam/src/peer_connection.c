@@ -533,8 +533,8 @@ int peer_connection_loop(PeerConnection* pc) {
           dtls_srtp_decrypt_rtp_packet(&pc->dtls_srtp, pc->agent_buf, &pc->agent_ret);
 
           ssrc = rtp_get_ssrc(pc->agent_buf);
-          LOGD("remote ssrc: %u", pc->remote_assrc);
-          LOGD("actual remote audio ssrc: %u", ssrc);
+          // LOGD("remote ssrc: %u", pc->remote_assrc);
+          // LOGD("actual remote audio ssrc: %u", ssrc);
           if (ssrc == pc->remote_assrc) {
             rtp_decoder_decode(&pc->artp_decoder, pc->agent_buf, pc->agent_ret);
           } else if (ssrc == pc->remote_vssrc) {

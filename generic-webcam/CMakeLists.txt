@@ -91,9 +91,9 @@ ExternalProject_Add(srtp2
 ExternalProject_Add(libwebsockets
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/libwebsockets
   CMAKE_ARGS
-    -DCMAKE_C_FLAGS="-fPIC" #-D_POSIX_C_SOURCE=200112L -D_REENTRANT -D_UCLIBC_ -D_XOPEN_SOURCE=700 -D_GNU_SOURCE -std=c99 -DIFA_FLAGS=8 -Wno-error=sign-conversion"
-    # -DCMAKE_INCLUDE_PATH=${CMAKE_BINARY_DIR}/dist/include
-    # -DLWS_MBEDTLS_INCLUDE_DIRS=${CMAKE_BINARY_DIR}/dist/include ${CMAKE_BINARY_DIR}/dist/include/mbedtls 
+    -DCMAKE_C_FLAGS="-fPIC -D_POSIX_C_SOURCE=200112L -D_REENTRANT -D_UCLIBC_ -D_XOPEN_SOURCE=700 -D_GNU_SOURCE -std=c99 -DIFA_FLAGS=8 -Wno-error=sign-conversion"
+    -DCMAKE_INCLUDE_PATH=${CMAKE_BINARY_DIR}/dist/include
+    -DLWS_MBEDTLS_INCLUDE_DIRS=${CMAKE_BINARY_DIR}/dist/include ${CMAKE_BINARY_DIR}/dist/include/mbedtls 
     -DBUILD_SHARED_LIBS=OFF # Ensure static
     -DLWS_WITH_SHARED=OFF
     -DLWS_WITH_STATIC=ON
