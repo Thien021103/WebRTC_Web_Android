@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: thien
+      MONGO_INITDB_ROOT_PASSWORD: 881199
+    ports:
+      - "27017:27017"
+    volumes:
+      - thien-mongo-data:/data/db
+    networks:
+      - thien-network
+
+  websocket-server:
+    build:
+      context: /home/thien/test2/websocket/signaling-server
+      dockerfile: Dockerfile
+    container_name: websocket-server
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongodb
+    networks:
+      - thien-network
+
+volumes:
+  thien-mongo-data:
+
+networks:
+  thien-network:
+    driver: bridge
