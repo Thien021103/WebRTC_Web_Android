@@ -16,7 +16,7 @@ services:
 
   websocket-server:
     build:
-      context: /home/thien/test2/websocket/signaling-server
+      context: /home/thien/WebRTC_Web_Android/signaling-server
       dockerfile: Dockerfile
     container_name: websocket-server
     ports:
