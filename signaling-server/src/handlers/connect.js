@@ -14,8 +14,10 @@ async function handleConnect(message, client) {
   if (type === 'user') {
     try {
       // Find user in db by accessToken
-      const user = await db.collection('users').findOne({ accessToken: token });
-      if (!user) {
+      const user = await db.collection('users').findOne(
+        { accessToken: token }
+      );
+      if (!user || !user.accessToken) {
         console.error('Invalid access token');
         client.close();
         return;

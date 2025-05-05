@@ -80,7 +80,10 @@ async function handleDisconnect(client) {
       if (client._type === 'user' && client._accessToken) {
         try {
           const db = getDb();
-          await db.collection('users').deleteOne({ accessToken: client._accessToken });
+          await db.collection('users').updateOne(
+            { accessToken: client._accessToken },
+            { $unset: { accessToken: '' } }
+          );
           console.log(`Deleted accessToken from users collection`);
         } catch (error) {
           console.error(`Error deleting accessToken`);
