@@ -1,7 +1,7 @@
 {
-  "name": "libdatachannel-signaling-server",
+  "name": "signaling-server",
   "version": "0.2.0",
-  "description": "Signaling server example for libdatachannel",
+  "description": "Signaling server example",
   "main": "signaling-server.js",
   "scripts": {
     "start": "node signaling-server.js",

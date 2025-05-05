@@ -1,9 +1,9 @@
 const http = require('http');
 const WebSocket = require('ws');
-const admin = require("firebase-admin");
+// const admin = require("firebase-admin");
 
 /** FCM setup **/
-const serviceAccount = require('../firebase-admin-sdk.json');
+// const serviceAccount = require('../firebase-admin-sdk.json');
 const { handleConnect } = require('./handlers/connect');
 const { handleOffer } = require('./handlers/offer');
 const { handleAnswer } = require('./handlers/answer');
@@ -28,26 +28,6 @@ Groups are stored locally as JSON, presented as:
 
 const groups = new Map();
 
-// const app = admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount),
-// });
-
-// // Hàm gửi thông báo FCM
-// async function sendFCMNotification(token) {
-//   try {
-//     const message = {
-//       data: {
-//         show_signalling: 'true'
-//       },
-//       token: token
-//     };
-//     const response = await admin.messaging(app).send(message);
-//     console.log('FCM notification sent:', response);
-//   } catch (error) {
-//     console.error('Error sending FCM notification:', error.message);
-//   }
-// }
-
 // Utility để thông báo trạng thái đến tất cả client trong cùng nhóm
 function notifyStateUpdate(groupId) {
   const group = groups.get(groupId);
@@ -61,47 +41,60 @@ function notifyStateUpdate(groupId) {
   }
 }
 
-// Create HTTP server
-const server = http.createServer((req, res) => {
-  res.writeHead(404, { 'Content-Type': 'text/plain' });
-  res.end('Not a normal http server, this is for Websocket only');
-});
+async function startServer() {
 
-const wss = new WebSocket.Server({ server });
+  // Connect to MongoDB
+  await connect();
 
-wss.on('connection', (ws) => {
-  let sessionId = Math.random().toString(36).substring(2, 15); // ID tạm thời cho client
-  console.log(`Client connected with temporary ID: ${sessionId}`);
-
-  // Gửi trạng thái ban đầu (Impossible nếu chưa thuộc nhóm)
-  ws.send(`STATE Impossible`);
-
-  ws.on('message', (data) => {
-    const message = data.toString();
-    console.log(`Message received: ${message}`);
-
-    if (message.startsWith('CONNECT')) {
-      handleConnect(message, ws);
-    } else if (message.startsWith('OFFER')) {
-      handleOffer(message);
-    } else if (message.startsWith('ANSWER')) {
-      handleAnswer(message);
-    } else if (message.startsWith('ICE')) {
-      handleIce(message);
-    } else if (message.startsWith('REGISTER')) {
-      handleRegister(message, ws);
-    } else if (message.startsWith('REGISTER')) {
-      handleLogin(message, ws);
-    }
+  // Create HTTP server
+  const server = http.createServer((req, res) => {
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('Not a normal http server, this is for Websocket only');
   });
 
-  ws.on('close', () => {
-    handleDisconnect(ws);
-    console.log(`Client ${sessionId} disconnected`);
+  const wss = new WebSocket.Server({ server });
+
+  wss.on('connection', (ws) => {
+    let sessionId = Math.random().toString(36).substring(2, 15); // ID tạm thời cho client
+    console.log(`Client connected with temporary ID: ${sessionId}`);
+
+    // Gửi trạng thái ban đầu (Impossible nếu chưa thuộc nhóm)
+    ws.send(`STATE Impossible`);
+
+    ws.on('message', (data) => {
+      const message = data.toString();
+      console.log(`Message received: ${message}`);
+
+      if (message.startsWith('CONNECT')) {
+        handleConnect(message, ws);
+      } else if (message.startsWith('OFFER')) {
+        handleOffer(message);
+      } else if (message.startsWith('ANSWER')) {
+        handleAnswer(message);
+      } else if (message.startsWith('ICE')) {
+        handleIce(message);
+      } else if (message.startsWith('REGISTER')) {
+        handleRegister(message, ws);
+      } else if (message.startsWith('REGISTER')) {
+        handleLogin(message, ws);
+      }
+    });
+
+    ws.on('close', () => {
+      handleDisconnect(ws);
+      console.log(`Client ${sessionId} disconnected`);
+    });
+
+    ws.on('error', console.error);
   });
 
-  ws.on('error', console.error);
-});
+  // Start server
+  const PORT = process.env.PORT || 8000;
+
+  server.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
+  });
+}
 
 // Handle disconnect
 function handleDisconnect(client) {
@@ -120,14 +113,10 @@ function handleDisconnect(client) {
   }
 }
 
-// Start server
-const port = process.env.PORT || 8000;
-
-// Connect to MongoDB
-await connect();
-
-server.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+// Start the server
+startServer().catch((error) => {
+  console.error('Failed to start server:', error.message);
+  process.exit(1);
 });
 
 module.exports = 
