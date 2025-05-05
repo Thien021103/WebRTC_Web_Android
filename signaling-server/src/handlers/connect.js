@@ -21,6 +21,7 @@ async function handleConnect(message, client) {
         return;
       }
       groupId = user.groupId; // Get groupId from user document
+      client._accessToken = token
     } catch (error) {
       console.error('Error validating user accessToken:', error.message);
       client.close();
