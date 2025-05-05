@@ -96,10 +96,10 @@ async function handleDisconnect(client) {
         try {
           const db = getDb();
           await db.collection('groups').updateOne(
-            { id: group.id },
+            { id: client._groupId },
             { $set: { state: 'Impossible' } }
           );
-          console.log(`Updated group ${group.id} state to Impossible`);
+          console.log(`Updated group ${client._groupId} state to Impossible`);
         } catch (error) {
           console.error(`Error updating group state: ${error.message}`);
         }
