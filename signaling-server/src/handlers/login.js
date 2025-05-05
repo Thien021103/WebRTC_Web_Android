@@ -1,5 +1,6 @@
 const { getDb } = require("../db/db");
 const { groups } = require("../groups/groups");
+const { generateAccessToken } = require("./register");
 
 async function handleLogin(message, client) {
   // Sử dụng regex để bóc tách message
@@ -33,12 +34,19 @@ async function handleLogin(message, client) {
       groupId: id,
     });
 
-    if (!user || !user.accessToken) {
+    if (!user) {
       console.error(`Login failed for email: ${email}, group: ${id}`);
       client.send('LOGIN failed');
       return;
     }
-
+    // New accessToken in to database
+    const accessToken = generateAccessToken();
+    await db.collection('users').updateOne(
+      { id },
+      { $set: { accessToken: accessToken } },
+      { upsert: true }
+    );
+    
     // Lưu hoặc cập nhật fcm_token trong collection groups
     const group = groups.get(id);
     if (!group) {
@@ -63,8 +71,8 @@ async function handleLogin(message, client) {
       { upsert: true }
     );
 
-    // Gửi accessToken về client
-    client.send(`LOGIN ${user.accessToken}`);
+    // Send accessToken to client
+    client.send(`LOGIN ${accessToken}`);
     console.log(`User logged in: ${email}, group: ${id}`);
   } catch (error) {
     console.error('Error in handleLogin:', error.message);

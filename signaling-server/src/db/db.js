@@ -12,6 +12,7 @@ async function connect(retries = 5, delay = 2000) {
       await client.connect();
       console.log('Connected to MongoDB');
       db = client.db(dbName);
+      db.collection("users").updateOne()
       return;
     } catch (error) {
       console.error(`MongoDB connection attempt ${i + 1} failed:`, error.message);

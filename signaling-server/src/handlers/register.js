@@ -30,7 +30,7 @@ async function handleRegister(message, client) {
   const db = getDb();
 
   try {
-    // Kiểm tra email đã tồn tại
+    // Check email on users collection
     const existingUser = await db.collection('users').findOne({ email });
     if (existingUser) {
       console.error(`Email already registered: ${email}`);
@@ -38,10 +38,10 @@ async function handleRegister(message, client) {
       return;
     }
 
-    // Tạo accessToken
+    // New accessToken
     const accessToken = generateAccessToken();
 
-    // Lưu user vào collection users
+    // New user to collection users
     await db.collection('users').insertOne({
       email,
       password,
@@ -49,7 +49,7 @@ async function handleRegister(message, client) {
       accessToken,
     });
 
-    // Lưu hoặc cập nhật fcm_token trong collection groups
+    // Update fcm_token on local groups and collection groups
     const group = groups.get(id);
     if (!group) {
       groups.set(id, {
@@ -72,7 +72,7 @@ async function handleRegister(message, client) {
       { upsert: true }
     );
 
-    // Gửi accessToken về client
+    // Send accessToken to client
     client.send(`LOGIN ${accessToken}`);
     console.log(`User registered: ${email}, group: ${id}`);
   } catch (error) {
@@ -81,4 +81,4 @@ async function handleRegister(message, client) {
   }
 }
 
-module.exports = { handleRegister };
+module.exports = { handleRegister, generateAccessToken };
