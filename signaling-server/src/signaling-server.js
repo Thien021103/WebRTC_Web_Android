@@ -17,7 +17,7 @@ const { groups, notifyStateUpdate } = require('./groups/groups');
 async function startServer() {
 
   // Connect to MongoDB
-  // await connect();
+  await connect();
 
   // Create HTTP server
   const server = http.createServer((req, res) => {
