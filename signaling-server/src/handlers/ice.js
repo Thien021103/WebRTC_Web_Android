@@ -1,4 +1,4 @@
-const { groups } = require('../signaling-server');
+const { groups } = require("../groups/groups");
 
 function handleIce(message) {
   

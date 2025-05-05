@@ -1,5 +1,5 @@
 const { getDb } = require('../db/db');
-const { groups } = require('../signaling-server');
+const { groups } = require("../groups/groups");
 
 // Hàm tạo chuỗi số ngẫu nhiên dài 10 ký tự
 function generateAccessToken() {

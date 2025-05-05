@@ -1,6 +1,6 @@
 const { getDb } = require('../db/db');
 const { sendFCMNotification } = require('../fcm/fcm');
-const { groups, notifyStateUpdate } = require('../signaling-server');
+const { groups, notifyStateUpdate } = require('../groups/groups');
 
 async function handleConnect(message, client) {
 
@@ -42,6 +42,7 @@ async function handleConnect(message, client) {
       },
       fcm_token: null,
     });
+    console.log(`New group added:\n${groups.get(groupId)}`)
   }
 
   const group = groups.get(groupId);

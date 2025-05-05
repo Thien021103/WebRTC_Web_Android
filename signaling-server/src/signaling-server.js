@@ -11,40 +11,13 @@ const { handleIce } = require('./handlers/ice');
 const { connect } = require('./db/db');
 const { handleLogin } = require('./handlers/login');
 const { handleRegister } = require('./handlers/register');
+const { groups, notifyStateUpdate } = require('./groups/groups');
 // const registrationToken = 'fL9GEwT9QoKekNVV6j3BZY:APA91bGVMIObkbbROcivQ8iDtO-eDEfsL9GtRd8nKnsalNJejYG6OzmlJcZm_QoMGYOBU4oKlsQBAoDdhhnI_HlNp8LgVkwuOEywPPa-qDDEeBmZnJrHig4'; // Thay bằng FCM token từ logcat (tạm thời hardcode)
-
-/************************  
-Groups are stored locally as JSON, presented as: 
-{ id,
-  state,
-  clients: {
-    camera: ws,
-    user: ws,
-    controller: ws
-  },
-  fcm_token,
-}
-************************/
-
-const groups = new Map();
-
-// Utility để thông báo trạng thái đến tất cả client trong cùng nhóm
-function notifyStateUpdate(groupId) {
-  const group = groups.get(groupId);
-  if (group) {
-    const message = `STATE ${group.state}`;
-    for (const client of Object.values(group.clients)) {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(message);
-      }
-    }
-  }
-}
 
 async function startServer() {
 
   // Connect to MongoDB
-  await connect();
+  // await connect();
 
   // Create HTTP server
   const server = http.createServer((req, res) => {
@@ -75,7 +48,7 @@ async function startServer() {
         handleIce(message);
       } else if (message.startsWith('REGISTER')) {
         handleRegister(message, ws);
-      } else if (message.startsWith('REGISTER')) {
+      } else if (message.startsWith('LOGIN')) {
         handleLogin(message, ws);
       }
     });
@@ -118,9 +91,3 @@ startServer().catch((error) => {
   console.error('Failed to start server:', error.message);
   process.exit(1);
 });
-
-module.exports = 
-{ 
-  groups,
-  notifyStateUpdate
-};

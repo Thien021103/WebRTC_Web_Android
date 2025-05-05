@@ -1,5 +1,5 @@
 const { getDb } = require("../db/db");
-const { groups } = require("../signaling-server");
+const { groups } = require("../groups/groups");
 
 async function handleLogin(message, client) {
   // Sử dụng regex để bóc tách message

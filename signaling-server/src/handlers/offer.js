@@ -1,4 +1,4 @@
-const { groups, notifyStateUpdate } = require("../signaling-server");
+const { groups, notifyStateUpdate } = require("../groups/groups");
 
 function handleOffer(message) {
 
