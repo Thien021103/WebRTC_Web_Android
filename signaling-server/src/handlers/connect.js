@@ -7,7 +7,8 @@ async function handleConnect(message, client) {
   const db = getDb();
   let groupId;
 
-  const [_, type, token] = message.split(' '); // "CONNECT camera 123" -> ["CONNECT", "camera", "123"]
+  const msg = message.toString().trim();
+  const [_, type, token] = msg.split(' '); // "CONNECT camera 123" -> ["CONNECT", "camera", "123"]
 
   // Handle user type with accessToken validation
   if (type === 'user') {
