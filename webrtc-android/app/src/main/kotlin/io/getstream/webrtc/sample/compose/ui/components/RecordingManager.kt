@@ -9,15 +9,15 @@ import android.util.Log
 import org.webrtc.AudioTrackSink
 import org.webrtc.VideoFrame
 import org.webrtc.VideoSink
-import java.io.File
+//import java.io.File
 import java.nio.ByteBuffer
 
 class RecordingManager (
   private var context: Context,
   private var mediaMuxer: MediaMuxer,
-  ) : AudioTrackSink, VideoSink {
+) : AudioTrackSink, VideoSink {
 
-  private var outputFile: File? = null
+//  private var outputFile: File? = null
   private val muxerLock = Any()
   private var isMuxerStarted = false
 
@@ -180,7 +180,7 @@ class RecordingManager (
 //    mediaMuxer = null
     videoTrackIndex = -1
     isMuxerStarted = false
-    outputFile = null
+//    outputFile = null
   }
 
   private fun recordVideoFrame(

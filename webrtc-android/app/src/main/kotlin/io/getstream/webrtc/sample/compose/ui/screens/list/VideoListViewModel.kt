@@ -21,7 +21,8 @@ class VideoListViewModel(context: Context) : ViewModel() {
   private val _videos = MutableStateFlow<List<Video>>(emptyList())
   val videos: StateFlow<List<Video>> = _videos.asStateFlow()
 
-  private val videoDir = context.getExternalFilesDir(null)
+  private val externalDir = context.getExternalFilesDir(null)
+  private val videoDir = File(externalDir, "id")
 
   init {
     viewModelScope.launch {

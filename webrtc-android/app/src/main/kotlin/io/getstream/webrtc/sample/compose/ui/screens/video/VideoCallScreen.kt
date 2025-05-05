@@ -17,8 +17,12 @@
 package io.getstream.webrtc.sample.compose.ui.screens.video
 
 import android.app.Activity
+import android.content.Context
 import android.media.MediaMuxer
+import android.os.Build
+import android.os.Environment
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.absolutePadding
@@ -50,14 +54,37 @@ import io.getstream.webrtc.sample.compose.ui.components.AudioRecorder
 import io.getstream.webrtc.sample.compose.ui.components.RecordingManager
 import kotlinx.coroutines.delay
 import java.io.File
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
+@RequiresApi(Build.VERSION_CODES.O)
+fun getOutputFilePath(context: Context): String {
+  // Format: |day-month-year|hour:min:sec|recorded.mp4
+  val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy|HH:mm:ss")
+  val timestamp = LocalDateTime.now().format(formatter)
+  val fileName = "Video|$timestamp|recorded.mp4" // e.g., |24-04-2025|17:48:42|recorded.mp4
+  val baseDir = context.getExternalFilesDir(null)
+  try {
+    // Try Downloads directory first
+    val idDir = File(baseDir, "id") // /storage/emulated/0/Android/data/<package_name>/files/id/
+    // Ensure /id directory exists
+    if (!idDir.exists()) {
+      idDir.mkdirs()
+    }
+    return File(idDir, fileName).absolutePath
+  } catch (_: Exception) {
+    return File(baseDir, fileName).absolutePath
+  }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun VideoCallScreen(
   onCancelCall: () -> Unit
 ) {
   val sessionManager = LocalWebRtcSessionManager.current
   val context = LocalContext.current
-  val outputFilePath = "${context.getExternalFilesDir(null)}/recorded24-4:${System.currentTimeMillis()}.mp4"
+  val outputFilePath = getOutputFilePath(context)
   val mediaMuxer = remember { MediaMuxer(outputFilePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4) }
   val recordingManager = remember { RecordingManager(context, mediaMuxer) }
 

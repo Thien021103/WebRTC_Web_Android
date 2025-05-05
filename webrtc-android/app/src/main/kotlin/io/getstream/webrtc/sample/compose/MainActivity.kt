@@ -144,6 +144,7 @@ fun MainScreen(onVideosClick: () -> Unit, onSignallingClick: () -> Unit) {
   }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SignallingScreen(id: Int, onBack: () -> Unit) {
   var startedSignalling by remember { mutableStateOf(false) }

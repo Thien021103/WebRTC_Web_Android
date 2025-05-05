@@ -43,6 +43,7 @@ class SignalingClient(private val id: Int) {
 
   // opening web socket with signaling server
   private val ws = client.newWebSocket(request, SignalingWebSocketListener())
+  private val accessToken = "123"
 
   // session flow to send information about the session state to the subscribers
   private val _sessionStateFlow = MutableStateFlow(WebRTCSessionState.Offline)
@@ -55,11 +56,12 @@ class SignalingClient(private val id: Int) {
   fun sendCommand(signalingCommand: SignalingCommand, message: String) {
     if(signalingCommand === SignalingCommand.CONNECT) {
       logger.d { "[sendCommand] $signalingCommand $message" }
-      ws.send("$signalingCommand user $id$message")
+      ws.send("$signalingCommand user $accessToken$message")
     }
     else {
       logger.d { "[sendCommand] $signalingCommand $message" }
-      ws.send("$signalingCommand user $id\n$message")
+      logger.d { "$signalingCommand user $accessToken\n$message" }
+      ws.send("$signalingCommand user $accessToken\n$message")
     }
   }
 
@@ -90,6 +92,7 @@ class SignalingClient(private val id: Int) {
   }
 
   private fun handleSignalingCommand(command: SignalingCommand, text: String) {
+    logger.d { "$text" }
     val value = getNextLineMessage(text)
     logger.d { "received signaling: $command $value" }
     signalingScope.launch {
