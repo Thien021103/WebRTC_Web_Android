@@ -9,4 +9,4 @@ COPY . .
 
 EXPOSE 8000
 
-CMD ["node", "signaling-server.js"]
+CMD ["node", "src/signaling-server.js"]
