@@ -42,7 +42,7 @@ async function handleLogin(message, client) {
     // New accessToken in to database
     const accessToken = generateAccessToken();
     await db.collection('users').updateOne(
-      { id },
+      { groupId: id },
       { $set: { accessToken: accessToken } },
       { upsert: true }
     );
