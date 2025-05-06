@@ -32,7 +32,7 @@ function handleAnswer(message) {
   }
 
   group.state = 'Active';
-  notifyStateUpdate(group.id);
+  notifyStateUpdate(id);
 
   // Forward ANSWER
   const forwardMessage = `ANSWER${sdpData}`;

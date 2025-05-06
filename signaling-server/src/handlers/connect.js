@@ -37,7 +37,7 @@ async function handleConnect(message, client) {
   // New group if received a new id
   if (!groups.has(groupId)) {
     groups.set(groupId, {
-      groupId,
+      id: groupId,
       state: 'Impossible',
       clients: {
         camera: null,
