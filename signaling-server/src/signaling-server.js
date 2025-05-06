@@ -92,18 +92,18 @@ async function handleDisconnect(client) {
 
     if (group) {
       // Deleted accessToken if user disconnect
-      if (client._type === 'user' && client._accessToken) {
-        try {
-          const db = getDb();
-          await db.collection('users').updateOne(
-            { accessToken: client._accessToken },
-            { $unset: { accessToken: '' } }
-          );
-          console.log(`Deleted accessToken from users collection`);
-        } catch (error) {
-          console.error(`Error deleting accessToken`);
-        }
-      }
+      // if (client._type === 'user' && client._accessToken) {
+      //   try {
+      //     const db = getDb();
+      //     await db.collection('users').updateOne(
+      //       { accessToken: client._accessToken },
+      //       { $unset: { accessToken: '' } }
+      //     );
+      //     console.log(`Deleted accessToken from users collection`);
+      //   } catch (error) {
+      //     console.error(`Error deleting accessToken`);
+      //   }
+      // }
 
       // Delete from group
       group.clients[client._type] = null;
@@ -127,15 +127,15 @@ async function handleDisconnect(client) {
       if (!group.clients.camera && !group.clients.user && !group.clients.controller) {
         // Delete group in collection and local
         groups.delete(client._groupId);
-        try {
-          const db = getDb();
-          await db.collection('groups').deleteOne(
-            { id: client._groupId }
-          );
-          console.log(`Deleted group ${client._groupId} from groups collection`);
-        } catch (error) {
-          console.error(`Error deleting group: ${error.message}`);
-        }
+        // try {
+        //   const db = getDb();
+        //   await db.collection('groups').deleteOne(
+        //     { id: client._groupId }
+        //   );
+        //   console.log(`Deleted group ${client._groupId} from groups collection`);
+        // } catch (error) {
+        //   console.error(`Error deleting group: ${error.message}`);
+        // }
       }
     }
   }
