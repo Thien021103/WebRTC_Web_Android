@@ -32,7 +32,10 @@ import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 
-class SignalingClient(private val id: Int) {
+class SignalingClient(
+  private val id: String,
+  private val accessToken: String
+) {
   private val logger by taggedLogger("Call:SignalingClient")
   private val signalingScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
   private val client = OkHttpClient()
@@ -43,7 +46,6 @@ class SignalingClient(private val id: Int) {
 
   // opening web socket with signaling server
   private val ws = client.newWebSocket(request, SignalingWebSocketListener())
-  private val accessToken = "123"
 
   // session flow to send information about the session state to the subscribers
   private val _sessionStateFlow = MutableStateFlow(WebRTCSessionState.Offline)
@@ -53,6 +55,7 @@ class SignalingClient(private val id: Int) {
   private val _signalingCommandFlow = MutableSharedFlow<Pair<SignalingCommand, String>>()
   val signalingCommandFlow: SharedFlow<Pair<SignalingCommand, String>> = _signalingCommandFlow
 
+  // Access token from login used for CONNECT, id used for other command
   fun sendCommand(signalingCommand: SignalingCommand, message: String) {
     if(signalingCommand === SignalingCommand.CONNECT) {
       logger.d { "[sendCommand] $signalingCommand $message" }
@@ -60,8 +63,7 @@ class SignalingClient(private val id: Int) {
     }
     else {
       logger.d { "[sendCommand] $signalingCommand $message" }
-      logger.d { "$signalingCommand user $accessToken\n$message" }
-      ws.send("$signalingCommand user $accessToken\n$message")
+      ws.send("$signalingCommand user $id\n$message")
     }
   }
 
@@ -92,7 +94,6 @@ class SignalingClient(private val id: Int) {
   }
 
   private fun handleSignalingCommand(command: SignalingCommand, text: String) {
-    logger.d { "$text" }
     val value = getNextLineMessage(text)
     logger.d { "received signaling: $command $value" }
     signalingScope.launch {

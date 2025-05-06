@@ -36,6 +36,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,9 +47,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.messaging.FirebaseMessaging
-//import com.google.firebase.FirebaseApp
 import io.getstream.webrtc.sample.compose.ui.screens.list.VideoListScreen
 import io.getstream.webrtc.sample.compose.ui.screens.list.VideoListViewModel
+import io.getstream.webrtc.sample.compose.ui.screens.stage.LoginScreen
+import io.getstream.webrtc.sample.compose.ui.screens.stage.RegisterScreen
 import io.getstream.webrtc.sample.compose.ui.screens.stage.StageScreen
 import io.getstream.webrtc.sample.compose.ui.screens.video.VideoCallScreen
 import io.getstream.webrtc.sample.compose.ui.theme.WebrtcSampleComposeTheme
@@ -63,6 +65,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 sealed class Screen {
+  object Login : Screen()
+  object Register : Screen()
   object Main : Screen()
   object Videos : Screen()
   object Signalling : Screen()
@@ -73,9 +77,6 @@ class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-//    FirebaseApp.initializeApp(this)
-//    FirebaseMessaging.getInstance().subscribeToTopic("doorbell")
-
     val permissions = arrayOf(
       Manifest.permission.CAMERA,
       Manifest.permission.RECORD_AUDIO,
@@ -84,22 +85,44 @@ class MainActivity : ComponentActivity() {
     )
     requestPermissions(permissions, 0)
 
-    val id = 123
-
     setContent {
       WebrtcSampleComposeTheme {
         Surface(
           modifier = Modifier.fillMaxSize(),
           color = MaterialTheme.colors.background
         ) {
-          val initialScreen = if (intent.getBooleanExtra("SHOW_SIGNALLING", false)) {
-            Screen.Signalling
-          } else {
-            Screen.Main
+          var fcmToken by remember { mutableStateOf("") }
+          LaunchedEffect(Unit) {
+            try {
+              fcmToken = FirebaseMessaging.getInstance().token.await()
+              Log.d("FCM Token", fcmToken)
+            } catch (e: Exception) {
+              println("Failed to get FCM token: $e")
+            }
           }
-          var currentScreen by remember { mutableStateOf(initialScreen) }
+          var currentScreen: Screen by remember { mutableStateOf(Screen.Login) }
+          var cameraId by remember { mutableStateOf("") }
+          var accessToken by remember { mutableStateOf("") }
 
           when (currentScreen) {
+            Screen.Login -> LoginScreen(
+              fcmToken = fcmToken,
+              onSuccess = { id, token ->
+                cameraId = id
+                accessToken = token
+                currentScreen = Screen.Main
+              },
+              onRegister = { currentScreen = Screen.Register }
+            )
+            Screen.Register -> RegisterScreen(
+              fcmToken = fcmToken,
+              onSuccess = { id, token ->
+                cameraId = id
+                accessToken = token
+                currentScreen = Screen.Main
+              },
+              onLogin = { currentScreen = Screen.Login }
+            )
             Screen.Main -> MainScreen(
               onVideosClick = { currentScreen = Screen.Videos },
               onSignallingClick = { currentScreen = Screen.Signalling }
@@ -109,7 +132,8 @@ class MainActivity : ComponentActivity() {
               onBack = { currentScreen = Screen.Main }
             )
             Screen.Signalling -> SignallingScreen(
-              id = id,
+              id = cameraId,
+              accessToken = accessToken,
               onBack = { currentScreen = Screen.Main }
             )
           }
@@ -121,15 +145,6 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen(onVideosClick: () -> Unit, onSignallingClick: () -> Unit) {
-  CoroutineScope(Dispatchers.IO).launch {
-    try {
-      val token = FirebaseMessaging.getInstance().token.await()
-      Log.d("FCM Token", "$token")
-    } catch (e: Exception) {
-      println("Failed to get FCM token: $e")
-    }
-  }
-
   Column(
     modifier = Modifier.fillMaxSize().padding(16.dp),
     verticalArrangement = Arrangement.Center
@@ -146,7 +161,11 @@ fun MainScreen(onVideosClick: () -> Unit, onSignallingClick: () -> Unit) {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun SignallingScreen(id: Int, onBack: () -> Unit) {
+fun SignallingScreen(
+  id: String,
+  accessToken: String,
+  onBack: () -> Unit
+) {
   var startedSignalling by remember { mutableStateOf(false) }
   var sessionManager by remember { mutableStateOf<WebRtcSessionManager?>(null) }
   val context = LocalContext.current
@@ -157,12 +176,12 @@ fun SignallingScreen(id: Int, onBack: () -> Unit) {
     if (!startedSignalling) {
       Button(
         onClick = {
-            sessionManager = WebRtcSessionManagerImpl(
-              context = context,
-              signalingClient = SignalingClient(id),
-              peerConnectionFactory = StreamPeerConnectionFactory(context)
-            )
-            startedSignalling = true
+          sessionManager = WebRtcSessionManagerImpl(
+            context = context,
+            signalingClient = SignalingClient(id = id, accessToken = accessToken),
+            peerConnectionFactory = StreamPeerConnectionFactory(context)
+          )
+          startedSignalling = true
         },
         modifier = Modifier.fillMaxWidth()
       ) {
@@ -174,7 +193,8 @@ fun SignallingScreen(id: Int, onBack: () -> Unit) {
         var onCallScreen by remember { mutableStateOf(false) }
         val state by sessionManager!!.signalingClient.sessionStateFlow.collectAsState()
         if (!onCallScreen) {
-          StageScreen(state = state,
+          StageScreen(
+            state = state,
             onJoinCall = { onCallScreen = true},
             onBack = {
               startedSignalling = false

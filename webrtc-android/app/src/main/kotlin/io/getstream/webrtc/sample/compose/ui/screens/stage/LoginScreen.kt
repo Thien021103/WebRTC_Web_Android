@@ -1,4 +1,187 @@
 package io.getstream.webrtc.sample.compose.ui.screens.stage
 
-class LoginScreen {
+import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Button
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
+
+@Composable
+fun LoginScreen(
+  fcmToken: String,
+  onSuccess: (String, String) -> Unit,
+  onRegister: () -> Unit
+) {
+
+  val loginUrl = "https://thientranduc.id.vn:444/api/login"
+
+  var email by remember { mutableStateOf("") }
+  var password by remember { mutableStateOf("") }
+  var cameraId by remember { mutableStateOf("") }
+  var errorMessage by remember { mutableStateOf("") }
+  var isLoading by remember { mutableStateOf(false) }
+
+  val snackbarHostState = remember { SnackbarHostState() }
+
+  val client = OkHttpClient()
+
+  Scaffold(
+    snackbarHost = { SnackbarHost(snackbarHostState) },
+    content = { padding ->
+      Column(
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(padding)
+          .padding(16.dp),
+        verticalArrangement = Arrangement.Center
+      ) {
+
+        Text("Login", fontSize = 24.sp, modifier = Modifier.padding(bottom = 16.dp))
+
+        OutlinedTextField(
+          value = email,
+          onValueChange = { email = it },
+          label = { Text("Email") },
+          modifier = Modifier.fillMaxWidth(),
+          enabled = !isLoading
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+          value = password,
+          onValueChange = { password = it },
+          label = { Text("Password") },
+          visualTransformation = PasswordVisualTransformation(),
+          modifier = Modifier.fillMaxWidth(),
+          enabled = !isLoading
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+          value = cameraId,
+          onValueChange = { cameraId = it },
+          label = { Text("Camera ID") },
+          modifier = Modifier.fillMaxWidth(),
+          enabled = !isLoading
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+        if (fcmToken.isBlank()) {
+          CircularProgressIndicator()
+          Text("Fetching FCM token...", fontSize = 16.sp, modifier = Modifier.padding(top = 8.dp))
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+          onClick = {
+            isLoading = true
+            errorMessage = ""
+            val body = JSONObject().apply {
+              put("email", email)
+              put("password", password)
+              put("groupId", cameraId)
+              put("fcmToken", fcmToken)
+            }.toString()
+            CoroutineScope(Dispatchers.IO).launch {
+              try {
+                val request = Request.Builder()
+                  .url(loginUrl) // Replace with your server URL
+                  .post(body.toRequestBody("application/json".toMediaType()))
+                  .build()
+                Log.d("Login Request", body)
+
+                // Response body will be: { "success": true, "accessToken": "xyz" }
+                val response = client.newCall(request).execute()
+                if (response.isSuccessful) {
+                  val responseBody = response.body?.string()
+                  if (responseBody != null) {
+                    Log.d("Login Response", responseBody)
+                  }
+                  val json = JSONObject(responseBody ?: "{}")
+                  val status = json.optString("status")
+                  if (status == "success") {
+                    val accessToken = json.optString("message", "")
+                    CoroutineScope(Dispatchers.Main).launch {
+                      onSuccess(cameraId, accessToken)
+                      isLoading = false
+                    }
+                  } else {
+                    CoroutineScope(Dispatchers.Main).launch {
+                      errorMessage = json.optString("message", "Login failed")
+                      isLoading = false
+                    }
+                  }
+                } else {
+                  CoroutineScope(Dispatchers.Main).launch {
+                    errorMessage = "Server error: ${response.body?.string()}"
+                    isLoading = false
+                  }
+                }
+              } catch (e: Exception) {
+                CoroutineScope(Dispatchers.Main).launch {
+                  errorMessage = "Network error: ${e.message}"
+                  isLoading = false
+                }
+              }
+            }
+          },
+          modifier = Modifier.fillMaxWidth(),
+          enabled = email.isNotBlank() && password.isNotBlank() && cameraId.isNotBlank() && fcmToken.isNotBlank() && !isLoading
+        ) {
+          if (isLoading) {
+            CircularProgressIndicator()
+            Text("Logging in...", fontSize = 20.sp)
+          }
+          else {
+            Text("Login", fontSize = 20.sp)
+          }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Change to Register button
+        TextButton(
+          onClick = onRegister,
+          modifier = Modifier.fillMaxWidth(),
+          enabled = !isLoading
+        ) {
+          Text("Don't have an account? Register", fontSize = 16.sp)
+        }
+      }
+    }
+  )
+  // Error snackbar
+  if (errorMessage.isNotEmpty()) {
+    LaunchedEffect(errorMessage) {
+      snackbarHostState.showSnackbar(errorMessage)
+    }
+  }
 }

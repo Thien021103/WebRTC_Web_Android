@@ -25,6 +25,7 @@ spotless = "6.7.0"
 media3Ui = "1.6.0"
 media3Exoplayer = "1.6.0"
 firebaseMessagingKtx = "24.1.1"
+firebasePerfKtx = "21.0.5"
 
 [libraries]
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
@@ -63,6 +64,7 @@ spotless-gradlePlugin = { group = "com.diffplug.spotless", name = "spotless-plug
 androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3Ui" }
 androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3Exoplayer" }
 firebase-messaging-ktx = { group = "com.google.firebase", name = "firebase-messaging-ktx", version.ref = "firebaseMessagingKtx" }
+firebase-perf-ktx = { group = "com.google.firebase", name = "firebase-perf-ktx", version.ref = "firebasePerfKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
