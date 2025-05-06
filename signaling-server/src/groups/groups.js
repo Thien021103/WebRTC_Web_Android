@@ -17,6 +17,7 @@ function notifyStateUpdate(groupId) {
   if (group) {
     const { camera, user, controller } = group.clients;
     const message = `STATE ${group.state}`;
+    console.log(`Notifying: ${message}`);
     [camera, user, controller].forEach((client) => {
       if (client && client.readyState === client.OPEN) {
         client.send(message);
