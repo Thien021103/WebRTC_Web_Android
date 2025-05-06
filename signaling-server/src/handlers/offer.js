@@ -19,6 +19,8 @@ function handleOffer(message) {
 
   console.log(`Handling offer from ${senderType}, group ${id}`);
 
+  console.log(groups)
+  
   const group = groups.get(id);
 
   if (!group || group.state !== 'Ready') {

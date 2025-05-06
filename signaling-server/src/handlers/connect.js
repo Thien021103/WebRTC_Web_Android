@@ -48,6 +48,8 @@ async function handleConnect(message, client) {
     });
     console.log(`New group added:\n${groups.get(groupId)}`)
   }
+  
+  console.log(groups)
 
   const group = groups.get(groupId);
 
