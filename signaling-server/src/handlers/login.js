@@ -84,7 +84,7 @@ async function handleLogin(req, res) {
     );
 
     console.log(`User logged in: ${email}, group: ${groupId}`);
-    res.json({ status: true, accessToken });
+    res.json({ status: true, message: accessToken });
   } catch (error) {
     console.error(`Error in handleLogin: ${error.message}`);
     res.status(500).json({ status: false, error: 'Server error' });
