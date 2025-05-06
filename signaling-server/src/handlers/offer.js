@@ -20,8 +20,10 @@ function handleOffer(message) {
   console.log(`Handling offer from ${senderType}, group ${id}`);
 
   console.log(groups)
-  
+
   const group = groups.get(id);
+
+  console.log(group)
 
   if (!group || group.state !== 'Ready') {
     console.error('Session must be Ready to handle offer');
@@ -38,6 +40,8 @@ function handleOffer(message) {
 
   // Forward OFFER
   const forwardMessage = `OFFER${sdpData}`;
+  console.log(forwardMessage)
+
   if (group.clients.user && group.clients.user.readyState === WebSocket.OPEN) {
     group.clients.user.send(forwardMessage);
   } else {
