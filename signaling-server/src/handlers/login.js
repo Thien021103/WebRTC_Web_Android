@@ -83,7 +83,7 @@ async function handleLogin(req, res) {
       { upsert: true }
     );
 
-    console.log(`User logged in: ${email}, group: ${groupId}`);
+    console.log(`User logged in: ${email}, group: ${groupId}, accessToken: ${accessToken}`);
     res.json({ status: "success", message: accessToken });
   } catch (error) {
     console.error(`Error in handleLogin: ${error.message}`);

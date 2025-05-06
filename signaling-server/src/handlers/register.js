@@ -81,8 +81,8 @@ async function handleRegister(req, res) {
       { upsert: true }
     );
 
-    console.log(`User registered: ${email}, group: ${groupId}`);
-    res.status(201).json({ status: "success", accessToken });
+    console.log(`User registered: ${email}, group: ${groupId}, accessToken: ${accessToken}`);
+    res.status(201).json({ status: "success", message: accessToken});
   } catch (error) {
     console.error(`Error in handleRegister: ${error.message}`);
     res.status(500).json({ status: "false", message: 'Server error' });
