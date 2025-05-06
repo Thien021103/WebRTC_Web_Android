@@ -32,7 +32,7 @@ async function handleRegister(req, res) {
   const { email, password, groupId, fcmToken } = req.body;
 
   if (!email || !password || !groupId || !fcmToken) {
-    return res.status(400).json({ status: false, error: 'Missing required fields' });
+    return res.status(400).json({ status: "false", message: 'Missing required fields' });
   }
 
   const db = getDb();
@@ -44,7 +44,7 @@ async function handleRegister(req, res) {
     });
     if (existingUser) {
       console.error(`Email already registered: ${email}`);
-      return res.status(400).json({ status: false, error: 'Email already registered' });
+      return res.status(400).json({ status: "false", message: 'Email already registered' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -82,10 +82,10 @@ async function handleRegister(req, res) {
     );
 
     console.log(`User registered: ${email}, group: ${groupId}`);
-    res.status(201).json({ status: true, accessToken });
+    res.status(201).json({ status: "success", accessToken });
   } catch (error) {
     console.error(`Error in handleRegister: ${error.message}`);
-    res.status(500).json({ status: false, error: 'Server error' });
+    res.status(500).json({ status: "false", message: 'Server error' });
   }
 }
 

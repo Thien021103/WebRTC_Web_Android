@@ -29,7 +29,7 @@ async function handleLogin(req, res) {
   const { email, password, groupId, fcmToken } = req.body;
 
   if (!email || !password || !groupId || !fcmToken) {
-    return res.status(400).json({ status: false, message: 'Missing required fields' });
+    return res.status(400).json({ status: "false", message: 'Missing required fields' });
   }
 
   const db = getDb();
@@ -43,13 +43,13 @@ async function handleLogin(req, res) {
 
     if (!user) {
       console.error(`Login failed for email: ${email}, group: ${groupId}`);
-      return res.status(401).json({ status: false, error: 'Invalid email or groupId' });
+      return res.status(401).json({ status: "false", message: 'Invalid email or groupId' });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       console.error(`Invalid password for email: ${email}`);
-      return res.status(401).json({ status: false, error: 'Invalid password' });
+      return res.status(401).json({ status: "false", message: 'Invalid password' });
     }
 
     const accessToken = uuidv4();
@@ -84,10 +84,10 @@ async function handleLogin(req, res) {
     );
 
     console.log(`User logged in: ${email}, group: ${groupId}`);
-    res.json({ status: true, message: accessToken });
+    res.json({ status: "success", message: accessToken });
   } catch (error) {
     console.error(`Error in handleLogin: ${error.message}`);
-    res.status(500).json({ status: false, error: 'Server error' });
+    res.status(500).json({ status: "false", message: 'Server error' });
   }
 }
 
