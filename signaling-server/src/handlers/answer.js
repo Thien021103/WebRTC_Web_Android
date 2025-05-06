@@ -1,4 +1,5 @@
 const { groups, notifyStateUpdate } = require("../groups/groups");
+const WebSocket = require('ws');
 
 function handleAnswer(message) {
 

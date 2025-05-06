@@ -1,4 +1,5 @@
 const { groups } = require("../groups/groups");
+const WebSocket = require('ws');
 
 function handleIce(message) {
   
