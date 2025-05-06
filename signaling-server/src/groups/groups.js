@@ -7,7 +7,7 @@ Groups are stored locally as JSON, presented as:
     user: ws,
     controller: ws
   },
-  fcm_token,
+  fcmToken,
 }
 ************************/
 const groups = new Map();

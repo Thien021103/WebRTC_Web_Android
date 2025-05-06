@@ -1,4 +1,6 @@
 const http = require('http');
+const express = require('express');
+
 const WebSocket = require('ws');
 // const admin = require("firebase-admin");
 
@@ -15,16 +17,28 @@ const { groups, notifyStateUpdate } = require('./groups/groups');
 // const registrationToken = 'fL9GEwT9QoKekNVV6j3BZY:APA91bGVMIObkbbROcivQ8iDtO-eDEfsL9GtRd8nKnsalNJejYG6OzmlJcZm_QoMGYOBU4oKlsQBAoDdhhnI_HlNp8LgVkwuOEywPPa-qDDEeBmZnJrHig4'; // Thay bằng FCM token từ logcat (tạm thời hardcode)
 
 async function startServer() {
+  console.log('Starting server...');
 
   // Connect to MongoDB
   await connect();
+  
+  // Create Express app
+  const app = express();
 
-  // Create HTTP server
-  const server = http.createServer((req, res) => {
-    res.writeHead(404, { 'Content-Type': 'text/plain' });
-    res.end('Not a normal http server, this is for Websocket only');
+  app.use(express.json());
+
+  app.post('/api/login', handleLogin);
+  app.post('/api/register', handleRegister);
+  
+  // Redirect other request
+  app.use((req, res) => {
+    res.status(404).send('Not a normal HTTP server, this is for WebSocket and login/register API only');
   });
+  
+  // Create HTTP server
+  const server = http.createServer(app);
 
+  // Create Websocket server
   const wss = new WebSocket.Server({ server });
 
   wss.on('connection', (ws) => {
@@ -46,11 +60,12 @@ async function startServer() {
         handleAnswer(message);
       } else if (message.startsWith('ICE')) {
         handleIce(message);
-      } else if (message.startsWith('REGISTER')) {
-        handleRegister(message, ws);
-      } else if (message.startsWith('LOGIN')) {
-        handleLogin(message, ws);
-      }
+      } 
+      // else if (message.startsWith('REGISTER')) {
+      //   handleRegister(message, ws);
+      // } else if (message.startsWith('LOGIN')) {
+      //   handleLogin(message, ws);
+      // }
     });
 
     ws.on('close', () => {

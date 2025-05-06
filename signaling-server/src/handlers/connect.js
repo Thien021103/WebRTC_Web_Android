@@ -44,7 +44,7 @@ async function handleConnect(message, client) {
         user: null,
         controller: null,
       },
-      fcm_token: null,
+      fcmToken: null,
     });
     console.log(`New group added:\n${groups.get(groupId)}`)
   }
@@ -66,9 +66,9 @@ async function handleConnect(message, client) {
       await db.collection('groups').insertOne({
         id: groupId,
         state: 'Impossible',
-        fcm_token: '',
+        fcmToken: '',
       });
-    } else if (type === 'user' && group.fcm_token) {
+    } else if (type === 'user' && group.fcmToken) {
       await db.collection('groups').updateOne(
         { id: groupId },
         { $set: { state: "Impossible" } }
@@ -78,8 +78,8 @@ async function handleConnect(message, client) {
     // Gửi FCM notification khi controller kết nối
     if (type === 'controller') {
       // const dbGroup = await db.collection('groups').findOne({ id: groupId });
-      if (dbGroup && dbGroup.fcm_token) {
-        await sendFCMNotification(dbGroup.fcm_token);
+      if (dbGroup && dbGroup.fcmToken) {
+        await sendFCMNotification(dbGroup.fcmToken);
       } else {
         console.log(`No user token found for group ${groupId}`);
       }
