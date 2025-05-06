@@ -57,7 +57,7 @@ async function handleLogin(req, res) {
     // Update users collection
     await db.collection('users').updateOne(
       { email: email, groupId: groupId },
-      { $set: { accessToken: accessToken, fcmToken: fcmToken } }
+      { $set: { accessToken: accessToken } }
     );
 
     // Update fcmToken on local groups and collection groups
