@@ -130,11 +130,14 @@ fun SignallingScreen(
                 }
               )
             } else {
-              VideoCallScreen {
-                onCallScreen = false
-                startedSignalling = false
-                sessionManager = null
-              }
+              VideoCallScreen (
+                cameraId = id,
+                onCancelCall = {
+                  onCallScreen = false
+                  startedSignalling = false
+                  sessionManager = null
+                }
+              )
             }
           }
         }

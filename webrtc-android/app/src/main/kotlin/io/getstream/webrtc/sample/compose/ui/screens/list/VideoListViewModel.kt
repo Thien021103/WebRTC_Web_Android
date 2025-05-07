@@ -1,6 +1,7 @@
 package io.getstream.webrtc.sample.compose.ui.screens.list
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -17,12 +18,15 @@ data class Video(
   val file: File
 )
 
-class VideoListViewModel(context: Context) : ViewModel() {
+class VideoListViewModel(
+  context: Context,
+  cameraId: String
+) : ViewModel() {
   private val _videos = MutableStateFlow<List<Video>>(emptyList())
   val videos: StateFlow<List<Video>> = _videos.asStateFlow()
 
   private val externalDir = context.getExternalFilesDir(null)
-  private val videoDir = File(externalDir, "id")
+  private val videoDir = File(externalDir, cameraId)
 
   init {
     viewModelScope.launch {
@@ -32,6 +36,7 @@ class VideoListViewModel(context: Context) : ViewModel() {
 
   private suspend fun loadVideos(): List<Video> = withContext(Dispatchers.IO) {
     val dir = videoDir ?: return@withContext emptyList()
+    Log.d("Directory", videoDir.path)
     dir.listFiles { file -> file.isFile && file.extension in listOf("mp4", "mkv", "avi") }
       ?.mapIndexed { index, file ->
         Video(

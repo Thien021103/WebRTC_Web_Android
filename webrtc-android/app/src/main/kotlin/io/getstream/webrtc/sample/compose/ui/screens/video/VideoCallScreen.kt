@@ -58,7 +58,10 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun getOutputFilePath(context: Context): String {
+fun getOutputFilePath(
+  context: Context,
+  cameraId: String
+): String {
   // Format: |day-month-year|hour:min:sec|recorded.mp4
   val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy|HH:mm:ss")
   val timestamp = LocalDateTime.now().format(formatter)
@@ -66,7 +69,7 @@ fun getOutputFilePath(context: Context): String {
   val baseDir = context.getExternalFilesDir(null)
   try {
     // Try Downloads directory first
-    val idDir = File(baseDir, "id") // /storage/emulated/0/Android/data/<package_name>/files/id/
+    val idDir = File(baseDir, cameraId) // /storage/emulated/0/Android/data/<package_name>/files/$cameraId/
     // Ensure /id directory exists
     if (!idDir.exists()) {
       idDir.mkdirs()
@@ -80,11 +83,12 @@ fun getOutputFilePath(context: Context): String {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun VideoCallScreen(
+  cameraId: String,
   onCancelCall: () -> Unit
 ) {
   val sessionManager = LocalWebRtcSessionManager.current
   val context = LocalContext.current
-  val outputFilePath = getOutputFilePath(context)
+  val outputFilePath = getOutputFilePath(cameraId = cameraId, context = context)
   val mediaMuxer = remember { MediaMuxer(outputFilePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4) }
   val recordingManager = remember { RecordingManager(context, mediaMuxer) }
 

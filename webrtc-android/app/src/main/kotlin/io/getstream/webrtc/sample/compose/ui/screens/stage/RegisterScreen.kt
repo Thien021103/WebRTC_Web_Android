@@ -23,7 +23,7 @@ import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
@@ -196,7 +196,7 @@ fun RegisterScreen(
           }
           else {
             Icon(
-              imageVector = Icons.AutoMirrored.Filled.Login,
+              imageVector = Icons.Filled.PersonAdd,
               contentDescription = "Register",
               modifier = Modifier.padding(end = 8.dp)
             )

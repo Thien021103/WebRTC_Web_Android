@@ -112,7 +112,7 @@ class MainActivity : ComponentActivity() {
               }
             )
             Screen.Videos -> VideoListScreen(
-              viewModel = VideoListViewModel(this),
+              viewModel = VideoListViewModel(context = this, cameraId = cameraId),
               onBack = { currentScreen = Screen.Main }
             )
             Screen.Signalling -> SignallingScreen(
