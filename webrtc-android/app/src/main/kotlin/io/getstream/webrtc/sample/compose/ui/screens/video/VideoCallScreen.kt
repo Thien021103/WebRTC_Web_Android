@@ -63,9 +63,9 @@ fun getOutputFilePath(
   cameraId: String
 ): String {
   // Format: |day-month-year|hour:min:sec|recorded.mp4
-  val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy|HH:mm:ss")
+  val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH-mm-ss")
   val timestamp = LocalDateTime.now().format(formatter)
-  val fileName = "Video|$timestamp|recorded.mp4" // e.g., |24-04-2025|17:48:42|recorded.mp4
+  val fileName = "Record $timestamp.mp4" // e.g., |24-04-2025|17:48:42|recorded.mp4
   val baseDir = context.getExternalFilesDir(null)
   try {
     // Try Downloads directory first
