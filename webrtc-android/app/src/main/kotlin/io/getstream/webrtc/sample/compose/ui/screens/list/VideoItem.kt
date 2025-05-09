@@ -15,6 +15,10 @@ import androidx.compose.ui.unit.sp
 import android.media.ThumbnailUtils
 import android.provider.MediaStore
 import androidx.compose.foundation.Image
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import io.getstream.webrtc.sample.compose.ui.screens.list.Video
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -22,7 +26,8 @@ import kotlinx.coroutines.withContext
 @Composable
 fun VideoItem(
   video: Video,
-  onVideoSelected: (Video) -> Unit
+  onVideoSelected: (Video) -> Unit,
+  onDelete: (Video) -> Unit
 ) {
   // Thumbnail generation
   val thumbnail by produceState<Bitmap?>(null, video.file) {
@@ -64,6 +69,14 @@ fun VideoItem(
         style = MaterialTheme.typography.subtitle1,
         modifier = Modifier.weight(1f)
       )
+      // Delete button
+      IconButton(onClick = { onDelete(video) }) {
+        Icon(
+          imageVector = Icons.Default.Delete,
+          contentDescription = "Delete ${video.displayName}",
+          tint = Color.Red // Distinct color for deletion
+        )
+      }
     }
   }
 }
