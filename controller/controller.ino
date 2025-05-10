@@ -3,9 +3,9 @@
 #include <WebSocketsClient.h>
 #include <ESP32Servo.h>
 
-#define BUTTON_PIN 4
-#define SERVO_PIN 5
-#define CONTROLLER_ID "DOOR_001"
+#define BUTTON_PIN 12
+#define SERVO_PIN 14
+#define CONTROLLER_ID "123"
 
 WebSocketsClient webSocket;
 Servo doorServo;
@@ -71,7 +71,7 @@ void loop() {
       Serial.println(WiFi.localIP());
 
       // Reinitialize WebSocket connection
-      webSocket.begin("thientranduc.id.vn", 444, "/");
+      webSocket.beginSSL("thientranduc.id.vn", 444, "/");
     } else {
       Serial.println("Failed to reconnect to WiFi");
       delay(5000); // Wait before retrying to avoid spamming
@@ -94,12 +94,12 @@ void loop() {
     // Retry Websocket connection
     if (!wsConnected) {
       Serial.println("Attempting WebSocket connection...");
-      webSocket.begin("thientranduc.id.vn", 444, "/");
+      webSocket.beginSSL("thientranduc.id.vn", 444, "/");
       if(wsConnected) {
-        webSocket.sendTXT("CONNECT controller" + String(CONTROLLER_ID));
+        webSocket.sendTXT("CONNECT controller " + String(CONTROLLER_ID));
       }
     } else {
-      webSocket.sendTXT("CONNECT controller" + String(CONTROLLER_ID));
+      webSocket.sendTXT("CONNECT controller " + String(CONTROLLER_ID));
     }
   }
 }
