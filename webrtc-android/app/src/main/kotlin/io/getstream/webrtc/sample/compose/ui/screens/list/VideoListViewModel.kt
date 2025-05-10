@@ -46,4 +46,21 @@ class VideoListViewModel(
         )
       } ?: emptyList()
   }
+  fun deleteVideo(video: Video) {
+    viewModelScope.launch {
+      withContext(Dispatchers.IO) {
+        try {
+          if (video.file.delete()) {
+            Log.d("VideoListViewModel", "Deleted ${video.displayName}")
+            // Refresh the list
+            _videos.value = loadVideos()
+          } else {
+            Log.e("VideoListViewModel", "Failed to delete ${video.displayName}")
+          }
+        } catch (e: Exception) {
+          Log.e("VideoListViewModel", "Error deleting ${video.displayName}: ${e.message}")
+        }
+      }
+    }
+  }
 }
