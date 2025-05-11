@@ -58,6 +58,10 @@ async function handleLogout(req, res) {
       group.clients.user = null;
       group.state = 'Impossible';
       notifyStateUpdate(groupId);
+      if (!group.clients.camera && !group.clients.user && !group.clients.controller) {
+        // Delete group in local
+        groups.delete(client._groupId);
+      }
     }
     // Update on collection groups
     await db.collection('groups').updateOne(

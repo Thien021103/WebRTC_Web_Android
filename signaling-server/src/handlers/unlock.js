@@ -1,0 +1,96 @@
+const e = require("express");
+const { getDb } = require("../db/db");
+const { groups } = require("../groups/groups");
+const bcrypt = require('bcrypt');
+
+async function handleUnlock(req, res) {
+  // // Sử dụng regex để bóc tách message
+  // /*
+  // LOGIN user 123
+  // email
+  // password
+  // fcmToken
+  // */
+  // const match = message.match(/^LOGIN (\w+) (\w+)\n([\s\S]*)$/);
+  // if (!match) {
+  //   console.error('Invalid LOGIN message format');
+  //   return;
+  // }
+
+  // const [_, type, id, rest] = match;
+  // const [email, password, fcmToken] = rest.trim().split('\n');
+
+  // if (type !== 'user') {
+  //   console.error('Only user can send LOGIN');
+  //   return;
+  // }
+
+  const { email, password, groupId } = req.body;
+
+  if (!email || !password || !groupId) {
+    return res.status(400).json({ status: "false", message: 'Missing required fields' });
+  }
+
+  const db = getDb();
+
+  try {
+    // Find user in db by accessToken
+    const user = await db.collection('users').findOne({ 
+      email: email, 
+      groupId: groupId,
+    });
+
+    if (!user) {
+      console.error(`Invalid email: ${email}, group: ${groupId}`);
+      return res.status(401).json({ status: "false", message: 'Invalid info' });
+    }
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      console.error(`Invalid password for email: ${email}`);
+      return res.status(401).json({ status: "false", message: 'Invalid password' });
+    }
+
+    // Send unlock message to controller
+    const group = groups.get(groupId);
+    const message = `UNLOCK ${groupId}`;
+    if (group) {
+      controller = group.clients.controller;
+      if (controller && controller.readyState === controller.OPEN) {
+        controller.send(message);
+      }
+    } else {
+      console.error(`Group not found in local: ${groupId}`);
+      return res.status(404).json({ status: "false", message: 'Group not found' });
+    }
+
+    const dbGroup = await db.collection('groups').findOne({ id: groupId });
+    if (!dbGroup) {
+      console.error(`Group not found: ${groupId}`);
+      return res.status(404).json({ status: "false", message: 'Group not found' });
+    } else {
+      if (dbGroup.door.lock === 'Unlocked') {
+        console.error(`Group already unlocked: ${groupId}`);
+        return res.status(400).json({ status: "false", message: 'Group already unlocked' });
+      }
+      // Update on collection groups
+      await db.collection('groups').updateOne(
+        { id: groupId },
+        { $set: {
+          door: { 
+            lock: 'Unlocked',
+            user: email,
+            time: new Date().toISOString()
+          }
+        } },
+        { upsert: true }
+      );
+    }
+    console.log(`User ${email} unlocked group: ${groupId}`);
+    return res.json({ status: "success", message: '' });
+  } catch (error) {
+    console.error(`Error in handleLogout: ${error.message}`);
+    return res.status(500).json({ status: "false", message: 'Server error' });
+  }
+}
+
+module.exports = { handleLogout };
