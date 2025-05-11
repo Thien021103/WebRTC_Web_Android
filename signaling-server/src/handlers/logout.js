@@ -1,9 +1,9 @@
 const { getDb } = require("../db/db");
-const { groups } = require("../groups/groups");
+const { groups, notifyStateUpdate } = require("../groups/groups");
 const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcrypt');
 
-async function handleLogin(req, res) {
+async function handleLogout(req, res) {
   // // Sử dụng regex để bóc tách message
   // /*
   // LOGIN user 123
@@ -25,9 +25,9 @@ async function handleLogin(req, res) {
   //   return;
   // }
 
-  const { email, password, groupId, fcmToken } = req.body;
+  const { email, groupId, accessToken } = req.body;
 
-  if (!email || !password || !groupId || !fcmToken) {
+  if (!email || !groupId || !accessToken) {
     return res.status(400).json({ status: "false", message: 'Missing required fields' });
   }
 
@@ -37,57 +37,42 @@ async function handleLogin(req, res) {
     // User from database
     const user = await db.collection('users').findOne({ 
       email: email, 
-      groupId: groupId 
+      groupId: groupId,
+      accessToken: accessToken, 
     });
 
     if (!user) {
-      console.error(`Login failed for email: ${email}, group: ${groupId}`);
+      console.error(`Logout failed for email: ${email}, group: ${groupId}`);
       return res.status(401).json({ status: "false", message: 'Invalid email or groupId' });
     }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      console.error(`Invalid password for email: ${email}`);
-      return res.status(401).json({ status: "false", message: 'Invalid password' });
-    }
-
-    const accessToken = uuidv4();
 
     // Update users collection
     await db.collection('users').updateOne(
       { email: email, groupId: groupId },
-      { $set: { accessToken: accessToken } }
+      { $unset: { accessToken: '' } }
     );
 
-    // Update fcmToken on local groups and collection groups
+    // Update on local groups 
     const group = groups.get(groupId);
-    if (!group) {
-      groups.set(groupId, {
-        id: groupId,
-        state: 'Impossible',
-        clients: {
-          camera: null,
-          user: null,
-          controller: null,
-        },
-        fcmToken: fcmToken,
-      });
-    } else {
-      group.fcmToken = fcmToken;
+    if (group) {
+      group.clients.user = null;
+      group.state = 'Impossible';
+      notifyStateUpdate(groupId);
     }
-
+    // Update on collection groups
+    const db = getDb();
     await db.collection('groups').updateOne(
       { id: groupId },
-      { $set: { fcmToken: fcmToken } },
-      { upsert: true }
+      { $set: { state: 'Impossible' } }
     );
+    console.log(`Updated db group ${groupId} state to Impossible`);
 
-    console.log(`User logged in: ${email}, group: ${groupId}`);
-    return res.json({ status: "success", message: accessToken });
+    console.log(`User logged out: ${email}, group: ${groupId}`);
+    return res.json({ status: "success", message: '' });
   } catch (error) {
-    console.error(`Error in handleLogin: ${error.message}`);
+    console.error(`Error in handleLogout: ${error.message}`);
     return res.status(500).json({ status: "false", message: 'Server error' });
   }
 }
 
-module.exports = { handleLogin };
+module.exports = { handleLogout };
