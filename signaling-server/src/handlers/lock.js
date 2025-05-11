@@ -49,29 +49,16 @@ async function handleLock(req, res) {
       return res.status(401).json({ status: "false", message: 'Invalid password' });
     }
 
-    // Send lock message to controller
-    const group = groups.get(groupId);
-    const message = `LOCK ${groupId}`;
-    if (group) {
-      const controller = group.clients.controller;
-      if (controller && controller.readyState === controller.OPEN) {
-        controller.send(message);
-      }
-    } else {
-      console.error(`Group not found in local: ${groupId}`);
-      return res.status(404).json({ status: "false", message: 'Group not found' });
-    }
-
+    // Update on collection groups
     const dbGroup = await db.collection('groups').findOne({ id: groupId });
     if (!dbGroup) {
       console.error(`Group not found: ${groupId}`);
       return res.status(404).json({ status: "false", message: 'Group not found' });
     } else {
-      if (dbGroup.door.lock === 'Locked') {
+      if (dbGroup.door.lock && dbGroup.door.lock === 'Locked') {
         console.error(`Group already locked: ${groupId}`);
         return res.status(400).json({ status: "false", message: 'Already locked' });
       }
-      // Update on collection groups
       await db.collection('groups').updateOne(
         { id: groupId },
         { $set: {
@@ -84,10 +71,24 @@ async function handleLock(req, res) {
         { upsert: true }
       );
     }
+
+    // Send lock message to controller
+    const group = groups.get(groupId);
+    const message = `LOCK ${groupId}`;
+    if (group) {
+      const controller = group.clients.controller;
+      if (controller && controller.readyState === controller.OPEN) {
+        controller.send(message);
+      }
+    } else {
+      console.error(`Group not found in local: ${groupId}`);
+      return res.status(404).json({ status: "false", message: 'Group not found' });
+    }
+    
     console.log(`User ${email} locked group: ${groupId}`);
     return res.json({ status: "success", message: '' });
   } catch (error) {
-    console.error(`Error in handleLogout: ${error.message}`);
+    console.error(`Error in handleLock: ${error.message}`);
     return res.status(500).json({ status: "false", message: 'Server error' });
   }
 }
