@@ -60,7 +60,7 @@ async function handleLogout(req, res) {
       notifyStateUpdate(groupId);
       if (!group.clients.camera && !group.clients.user && !group.clients.controller) {
         // Delete group in local
-        groups.delete(client._groupId);
+        groups.delete(groupId);
       }
     }
     // Update on collection groups
