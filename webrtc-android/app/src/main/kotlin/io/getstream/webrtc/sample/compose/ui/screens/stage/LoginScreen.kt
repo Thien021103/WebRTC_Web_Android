@@ -51,7 +51,7 @@ import org.json.JSONObject
 @Composable
 fun LoginScreen(
   fcmToken: String,
-  onSuccess: (String, String) -> Unit,
+  onSuccess: (String, String, String) -> Unit,
   onRegister: () -> Unit
 ) {
 
@@ -154,7 +154,7 @@ fun LoginScreen(
                   if (status == "success") {
                     val accessToken = json.optString("message", "")
                     CoroutineScope(Dispatchers.Main).launch {
-                      onSuccess(cameraId, accessToken)
+                      onSuccess(email, cameraId, accessToken)
                       isLoading = false
                     }
                   } else {

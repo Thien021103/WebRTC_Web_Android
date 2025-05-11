@@ -1,5 +1,6 @@
 package io.getstream.webrtc.sample.compose.ui.screens.stage
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -8,31 +9,52 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.getstream.webrtc.sample.compose.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
 
 @Composable
 fun MainScreen(
+  email: String,
   id: String,
+  token: String,
   onVideosClick: () -> Unit,
   onSignallingClick: () -> Unit,
   onLogout: () -> Unit
 ) {
+  var askLogout by remember { mutableStateOf(false) }
+
   Scaffold(
     topBar = {
       TopAppBar(
@@ -99,7 +121,7 @@ fun MainScreen(
         }
         Spacer(modifier = Modifier.height(24.dp))
         Button(
-          onClick = onLogout,
+          onClick = { askLogout = true },
           modifier = Modifier
             .fillMaxWidth()
             .height(56.dp),
@@ -120,4 +142,75 @@ fun MainScreen(
       }
     }
   )
+  if (askLogout) {
+    AlertDialog(
+      onDismissRequest = { askLogout = false },
+      title = {
+        Text(
+          text = stringResource(R.string.confirm_logout),
+          fontSize = 20.sp,
+          fontWeight = FontWeight.Bold
+        )
+      },
+      text = {
+        Text(
+          text = stringResource(R.string.logout_message),
+          fontSize = 16.sp
+        )
+      },
+      confirmButton = {
+        Button(
+          onClick = {
+            performLogOut(email = email, groupId = id, accessToken = token)
+            onLogout()
+            askLogout = false
+          },
+          shape = RoundedCornerShape(8.dp),
+          colors = ButtonDefaults.buttonColors(
+            backgroundColor = MaterialTheme.colors.error,
+            contentColor = MaterialTheme.colors.onError
+          )
+        ) {
+          Text(stringResource(R.string.confirm), fontSize = 14.sp)
+        }
+      },
+      dismissButton = {
+        TextButton(onClick = { askLogout = false }) {
+          Text(stringResource(R.string.cancel), fontSize = 14.sp)
+        }
+      },
+      shape = RoundedCornerShape(12.dp),
+      backgroundColor = MaterialTheme.colors.surface
+    )
+  }
+}
+
+fun performLogOut (
+  email: String,
+  groupId: String,
+  accessToken: String
+) {
+  val client = OkHttpClient()
+
+  val logOutUrl = "https://thientranduc.id.vn:444/api/logout"
+
+  val body = JSONObject().apply {
+    put("email", email)
+    put("groupId", groupId)
+    put("accessToken", accessToken)
+  }.toString()
+  CoroutineScope(Dispatchers.IO).launch {
+    try {
+      val request = Request.Builder()
+        .url(logOutUrl) // Replace with your server URL
+        .post(body.toRequestBody("application/json".toMediaType()))
+        .build()
+
+      // Response body will be: { "success": true, "accessToken": "xyz" }
+      val response = client.newCall(request).execute()
+      Log.d("Logout", "Server response: ${response.body?.string()}")
+    } catch (e: Exception) {
+      Log.d("Logout error", "Server error: ${e.message}")
+    }
+  }
 }

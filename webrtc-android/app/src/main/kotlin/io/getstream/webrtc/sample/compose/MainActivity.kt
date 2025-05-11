@@ -79,13 +79,15 @@ class MainActivity : ComponentActivity() {
             }
           }
           var currentScreen: Screen by remember { mutableStateOf(Screen.Login) }
+          var userEmail by remember { mutableStateOf("") }
           var cameraId by remember { mutableStateOf("") }
           var accessToken by remember { mutableStateOf("") }
 
           when (currentScreen) {
             Screen.Login -> LoginScreen(
               fcmToken = fcmToken,
-              onSuccess = { id, token ->
+              onSuccess = { email, id, token ->
+                userEmail = email
                 cameraId = id
                 accessToken = token
                 currentScreen = Screen.Main
@@ -94,7 +96,8 @@ class MainActivity : ComponentActivity() {
             )
             Screen.Register -> RegisterScreen(
               fcmToken = fcmToken,
-              onSuccess = { id, token ->
+              onSuccess = { email, id, token ->
+                userEmail = email
                 cameraId = id
                 accessToken = token
                 currentScreen = Screen.Main
@@ -102,10 +105,13 @@ class MainActivity : ComponentActivity() {
               onLogin = { currentScreen = Screen.Login }
             )
             Screen.Main -> MainScreen(
+              email = userEmail,
               id = cameraId,
+              token = accessToken,
               onVideosClick = { currentScreen = Screen.Videos },
               onSignallingClick = { currentScreen = Screen.Signalling },
               onLogout = {
+                userEmail = ""
                 cameraId = ""
                 accessToken = ""
                 currentScreen = Screen.Login
