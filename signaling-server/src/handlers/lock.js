@@ -2,7 +2,7 @@ const { getDb } = require("../db/db");
 const { groups } = require("../groups/groups");
 const bcrypt = require('bcrypt');
 
-async function handleUnlock(req, res) {
+async function handleLock(req, res) {
   // // Sử dụng regex để bóc tách message
   // /*
   // LOGIN user 123
@@ -49,9 +49,9 @@ async function handleUnlock(req, res) {
       return res.status(401).json({ status: "false", message: 'Invalid password' });
     }
 
-    // Send unlock message to controller
+    // Send lock message to controller
     const group = groups.get(groupId);
-    const message = `UNLOCK ${groupId}`;
+    const message = `LOCK ${groupId}`;
     if (group) {
       const controller = group.clients.controller;
       if (controller && controller.readyState === controller.OPEN) {
@@ -67,16 +67,16 @@ async function handleUnlock(req, res) {
       console.error(`Group not found: ${groupId}`);
       return res.status(404).json({ status: "false", message: 'Group not found' });
     } else {
-      if (dbGroup.door.lock === 'Unlocked') {
-        console.error(`Group already unlocked: ${groupId}`);
-        return res.status(400).json({ status: "false", message: 'Already unlocked' });
+      if (dbGroup.door.lock === 'Locked') {
+        console.error(`Group already locked: ${groupId}`);
+        return res.status(400).json({ status: "false", message: 'Already locked' });
       }
       // Update on collection groups
       await db.collection('groups').updateOne(
         { id: groupId },
         { $set: {
           door: { 
-            lock: 'Unlocked',
+            lock: 'Locked',
             user: email,
             time: new Date().toISOString()
           }
@@ -84,7 +84,7 @@ async function handleUnlock(req, res) {
         { upsert: true }
       );
     }
-    console.log(`User ${email} unlocked group: ${groupId}`);
+    console.log(`User ${email} locked group: ${groupId}`);
     return res.json({ status: "success", message: '' });
   } catch (error) {
     console.error(`Error in handleLogout: ${error.message}`);
@@ -92,4 +92,4 @@ async function handleUnlock(req, res) {
   }
 }
 
-module.exports = { handleUnlock };
+module.exports = { handleLock };
