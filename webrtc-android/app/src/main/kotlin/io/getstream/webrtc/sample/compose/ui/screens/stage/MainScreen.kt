@@ -3,6 +3,7 @@ package io.getstream.webrtc.sample.compose.ui.screens.stage
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -166,12 +167,23 @@ fun MainScreen(
             askLogout = false
           },
           shape = RoundedCornerShape(8.dp),
+          modifier = Modifier.height(50.dp),
           colors = ButtonDefaults.buttonColors(
             backgroundColor = MaterialTheme.colors.error,
             contentColor = MaterialTheme.colors.onError
           )
         ) {
-          Text(stringResource(R.string.confirm), fontSize = 14.sp)
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(vertical = 8.dp)
+          ) {
+            Text(
+              text = stringResource(R.string.confirm),
+              fontSize = 14.sp,
+              fontWeight = FontWeight.Bold
+            )
+          }
         }
       },
       dismissButton = {
@@ -180,6 +192,7 @@ fun MainScreen(
         }
       },
       shape = RoundedCornerShape(12.dp),
+      modifier = Modifier.height(170.dp),
       backgroundColor = MaterialTheme.colors.surface
     )
   }
