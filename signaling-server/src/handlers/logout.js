@@ -60,7 +60,6 @@ async function handleLogout(req, res) {
       notifyStateUpdate(groupId);
     }
     // Update on collection groups
-    const db = getDb();
     await db.collection('groups').updateOne(
       { id: groupId },
       { $set: { state: 'Impossible' } }
