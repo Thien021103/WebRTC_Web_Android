@@ -16,7 +16,7 @@ const { handleRegister } = require('./handlers/register');
 const { groups, notifyStateUpdate } = require('./groups/groups');
 const { handleLogout } = require('./handlers/logout');
 const { handleUnlock } = require('./handlers/unlock');
-const { handleLock } = require('./handlers/lock');
+const { handleLock, handleConntrollerLock } = require('./handlers/lock');
 // const registrationToken = 'fL9GEwT9QoKekNVV6j3BZY:APA91bGVMIObkbbROcivQ8iDtO-eDEfsL9GtRd8nKnsalNJejYG6OzmlJcZm_QoMGYOBU4oKlsQBAoDdhhnI_HlNp8LgVkwuOEywPPa-qDDEeBmZnJrHig4'; // Thay bằng FCM token từ logcat (tạm thời hardcode)
 
 async function startServer() {
@@ -67,9 +67,9 @@ async function startServer() {
         handleAnswer(message);
       } else if (message.startsWith('ICE')) {
         handleIce(message);
-      } 
-      // else if (message.startsWith('REGISTER')) {
-      //   handleRegister(message, ws);
+      } else if (message.startsWith('LOCK')) {
+        handleConntrollerLock(message);
+      }
       // } else if (message.startsWith('LOGIN')) {
       //   handleLogin(message, ws);
       // }

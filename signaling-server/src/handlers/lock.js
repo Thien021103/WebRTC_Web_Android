@@ -93,4 +93,48 @@ async function handleLock(req, res) {
   }
 }
 
-module.exports = { handleLock };
+async function handleConntrollerLock(message) {
+  // Sử dụng regex để trích xuất senderType, groupId
+  const match = message.match(/^LOCK (\w+) (\w+)$/);
+  if (!match) {
+    console.error('Invalid LOCK message format');
+    return;
+  }
+  const [_, senderType, groupId] = match; // match[0] là toàn bộ chuỗi, bỏ qua
+  console.log(`Handling offer from ${senderType}, group ${id}`);
+  if (senderType !== 'controller') {
+    console.error('Only controller can send LOCK');
+    return;
+  }
+  try {
+    // Update on collection groups
+    const dbGroup = await db.collection('groups').findOne({ id: groupId });
+    if (!dbGroup) {
+      console.error(`Group not found: ${groupId}`);
+      return;
+    } else {
+      if (dbGroup.door.lock && dbGroup.door.lock === 'Locked') {
+        console.error(`Group already locked: ${groupId}`);
+        return;
+      }
+      await db.collection('groups').updateOne(
+        { id: groupId },
+        { $set: {
+          door: { 
+            lock: 'Locked',
+            user: `Controller ${groupId}`,
+            time: new Date().toISOString()
+          }
+        } },
+        { upsert: true }
+      );
+    }
+    console.log(`User ${email} locked group: ${groupId}`);
+    return;
+  } catch (error) {
+    console.error(`Error in handleControllerLock: ${error.message}`);
+    return;
+  }
+}
+
+module.exports = { handleLock, handleConntrollerLock };
