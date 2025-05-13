@@ -99,7 +99,7 @@ async function handleUnlock(req, res) {
     }
 
     console.log(`User ${email} unlocked group: ${groupId}`);
-    return res.json({ status: "success", message: '' });
+    return res.json({ status: "success", message: 'Unlocked' });
   } catch (error) {
     console.error(`Error in handleUnlock: ${error.message}`);
     return res.status(500).json({ status: "false", message: 'Server error' });

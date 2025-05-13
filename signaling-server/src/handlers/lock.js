@@ -99,7 +99,7 @@ async function handleLock(req, res) {
     }
     
     console.log(`User ${email} locked group: ${groupId}`);
-    return res.json({ status: "success", message: '' });
+    return res.json({ status: "success", message: 'Locked' });
   } catch (error) {
     console.error(`Error in handleLock: ${error.message}`);
     return res.status(500).json({ status: "false", message: 'Server error' });
