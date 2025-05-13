@@ -40,9 +40,10 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
         delay(2000);        // Simulate unlock duration
         doorServo.write(0);  // Back to locked position
         Serial.println("Door locked again");
+        webSocket.sendTXT("LOCK controller " + String(CONTROLLER_ID));
       }
-      else if (message == "UNLOCK " + String(CONTROLLER_ID)) {
-        Serial.println("Unlocking door...");
+      else if (message == "LOCK " + String(CONTROLLER_ID)) {
+        Serial.println("Locking door...");
         doorServo.write(90); // Unlock position
         delay(2000);        // Simulate unlock duration
         doorServo.write(0);  // Back to locked position
