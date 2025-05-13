@@ -106,6 +106,9 @@ async function handleConntrollerLock(message) {
     console.error('Only controller can send LOCK');
     return;
   }
+  
+  const db = getDb();
+
   try {
     // Update on collection groups
     const dbGroup = await db.collection('groups').findOne({ id: groupId });
