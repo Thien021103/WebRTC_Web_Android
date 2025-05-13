@@ -101,7 +101,7 @@ async function handleConntrollerLock(message) {
     return;
   }
   const [_, senderType, groupId] = match; // match[0] là toàn bộ chuỗi, bỏ qua
-  console.log(`Handling offer from ${senderType}, group ${id}`);
+  console.log(`Handling offer from ${senderType}, group ${groupId}`);
   if (senderType !== 'controller') {
     console.error('Only controller can send LOCK');
     return;
