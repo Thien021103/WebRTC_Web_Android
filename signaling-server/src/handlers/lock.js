@@ -106,7 +106,7 @@ async function handleConntrollerLock(message) {
     console.error('Only controller can send LOCK');
     return;
   }
-  
+
   const db = getDb();
 
   try {
@@ -132,7 +132,7 @@ async function handleConntrollerLock(message) {
         { upsert: true }
       );
     }
-    console.log(`User ${email} locked group: ${groupId}`);
+    console.log(`Controller ${groupId} locked group: ${groupId}`);
     return;
   } catch (error) {
     console.error(`Error in handleControllerLock: ${error.message}`);
