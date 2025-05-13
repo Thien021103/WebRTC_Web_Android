@@ -61,7 +61,7 @@ async function handleUnlock(req, res) {
           { $set: {
             door: { 
               lock: 'Unlocked',
-              user: email,
+              user: `User ${email}`,
               time: new Date().toISOString()
             }
           } },
@@ -73,7 +73,7 @@ async function handleUnlock(req, res) {
           { $set: {
             door: { 
               lock: 'Unlocked',
-              user: email,
+              user: `User ${email}`,
               time: new Date().toISOString()
             }
           } },
