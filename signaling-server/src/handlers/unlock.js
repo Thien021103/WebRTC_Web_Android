@@ -67,6 +67,18 @@ async function handleUnlock(req, res) {
           } },
           { upsert: true }
         );
+      } else if (dbGroup.door.lock && dbGroup.door.lock === 'Locked') {
+        await db.collection('groups').updateOne(
+          { id: groupId },
+          { $set: {
+            door: { 
+              lock: 'Unlocked',
+              user: email,
+              time: new Date().toISOString()
+            }
+          } },
+          { upsert: true }
+        );
       } else if (dbGroup.door.lock && dbGroup.door.lock === 'Unlocked') {
         console.error(`Group already unlocked: ${groupId}`);
         return res.status(400).json({ status: "false", message: 'Already unlocked' });

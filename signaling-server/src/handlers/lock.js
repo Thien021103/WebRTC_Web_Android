@@ -55,21 +55,34 @@ async function handleLock(req, res) {
       console.error(`Group not found: ${groupId}`);
       return res.status(404).json({ status: "false", message: 'Group not found' });
     } else {
-      if (dbGroup.door.lock && dbGroup.door.lock === 'Locked') {
+      if (!dbGroup.door) {
+        await db.collection('groups').updateOne(
+          { id: groupId },
+          { $set: {
+            door: { 
+              lock: 'Locked',
+              user: email,
+              time: new Date().toISOString()
+            }
+          } },
+          { upsert: true }
+        );
+      } else if (dbGroup.door.lock && dbGroup.door.lock === 'Unlocked') {
+        await db.collection('groups').updateOne(
+          { id: groupId },
+          { $set: {
+            door: { 
+              lock: 'Locked',
+              user: email,
+              time: new Date().toISOString()
+            }
+          } },
+          { upsert: true }
+        );
+      } else if (dbGroup.door.lock && dbGroup.door.lock === 'Locked') {
         console.error(`Group already locked: ${groupId}`);
         return res.status(400).json({ status: "false", message: 'Already locked' });
       }
-      await db.collection('groups').updateOne(
-        { id: groupId },
-        { $set: {
-          door: { 
-            lock: 'Locked',
-            user: email,
-            time: new Date().toISOString()
-          }
-        } },
-        { upsert: true }
-      );
     }
 
     // Send lock message to controller
@@ -116,21 +129,34 @@ async function handleConntrollerLock(message) {
       console.error(`Group not found: ${groupId}`);
       return;
     } else {
-      if (dbGroup.door.lock && dbGroup.door.lock === 'Locked') {
+      if (!dbGroup.door) {
+        await db.collection('groups').updateOne(
+          { id: groupId },
+          { $set: {
+            door: { 
+              lock: 'Locked',
+              user: `Controller ${groupId}`,
+              time: new Date().toISOString()
+            }
+          } },
+          { upsert: true }
+        );
+      } else if (dbGroup.door.lock && dbGroup.door.lock === 'Unlocked') {
+        await db.collection('groups').updateOne(
+          { id: groupId },
+          { $set: {
+            door: { 
+              lock: 'Locked',
+              user: `Controller ${groupId}`,
+              time: new Date().toISOString()
+            }
+          } },
+          { upsert: true }
+        );
+      } else if (dbGroup.door.lock && dbGroup.door.lock === 'Locked') {
         console.error(`Group already locked: ${groupId}`);
         return;
       }
-      await db.collection('groups').updateOne(
-        { id: groupId },
-        { $set: {
-          door: { 
-            lock: 'Locked',
-            user: `Controller ${groupId}`,
-            time: new Date().toISOString()
-          }
-        } },
-        { upsert: true }
-      );
     }
     console.log(`Controller ${groupId} locked group: ${groupId}`);
     return;
