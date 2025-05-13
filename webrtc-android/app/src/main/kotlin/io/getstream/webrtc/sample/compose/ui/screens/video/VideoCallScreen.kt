@@ -83,6 +83,7 @@ fun getOutputFilePath(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun VideoCallScreen(
+  email: String,
   cameraId: String,
   onCancelCall: () -> Unit
 ) {
@@ -157,6 +158,9 @@ fun VideoCallScreen(
 //    val activity = (LocalContext.current as? Activity)
 
     VideoCallControls(
+      context = context,
+      email = email,
+      id = cameraId,
       modifier = Modifier
         .fillMaxWidth()
         .align(Alignment.BottomCenter),

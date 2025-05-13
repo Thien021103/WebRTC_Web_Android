@@ -122,6 +122,7 @@ class MainActivity : ComponentActivity() {
               onBack = { currentScreen = Screen.Main }
             )
             Screen.Signalling -> SignallingScreen(
+              email = userEmail,
               id = cameraId,
               accessToken = accessToken,
               onBack = { currentScreen = Screen.Main }
