@@ -21,10 +21,6 @@ int sdp_append(Sdp* sdp, const char* format, ...) {
   return 0;
 }
 
-void sdp_reset(Sdp* sdp) {
-  memset(sdp->content, 0, sizeof(sdp->content));
-}
-
 void sdp_append_h264(Sdp* sdp) {
   sdp_append(sdp, "m=video 9 UDP/TLS/RTP/SAVPF 96 102");
   sdp_append(sdp, "a=rtcp-fb:102 nack");

@@ -56,42 +56,6 @@ void stun_msg_create(StunMessage* msg, uint16_t type) {
   msg->size = sizeof(StunHeader);
 }
 
-// int stun_xor_address(StunMessage* msg, const Address* addr, char* xor_addr) {
-//   // Build the XOR mask: magic cookie + transaction ID
-//   StunHeader* header = (StunHeader*)msg->buf;
-//   uint8_t mask[16];
-//   uint32_t magic = htonl(MAGIC_COOKIE);
-//   memcpy(mask, &magic, 4);
-//   memcpy(mask + 4, header->transaction_id, 12);
-
-//   uint16_t* port = (uint16_t*)(xor_addr + 2);
-//   uint32_t* val32 = (uint32_t*)(xor_addr + 4);
-//   uint16_t* val16 = (uint16_t*)(xor_addr + 4);
-//   int i;
-
-//   switch (addr->family) {
-//     case AF_INET:
-//       xor_addr[1] = STUN_FAMILY_IPV4; // Family
-//       xor_addr[0] = 0x00;             // Reserved byte
-//       *port = htons(addr->port) ^ *(uint16_t*)mask; // XOR port with first 16 bits
-//       *val32 = addr->sin.sin_addr.s_addr ^ *(uint32_t*)mask; // XOR IPv4 with first 32 bits
-//       return 8;
-
-//     case AF_INET6:
-//       xor_addr[1] = STUN_FAMILY_IPV6; // Family
-//       xor_addr[0] = 0x00;             // Reserved byte
-//       *port = htons(addr->port) ^ *(uint16_t*)mask; // XOR port with first 16 bits
-//       for (i = 0; i < 8; i++) {
-//           uint16_t ip_segment = ntohs(*(uint16_t*)(addr->sin6.sin6_addr.s6_addr + 2 * i));
-//           val16[i] = ip_segment ^ *(uint16_t*)(mask + 2 * i);
-//       }
-//       return 20;
-
-//     default:
-//         return 0; // Unsupported family
-//     }
-// }
-
 int stun_set_mapped_address(char* value, uint8_t* mask, Address* addr) {
   int ret, i;
   char addr_string[ADDRSTRLEN];
@@ -370,48 +334,13 @@ int stun_probe(uint8_t* buf, size_t size) {
     LOGE("STUN message is too short.");
     return -1;
   }
-
   header = (StunHeader*)buf;
   if (header->magic_cookie != htonl(MAGIC_COOKIE)) {
     return -1;
   }
-
   return 0;
 }
 
-#if 0
-StunMsgType stun_is_stun_msg(uint8_t *buf, size_t size) {
-
-  if (size < sizeof(StunHeader)) {
-    //LOGE("STUN message is too short.");
-    return STUN_MSG_TYPE_INVLID;
-  }
-
-  StunHeader *header = (StunHeader *)buf;
-  if (header->magic_cookie != htonl(MAGIC_COOKIE)) {
-    //LOGE("STUN magic cookie does not match.");
-    return STUN_MSG_TYPE_INVLID;
-  }
-
-  if (ntohs(header->type) == STUN_BINDING_REQUEST) {
-
-    return STUN_MSG_TYPE_BINDING_REQUEST;
-
-  } else if (ntohs(header->type) == STUN_BINDING_RESPONSE) {
-
-    return STUN_MSG_TYPE_BINDING_RESPONSE;
-
-  } else if (ntohs(header->type) == STUN_BINDING_ERROR_RESPONSE) {
-
-    return STUN_MSG_TYPE_BINDING_ERROR_RESPONSE;
-  } else {
-
-    return STUN_MSG_TYPE_INVLID;
-  }
-
-  return 0;
-}
-#endif
 int stun_msg_is_valid(uint8_t* buf, size_t size, char* password) {
   StunMessage msg;
 

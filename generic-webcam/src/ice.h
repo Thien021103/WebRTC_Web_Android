@@ -33,19 +33,12 @@ typedef struct IceCandidate IceCandidate;
 
 struct IceCandidate {
   int foundation;
-
   int component;
-
   uint32_t priority;
-
   char transport[32 + 1];
-
   IceCandidateType type;
-
   IceCandidateState state;
-
   Address addr;
-
   Address raddr;
 };
 
@@ -64,7 +57,5 @@ void ice_candidate_create(IceCandidate* ice_candidate, int foundation, IceCandid
 void ice_candidate_to_description(IceCandidate* candidate, char* description, int length);
 
 int ice_candidate_from_description(IceCandidate* candidate, char* description, char* end);
-
-int ice_candidate_get_local_address(IceCandidate* candidate, Address* address);
 
 #endif  // ICE_H_

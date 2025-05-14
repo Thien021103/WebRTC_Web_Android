@@ -15,32 +15,6 @@
 #include "socket.h"
 #include "utils.h"
 
-// int dtls_srtp_udp_send(void* ctx, const uint8_t* buf, size_t len) {
-//   DtlsSrtp* dtls_srtp = (DtlsSrtp*)ctx;
-//   UdpSocket* udp_socket = (UdpSocket*)dtls_srtp->user_data;
-
-//   int ret = udp_socket_sendto(udp_socket, dtls_srtp->remote_addr, buf, len);
-
-//   LOGI("dtls_srtp_udp_send (%d)", ret);
-
-//   return ret;
-// }
-
-// int dtls_srtp_udp_recv(void* ctx, uint8_t* buf, size_t len) {
-//   DtlsSrtp* dtls_srtp = (DtlsSrtp*)ctx;
-//   UdpSocket* udp_socket = (UdpSocket*)dtls_srtp->user_data;
-
-//   int ret;
-
-//   while ((ret = udp_socket_recvfrom(udp_socket, &udp_socket->bind_addr, buf, len)) <= 0) {
-//     ports_sleep_ms(1);
-//   }
-
-//   LOGI("dtls_srtp_udp_recv (%d)", ret);
-
-//   return ret;
-// }
-
 static void dtls_srtp_x509_digest(const mbedtls_x509_crt* crt, char* buf) {
   int i;
   unsigned char digest[32];
@@ -139,12 +113,6 @@ static int dtls_srtp_selfsign_cert(DtlsSrtp* dtls_srtp) {
   return ret;
 }
 
-// #if CONFIG_MBEDTLS_DEBUG
-// static void dtls_srtp_debug(void* ctx, int level, const char* file, int line, const char* str) {
-//   LOGD("%s:%04d: %s", file, line, str);
-// }
-// #endif
-
 int dtls_srtp_init(DtlsSrtp* dtls_srtp, DtlsSrtpRole role, void* user_data) {
   static const mbedtls_ssl_srtp_profile default_profiles[] = {
       MBEDTLS_TLS_SRTP_AES128_CM_HMAC_SHA1_80,
@@ -156,8 +124,6 @@ int dtls_srtp_init(DtlsSrtp* dtls_srtp, DtlsSrtpRole role, void* user_data) {
   dtls_srtp->role = role;
   dtls_srtp->state = DTLS_SRTP_STATE_INIT;
   dtls_srtp->user_data = user_data;
-  // dtls_srtp->udp_send = dtls_srtp_udp_send;
-  // dtls_srtp->udp_recv = dtls_srtp_udp_recv;
 
   mbedtls_ssl_config_init(&dtls_srtp->conf);
   mbedtls_ssl_init(&dtls_srtp->ssl);
@@ -166,10 +132,7 @@ int dtls_srtp_init(DtlsSrtp* dtls_srtp, DtlsSrtpRole role, void* user_data) {
   mbedtls_pk_init(&dtls_srtp->pkey);
   mbedtls_entropy_init(&dtls_srtp->entropy);
   mbedtls_ctr_drbg_init(&dtls_srtp->ctr_drbg);
-// #if CONFIG_MBEDTLS_DEBUG
-//   mbedtls_debug_set_threshold(3);
-//   mbedtls_ssl_conf_dbg(&dtls_srtp->conf, dtls_srtp_debug, NULL);
-// #endif
+
   dtls_srtp_selfsign_cert(dtls_srtp);
 
   mbedtls_ssl_conf_verify(&dtls_srtp->conf, dtls_srtp_cert_verify, NULL);
@@ -247,28 +210,6 @@ static int dtls_srtp_key_derivation(DtlsSrtp* dtls_srtp, const unsigned char* ma
     LOGE("mbedtls_ssl_tls_prf failed(%d)", ret);
     return ret;
   }
-
-#if 0
-  int i, j;
-  printf("    DTLS-SRTP key material is:");
-  for (j = 0; j < sizeof(key_material); j++) {
-    if (j % 8 == 0) {
-      printf("\n    ");
-    }
-    printf("%02x ", key_material[j]);
-  }
-  printf("\n");
-
-  /* produce a less readable output used to perform automatic checks
-   * - compare client and server output
-   * - interop test with openssl which client produces this kind of output
-   */
-  printf("    Keying material: ");
-  for (j = 0; j < sizeof(key_material); j++) {
-    printf("%02X", key_material[j]);
-  }
-  printf("\n");
-#endif
 
   const uint8_t* client_key = key_material;
   const uint8_t* server_key = client_key + SRTP_MASTER_KEY_LENGTH;

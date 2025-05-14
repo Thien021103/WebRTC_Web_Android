@@ -22,7 +22,6 @@ void agent_clear_candidates(Agent* agent) {
   agent->local_candidates_count = 0;
   agent->remote_candidates_count = 0;
   agent->candidate_pairs_num = 0;
-    // agent->indication_sent = 0;
   agent->turn_permission = 0;
   agent->requested = 0;
   agent->responded = 0;
@@ -61,7 +60,6 @@ void agent_destroy(Agent* agent) {
     udp_socket_close(&agent->udp_sockets[1]);
   }
 #endif
-  // agent->indication_sent = 0;
   agent->turn_permission = 0;
   agent->requested = 0;
   agent->responded = 0;

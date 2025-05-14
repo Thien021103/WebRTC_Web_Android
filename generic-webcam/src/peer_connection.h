@@ -140,10 +140,6 @@ void peer_connection_ondatachannel(PeerConnection* pc,
                                    void (*onopen)(void* userdata),
                                    void (*onclose)(void* userdata));
 
-int peer_connection_lookup_sid(PeerConnection* pc, const char* label, uint16_t* sid);
-
-char* peer_connection_lookup_sid_label(PeerConnection* pc, uint16_t sid);
-
 /**
  * @brief adds a new remote candidate to the peer connection
  * @param[in] peer connection

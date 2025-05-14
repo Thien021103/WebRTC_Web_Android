@@ -155,13 +155,7 @@ static void on_request_keyframe(void* data) {
 // }
 
 static void* peer_singaling_task(void* data) {
-
-//  while (!g_interrupted) {
-//    peer_signaling_loop();
-//    usleep(1000);
-      connect_to_janus_server();
-//  }
-
+    connect_to_ws_server();
     pthread_exit(NULL);
 }
 
@@ -237,7 +231,6 @@ int main(int argc, char* argv[]) {
   service_config.pc = g_pc;
 
   peer_signaling_set_config(&service_config);
-  // peer_signaling_join_channel();
 
   pthread_create(&peer_connection_thread, NULL, peer_connection_task, NULL);
   pthread_create(&peer_singaling_thread, NULL, peer_singaling_task, NULL);

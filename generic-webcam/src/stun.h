@@ -109,13 +109,9 @@ struct StunMessage {
 
 void stun_msg_create(StunMessage* msg, uint16_t type);
 
-// int stun_xor_address(StunMessage* msg, const Address* addr, char* xor_addr);
-
 int stun_set_mapped_address(char* value, uint8_t* mask, Address* addr);
 
 void stun_get_mapped_address(char* value, uint8_t* mask, Address* addr);
-
-void stun_msg_parse(StunMessage* msg, uint8_t* buf, size_t len);
 
 void stun_parse_msg_buf(StunMessage* msg);
 

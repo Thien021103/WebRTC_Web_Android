@@ -52,8 +52,3 @@ int addr_to_string(const Address* addr, char* buf, size_t len) {
   }
   return 0;
 }
-
-int addr_equal(const Address* a, const Address* b) {
-  // TODO
-  return 1;
-}

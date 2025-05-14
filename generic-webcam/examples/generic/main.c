@@ -60,7 +60,7 @@ static void signal_handler(int signal) {
 }
 
 static void* peer_singaling_task(void* data) {
-    connect_to_janus_server();
+    connect_to_ws_server();
     pthread_exit(NULL);
 }
 

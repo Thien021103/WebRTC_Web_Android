@@ -4,7 +4,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "base64.h"
 #include "config.h"
 #include "peer_signaling.h"
 #include "ports.h"
@@ -12,77 +11,28 @@
 #include <libwebsockets.h>
 #include "agent.h"
 
-#define KEEP_ALIVE_TIMEOUT_SECONDS 60
-#define CONNACK_RECV_TIMEOUT_MS 1000
-
 #define TOPIC_SIZE 128
 #define HOST_LEN 64
 #define CRED_LEN 128
 #define PEER_ID_SIZE 80
 
-// #define RPC_VERSION "2.0"
-
-// #define RPC_METHOD_STATE "state"
-// #define RPC_METHOD_OFFER "offer"
-// #define RPC_METHOD_ANSWER "answer"
-// #define RPC_METHOD_CLOSE "close"
-
-// #define RPC_ERROR_PARSE_ERROR "{\"code\":-32700,\"message\":\"Parse error\"}"
-// #define RPC_ERROR_INVALID_REQUEST "{\"code\":-32600,\"message\":\"Invalid Request\"}"
-// #define RPC_ERROR_METHOD_NOT_FOUND "{\"code\":-32601,\"message\":\"Method not found\"}"
-// #define RPC_ERROR_INVALID_PARAMS "{\"code\":-32602,\"message\":\"Invalid params\"}"
-// #define RPC_ERROR_INTERNAL_ERROR "{\"code\":-32603,\"message\":\"Internal error\"}"
-
-static char* rand_string(char* str, size_t size)
-{
-    const char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJK...";
-    if (size) {
-        --size;
-        for (size_t n = 0; n < size; n++) {
-            int key = rand() % (int)(sizeof charset - 1);
-            str[n] = charset[key];
-        }
-        str[size] = '\0';
-    }
-    return str;
-}
-
 typedef struct PeerSignaling {
-
-    char subtopic[TOPIC_SIZE];
-    char pubtopic[TOPIC_SIZE];
 
     uint16_t packet_id;
     char id[PEER_ID_SIZE];
-
-    int mqtt_port;
-    int http_port;
-    char mqtt_host[HOST_LEN];
-    char http_host[HOST_LEN];
-    char http_path[HOST_LEN];
+    
     char ws_host[HOST_LEN];
     int  ws_port;
-    char username[CRED_LEN];
-    char password[CRED_LEN];
     char client_id[CRED_LEN];
     PeerConnection* pc;
 
 } PeerSignaling;
 
 enum MsgType {
-    JANUS_MSS_UNKNOWN = 0,
     JANUS_MSS_ICE_CANDIDATE = 1,
-    JANUS_MSS_ICE_CANDIDATE_GATHERED = 2,
     JANUS_MSS_SDP_OFFER = 3,
     JANUS_MSS_SDP_ANSWER = 4,
-    JANUS_MSS_REGISTER = 5,
     JANUS_MSS_REGISTER_WITH_SERVER = 6,
-    JANUS_MSS_ROOM_REQUEST = 7,
-    JANUS_MSS_KEEP_ALIVE = 8,
-    JANUS_MSS_ROOM_CALL = 9,
-    ///////////////////////////////////////////////////////////
-    JANUS_MSS_ROOM_PARTICIPANTS = 10,
-    //////////////////////////////////////////////////////////
 };
 
 // Signaling information
@@ -103,19 +53,8 @@ static enum SignalingState signaling_state = Impossible;
 
 static PeerSignaling g_ps;
 
-//Janus information
-long long feed_id = 0;
-long long session_id = 0;
-long long handle_id = 0;
-char transaction[12];
-
 static struct lws_context *lws_context = NULL;
 static struct lws* web_socket = NULL;
-
-static const char* room = "1234";
-static const char* token = "";
-// static const char* receiver_id = "2002";
-static const char* peer_id = "1001";
 
 static int retry_delay = 1000000; // Start with 1s
 static int mainloop = 1;
@@ -154,39 +93,16 @@ const char *ca_pem =
 
 enum AppState {
     APP_STATE_UNKNOWN = 0,
-    APP_STATE_ERROR = 1, /* generic error */
     SERVER_CONNECTING = 1000,
     SERVER_CONNECTION_ERROR,
     SERVER_CONNECTED, /* Ready to register */
-    SERVER_REGISTERING = 2000,
-    SERVER_REGISTRATION_ERROR,
     SERVER_REGISTERED, /* Ready to call a peer */
-    SERVER_REGISTERING_2 = 2500,
-    SERVER_REGISTRATION_ERROR_2,
-    SERVER_REGISTERED_2, /* Ready to call a peer */
-    SERVER_REGISTERING_3 = 2700,
-    SERVER_REGISTRATION_ERROR_3,
-    SERVER_REGISTERED_3, /* Ready to call a peer */
     SERVER_CLOSED, /* server connection closed by us or the server */
-    PEER_CONNECTING = 3000,
-    PEER_CONNECTION_ERROR,
-    PEER_CONNECTED,
-    PEER_CALL_NEGOTIATING = 3500,
-    PEER_CALL_NEGOTIATED = 4000,
-    PEER_CALL_STARTED,
-    PEER_CALL_STOPPING,
-    PEER_CALL_STOPPED,
-    PEER_CALL_ERROR,
 };
 
 static enum AppState app_state = APP_STATE_UNKNOWN;
 
 #define JANUS_RX_BUFFER_BYTES (1024*100)
-// enum protocols
-// {
-//     PROTOCOL_JANUS = 0,
-//     PROTOCOL_COUNT
-// };
 
 static int callback_janus(struct lws* wsi, enum lws_callback_reasons reason, void* user, void* in, size_t len);
 
@@ -198,18 +114,7 @@ static int lws_websocket_connection_send_text(struct lws* wsi_in, char* str, enu
     size_t n;
 
     switch (msgtype) {
-    case JANUS_MSS_ICE_CANDIDATE_GATHERED:
-        break;
-    case JANUS_MSS_ICE_CANDIDATE:
-        break;
     case JANUS_MSS_SDP_OFFER:
-        n = sprintf((char*)p, "%s", str);
-        LOGI("Sent: %s\n", (char*)p);
-        lws_write(wsi_in, p, n, LWS_WRITE_TEXT);
-        break;
-    case JANUS_MSS_SDP_ANSWER:
-        break;
-    case JANUS_MSS_REGISTER:
         n = sprintf((char*)p, "%s", str);
         LOGI("Sent: %s\n", (char*)p);
         lws_write(wsi_in, p, n, LWS_WRITE_TEXT);
@@ -219,13 +124,9 @@ static int lws_websocket_connection_send_text(struct lws* wsi_in, char* str, enu
         LOGI("Sent: %s\n", (char*)p);
         lws_write(wsi_in, p, n, LWS_WRITE_TEXT);
         break;
-    case JANUS_MSS_ROOM_REQUEST:
+    case JANUS_MSS_SDP_ANSWER:
         break;
-    case JANUS_MSS_KEEP_ALIVE:
-        break;
-    case JANUS_MSS_ROOM_PARTICIPANTS:
-        break;
-    case JANUS_MSS_ROOM_CALL:
+    case JANUS_MSS_ICE_CANDIDATE:
         break;
     default:
         break;
@@ -395,33 +296,16 @@ static int callback_janus(struct lws* wsi, enum lws_callback_reasons reason, voi
 }
 
 static void peer_signaling_onicecandidate(char* description, void* userdata) {
-    // LOGI("Making initial offer:\n%s\n", description);
-    // Remove host candidates from SDP
-    char sdp_without_host_candidate[5000];
-    memset(sdp_without_host_candidate, 0, sizeof(sdp_without_host_candidate));
-
-    char *line = strtok(description, "\n");
-    while (line != NULL) {
-        if (strstr(line, "typ host") == NULL) {
-            strcat(sdp_without_host_candidate, line);
-            strcat(sdp_without_host_candidate, "\n");
-        }
-        line = strtok(NULL, "\n");
-    }
-    strcpy(description, sdp_without_host_candidate);
-
     char offer[5000];
 
     snprintf(offer, sizeof(offer), "OFFER camera %s\n%s", g_ps.id, description);
 
     // Send the offer over WebSocket
     lws_websocket_connection_send_text(web_socket, offer, JANUS_MSS_SDP_OFFER);
-
-    // g_free(text);
 }
 
 int peer_signaling_loop() {
-    connect_to_janus_server();
+    connect_to_ws_server();
     return 0;
 }
 
@@ -432,8 +316,6 @@ void peer_signaling_leave_channel() {
 void peer_signaling_set_config(ServiceConfiguration* service_config) {
 
     memset(&g_ps, 0, sizeof(g_ps));
-
-    //congnv
     do {
         if (service_config->ws_url == NULL || strlen(service_config->ws_url) == 0) {
             break;
@@ -443,9 +325,8 @@ void peer_signaling_set_config(ServiceConfiguration* service_config) {
         g_ps.ws_port = service_config->ws_port;
         LOGI("WS Host: %s, Port: %d", g_ps.ws_host, g_ps.ws_port);
     } while (0);
-
-    // Username, password, id
-
+    
+    // ID
     if (service_config->id != NULL && strlen(service_config->id) > 0) {
         strncpy(g_ps.id, service_config->id, PEER_ID_SIZE);
     }
@@ -454,16 +335,7 @@ void peer_signaling_set_config(ServiceConfiguration* service_config) {
         strncpy(g_ps.client_id, service_config->client_id, CRED_LEN);
     }
 
-    if (service_config->username != NULL && strlen(service_config->username) > 0) {
-        strncpy(g_ps.username, service_config->username, CRED_LEN);
-    }
-
-    if (service_config->password != NULL && strlen(service_config->password) > 0) {
-        strncpy(g_ps.password, service_config->password, CRED_LEN);
-    }
-
     g_ps.pc = service_config->pc;
-
     peer_connection_onicecandidate(g_ps.pc, peer_signaling_onicecandidate);
 }
 #endif  // DISABLE_PEER_SIGNALING
@@ -477,7 +349,7 @@ void disconnect_websocket() {
     }
 }
 
-void connect_to_janus_server()
+void connect_to_ws_server()
 {
     // lws_set_log_level(LLL_ERR | LLL_WARN | LLL_NOTICE | LLL_INFO | LLL_DEBUG | LLL_PARSER | LLL_HEADER | LLL_EXT | LLL_CLIENT, NULL);
     struct lws_context_creation_info info;

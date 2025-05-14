@@ -29,6 +29,4 @@ void sdp_create(Sdp* sdp, int b_video, int b_audio, int b_datachannel);
 
 int sdp_append(Sdp* sdp, const char* format, ...);
 
-void sdp_reset(Sdp* sdp);
-
 #endif  // SDP_H_

@@ -69,7 +69,6 @@ struct Agent {
 
   int use_channel;
   int turn_permission;
-  // int indication_sent;
   int requested;  // Sent request to client
   int responded;  // Sent response to client
   unsigned char channel[4];

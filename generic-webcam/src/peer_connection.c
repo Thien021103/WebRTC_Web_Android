@@ -629,19 +629,6 @@ void peer_connection_create_offer(PeerConnection* pc) {
   pc->b_local_description_created = 0;
 }
 
-int peer_connection_send_rtcp_pil(PeerConnection* pc, uint32_t ssrc) {
-  int ret = -1;
-  uint8_t plibuf[128];
-  rtcp_get_pli(plibuf, 12, ssrc);
-
-  // TODO: encrypt rtcp packet
-  // guint size = 12;
-  // dtls_transport_encrypt_rctp_packet(pc->dtls_transport, plibuf, &size);
-  // ret = nice_agent_send(pc->nice_agent, pc->stream_id, pc->component_id, size, (gchar*)plibuf);
-
-  return ret;
-}
-
 // callbacks
 void peer_connection_on_connected(PeerConnection* pc, void (*on_connected)(void* userdata)) {
   pc->on_connected = on_connected;
@@ -670,25 +657,6 @@ void peer_connection_ondatachannel(PeerConnection* pc,
     sctp_onclose(&pc->sctp, onclose);
     sctp_onmessage(&pc->sctp, onmessage);
   }
-}
-
-int peer_connection_lookup_sid(PeerConnection* pc, const char* label, uint16_t* sid) {
-  for (int i = 0; i < pc->sctp.stream_count; i++) {
-    if (strncmp(pc->sctp.stream_table[i].label, label, sizeof(pc->sctp.stream_table[i].label)) == 0) {
-      *sid = pc->sctp.stream_table[i].sid;
-      return 0;
-    }
-  }
-  return -1;  // Not found
-}
-
-char* peer_connection_lookup_sid_label(PeerConnection* pc, uint16_t sid) {
-  for (int i = 0; i < pc->sctp.stream_count; i++) {
-    if (pc->sctp.stream_table[i].sid == sid) {
-      return pc->sctp.stream_table[i].label;
-    }
-  }
-  return NULL;  // Not found
 }
 
 int peer_connection_add_ice_candidate(PeerConnection* pc, char* candidate) {

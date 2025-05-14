@@ -11,45 +11,27 @@ extern "C" {
 
 typedef struct ServiceConfiguration {
   char* id;
-  const char* mqtt_url;
-  int mqtt_port;
   const char* client_id;
-  const char* http_url;
-  int http_port;
   const char* ws_url;
   int ws_port;
-  const char* username;
-  const char* password;
   PeerConnection* pc;
 } ServiceConfiguration;
 
 #define SERVICE_CONFIG_DEFAULT()                    \
   {                                                 \
-    .mqtt_url = "broker.emqx.io",                   \
-    .mqtt_port = 8883,                              \
     .ws_url = "thientranduc.id.vn",                 \
     .ws_port = 444,                                 \
     .client_id = "peer",                            \
-    .http_url = "",                                 \
-    .http_port = 443,                               \
-    .username = "",                                 \
-    .password = "",                                 \
     .pc = NULL                                      \
   }
 
 void peer_signaling_set_config(ServiceConfiguration* config);
 
-int peer_signaling_whip_connect();
-
-void peer_signaling_whip_disconnect();
-
-int peer_signaling_join_channel();
-
 void peer_signaling_leave_channel();
 
 int peer_signaling_loop();
-//congnv
-void connect_to_janus_server();
+
+void connect_to_ws_server();
 
 #endif  // DISABLE_PEER_SIGNALING
 
