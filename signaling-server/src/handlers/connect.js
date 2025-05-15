@@ -106,4 +106,39 @@ async function handleConnect(message, client) {
   }
 }
 
-module.exports = { handleConnect };
+// Handle disconnect
+async function handleDisconnect(client) {
+  if (client && client._groupId) {
+
+    const group = groups.get(client._groupId);
+
+    if (group) {
+
+      // Delete from group
+      group.clients[client._type] = null;
+      
+      // Update group state in collection and local
+      if (!group.clients.camera || !group.clients.user || !group.clients.controller) {
+        group.state = 'Impossible';
+        try {
+          const db = getDb();
+          await db.collection('groups').updateOne(
+            { id: client._groupId },
+            { $set: { state: 'Impossible' } }
+          );
+          console.log(`Updated group ${client._groupId} state to Impossible`);
+        } catch (error) {
+          console.error(`Error updating group state: ${error.message}`);
+        }
+        notifyStateUpdate(client._groupId);
+      }
+
+      if (!group.clients.camera && !group.clients.user && !group.clients.controller) {
+        // Delete group in local
+        groups.delete(client._groupId);
+      }
+    }
+  }
+}
+
+module.exports = { handleConnect, handleDisconnect };
