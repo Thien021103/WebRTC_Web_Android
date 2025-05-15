@@ -1,14 +1,11 @@
 const mongoose = require('mongoose');
 
-const mongoUrl = 'mongodb://thien:881199@mongodb:27017/mydb';
+const mongoUrl = 'mongodb://thien:881199@mongodb:27017/mydb?authSource=admin';
 
 async function connect(retries = 5, delay = 2000) {
   for (let i = 0; i < retries; i++) {
     try {
-      await mongoose.connect(mongoUrl, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      });
+      await mongoose.connect(mongoUrl);
       console.log('Connected to MongoDB');
       return;
     } catch (error) {
