@@ -1,36 +1,30 @@
-const { getDb } = require('../db/db');
-const { sendFCMNotification } = require('../fcm/fcm');
+const User = require('../schemas/user');
+const Group = require('../schemas/group');
 const { groups, notifyStateUpdate } = require('../groups/groups');
+const { sendFCMNotification } = require('../fcm/fcm');
 
 async function handleConnect(message, client) {
+  const msg = message.toString().trim();
+  const [_, type, token] = msg.split(' ');
 
-  const db = getDb();
   let groupId;
 
-  const msg = message.toString().trim();
-  const [_, type, token] = msg.split(' '); // "CONNECT camera 123" -> ["CONNECT", "camera", "123"]
-
-  // Handle user type with accessToken validation
   if (type === 'user') {
     try {
-      // Find user in db by accessToken
-      const user = await db.collection('users').findOne(
-        { accessToken: token }
-      );
+      const user = await User.findOne({ accessToken: token });
       if (!user || !user.accessToken) {
         console.error('Invalid access token');
         client.close();
         return;
       }
-      groupId = user.groupId; // Get groupId from user document
-      client._accessToken = token
+      groupId = user.groupId;
+      client._accessToken = token;
     } catch (error) {
       console.error('Error validating user accessToken:', error.message);
       client.close();
       return;
     }
   } else {
-    // For non-user types (camera, controller), use token as id
     groupId = token;
   }
 
@@ -39,22 +33,17 @@ async function handleConnect(message, client) {
     groups.set(groupId, {
       id: groupId,
       state: 'Impossible',
-      clients: {
-        camera: null,
-        user: null,
-        controller: null,
-      },
+      clients: { camera: null, user: null, controller: null },
       fcmToken: null,
     });
-    console.log(`New group added:\n${groups.get(groupId)}`)
+    console.log(`New group added:\n${JSON.stringify(groups.get(groupId))}`);
   }
-  
-  console.log(groups)
+
+  console.log(groups);
 
   const group = groups.get(groupId);
 
-  // Assign client to group based on type
-  if (type === 'camera' || type === 'user' || type === 'controller') {
+  if (['camera', 'user', 'controller'].includes(type)) {
     group.clients[type] = client;
     client._groupId = groupId;  // groupId for WebSocket instance
     client._type = type;        // type of WebSocket instance
@@ -62,24 +51,22 @@ async function handleConnect(message, client) {
   }
 
   try {
-    // Save or update group in MongoDB
-    const dbGroup = await db.collection('groups').findOne({ id: groupId });
+    const dbGroup = await Group.findOne({ id: groupId });
     if (!dbGroup) {
-      await db.collection('groups').insertOne({
+      await Group.create({
         id: groupId,
         state: 'Impossible',
         fcmToken: '',
       });
     } else if (type === 'user' && group.fcmToken) {
-      await db.collection('groups').updateOne(
-        { id: groupId },
-        { $set: { state: "Impossible" } }
+      await Group.updateOne(
+        { id: groupId }, 
+        { $set: { state: 'Impossible' } }
       );
     }
 
     // Gửi FCM notification khi controller kết nối
     if (type === 'controller') {
-      // const dbGroup = await db.collection('groups').findOne({ id: groupId });
       if (dbGroup && dbGroup.fcmToken) {
         await sendFCMNotification(dbGroup.fcmToken);
       } else {
@@ -95,8 +82,8 @@ async function handleConnect(message, client) {
     const newState = camera && user && controller ? 'Ready' : 'Impossible';
     group.state = newState;
 
-    await db.collection('groups').updateOne(
-      { id: groupId },
+    await Group.updateOne(
+      { id: groupId }, 
       { $set: { state: newState } }
     );
 
@@ -121,8 +108,7 @@ async function handleDisconnect(client) {
       if (!group.clients.camera || !group.clients.user || !group.clients.controller) {
         group.state = 'Impossible';
         try {
-          const db = getDb();
-          await db.collection('groups').updateOne(
+          await Group.updateOne(
             { id: client._groupId },
             { $set: { state: 'Impossible' } }
           );

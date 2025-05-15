@@ -2,7 +2,7 @@ const { handleConnect, handleDisconnect } = require('../handlers/connect');
 const { handleOffer } = require('../handlers/offer');
 const { handleAnswer } = require('../handlers/answer');
 const { handleIce } = require('../handlers/ice');
-const { handleConntrollerLock } = require('../handlers/lock');
+const { handleConntrollerLock } = require('../handlers/controllerlock');
 
 module.exports = (wss) => {
   wss.on('connection', (ws) => {
