@@ -23,6 +23,7 @@
     "express": "^5.1.0",
     "firebase-admin": "^13.2.0",
     "mongodb": "^6.16.0",
+    "mongoose": "^8.14.3",
     "uuid": "^11.1.0",
     "websocket": "^1.0.35",
     "ws": "^8.18.0"
