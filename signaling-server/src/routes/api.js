@@ -19,6 +19,6 @@ router.post('/lock', authMiddleware, handleLock);
 router.post('/unlock', authMiddleware, handleUnlock);
 
 router.get('/users', authMiddleware, handleGetUsers);
-router.delete('/users/:id', authMiddleware, handleDeleteUser);
+router.delete('/users', authMiddleware, handleDeleteUser);
 
 module.exports = router;

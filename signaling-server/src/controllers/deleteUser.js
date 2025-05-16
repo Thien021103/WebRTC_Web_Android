@@ -3,7 +3,7 @@ const { deleteUser } = require("../services/deleteUser");
 async function handleDeleteUser(req, res) {
   try {
     const decoded = req.user; // From authMiddleware
-    const { id } = req.params;
+    const { id } = req.body;
     const result = await deleteUser(decoded, id);
     res.json({ status: "success", message: result.message });
   } catch (error) {
