@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key'; // Use env in production
 
-const authMiddleware = (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ status: "false", message: 'No token provided' });
@@ -11,10 +11,22 @@ const authMiddleware = (req, res, next) => {
   const token = authHeader.split(' ')[1];
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
-    req.user = decoded; // { email, groupId, deviceId }
+    let entity;
+
+    if (decoded.isOwner) {
+      entity = await Owner.findOne({ email: decoded.email, groupId: decoded.groupId, accessToken: token });
+    } else {
+      entity = await User.findOne({ id: decoded.id, groupId: decoded.groupId, accessToken: token });
+    }
+
+    if (!entity) {
+      return res.status(401).json({ status: "false", message: 'Invalid or revoked token' });
+    }
+
+    req.user = decoded; // { email | id, groupId, isOwner }
     next();
   } catch (error) {
-    res.status(401).json({ status: "false", message: 'Invalid token' });
+    res.status(401).json({ status: "false", message: 'Invalid or expired token' });
   }
 };
 

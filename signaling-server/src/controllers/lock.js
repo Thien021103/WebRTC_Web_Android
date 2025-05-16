@@ -1,9 +1,18 @@
-const { lockGroup } = require('../services/lock');
+const { lock } = require('../services/lock');
 
 async function handleLock(req, res) {
   try {
-    const { email, password, groupId } = req.body;
-    await lockGroup({ email, password, groupId });
+    const { email, id, password } = req.body;
+    const decoded = req.user; // Bearer token
+
+    if (email) {
+      await lock({ identifier: email, password: password, decoded: decoded });
+    } else if (id) {
+      await lock({ identifier: id, password: password, decoded: decoded });
+    } else {
+      throw new Error('Missing required fields');
+    }
+
     res.json({ status: "success", message: 'Locked' });
   } catch (error) {
     console.error(`Error in handleLock: ${error.message}`);

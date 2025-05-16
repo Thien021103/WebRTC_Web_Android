@@ -1,5 +1,4 @@
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const Owner = require('../schemas/owner');
 const User = require('../schemas/user');
 const Group = require('../schemas/group');
@@ -7,21 +6,9 @@ const { groups } = require('../groups/groups');
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key';
 
-async function unlock({ identifier, password, accessToken }) {
-  if (!identifier || !password || !accessToken) {
+async function unlock({ identifier, password, decoded }) {
+  if (!identifier || !password || !decoded) {
     throw new Error('Missing required fields');
-  }
-
-  // Verify JWT
-  let decoded;
-  try {
-    decoded = jwt.verify(accessToken, SECRET_KEY);
-    if ((decoded.isOwner && decoded.email !== identifier) || (!decoded.isOwner && decoded.id !== identifier)) {
-      throw new Error('Unauthorized');
-    }
-  } catch (error) {
-    console.error(error.message);
-    throw new Error('Invalid or expired token');
   }
 
   console.log(decoded);
@@ -31,9 +18,9 @@ async function unlock({ identifier, password, accessToken }) {
   // Validate user/owner
   let entity;
   if (isOwner) {
-    entity = await Owner.findOne({ email: identifier, groupId, accessToken });
+    entity = await Owner.findOne({ email: identifier, groupId: groupId });
   } else {
-    entity = await User.findOne({ id: identifier, groupId, accessToken });
+    entity = await User.findOne({ id: identifier, groupId: groupId });
   }
   if (!entity) {
     throw new Error('Invalid info');
