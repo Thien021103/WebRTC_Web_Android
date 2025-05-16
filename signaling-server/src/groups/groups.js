@@ -6,8 +6,7 @@ Groups are stored locally as JSON, presented as:
     camera: ws,
     user: ws,
     controller: ws
-  },
-  fcmToken,
+  }
 }
 ************************/
 const groups = new Map();

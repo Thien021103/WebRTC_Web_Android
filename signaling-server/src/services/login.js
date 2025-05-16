@@ -32,18 +32,12 @@ async function loginOwner({ email, password, groupId, fcmToken }) {
     { $set: { fcmToken: fcmToken, accessToken: accessToken } }
   );
 
-  await Group.updateOne(
-    { id: groupId },
-    { $set: { fcmToken: fcmToken } },
-    { upsert: true }
-  );
-
   console.log(`Owner logged in: ${email}, group: ${groupId}`);
   return { accessToken };
 }
 
 async function loginUser({ id, password, fcmToken }) {
-  if (!id || !password) {
+  if (!id || !password || !fcmToken) {
     throw new Error('Missing required fields');
   }
 
@@ -61,12 +55,6 @@ async function loginUser({ id, password, fcmToken }) {
   await User.updateOne(
     { id }, 
     { $set: { fcmToken: fcmToken, accessToken: accessToken } }
-  );
-
-  await Group.updateOne(
-    { id: user.groupId },
-    { $set: { fcmToken: fcmToken } },
-    { upsert: true }
   );
 
   console.log(`User logged in: ${id}, group: ${user.groupId}`);

@@ -18,7 +18,7 @@ async function registerOwner({ email, password, groupId, fcmToken }) {
 
   const existingOwner = await Owner.findOne({ groupId });
   if (existingOwner) {
-    throw new Error('GroupId already owned');
+    throw new Error('Unauthorized');
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -32,12 +32,6 @@ async function registerOwner({ email, password, groupId, fcmToken }) {
     fcmToken: fcmToken,
   });
   await dbOwner.save();
-
-  await Group.updateOne(
-    { id: groupId },
-    { $set: { fcmToken } },
-    { upsert: true }
-  );
 
   console.log(`Owner registered: ${email}, group: ${groupId}, accessToken: ${accessToken}`);
   return { accessToken };

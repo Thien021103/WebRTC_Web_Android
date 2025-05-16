@@ -33,14 +33,11 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-const wsAuthMiddleware = (message, client) => {
-  const match = message.match(/^CONNECT user (\S+)$/);
-  if (!match) return false;
-
-  const token = match[1];
+const wsAuthMiddleware = (token, client) => {
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
     client._user = decoded; // Store user data
+    client._accessToken = token;
     return true;
   } catch (error) {
     console.error('WebSocket auth failed:', error.message);

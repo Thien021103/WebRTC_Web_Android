@@ -8,7 +8,7 @@ async function handleLogin(req, res) {
     if (email && groupId && fcmToken) {
       result = await loginOwner({ email, password, groupId, fcmToken });
     } else if (id && fcmToken) {
-      result = await loginUser({ id, password });
+      result = await loginUser({ id, password, fcmToken });
     } else {
       throw new Error('Missing required fields');
     }

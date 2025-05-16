@@ -21,7 +21,7 @@ async function handleRegister(req, res) {
         status: "false",
         message: error.message
       });
-    } else if (error.message === 'Invalid or expired token' || error.message === 'Unauthorized' || error.message === 'GroupId already owned'){
+    } else if (error.message === 'Invalid or expired token' || error.message === 'Unauthorized'){
       res.status(401).json({
         status: "false",
         message: error.message

@@ -1,130 +1,125 @@
+const jwt = require('jsonwebtoken');
+const Owner = require('../schemas/owner');
 const User = require('../schemas/user');
 const Group = require('../schemas/group');
 const { groups, notifyStateUpdate } = require('../groups/groups');
 const { sendFCMNotification } = require('../fcm/fcm');
+const { wsAuthMiddleware } = require('../middleware/auth');
+
+const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key';
 
 async function handleConnect(message, client) {
   const msg = message.toString().trim();
-  const [_, type, token] = msg.split(' ');
+  const match = msg.match(/^CONNECT\s+(\w+)\s+(\S+)$/);
+  if (!match) {
+    console.error('Invalid CONNECT message format');
+    client.close();
+    return;
+  }
+  const [_, type, idOrToken] = match;
 
-  let groupId;
+  let groupId, jwtToken, entity;
 
   if (type === 'user') {
-    try {
-      const user = await User.findOne({ accessToken: token });
-      if (!user || !user.accessToken) {
-        console.error('Invalid access token');
-        client.close();
-        return;
-      }
-      groupId = user.groupId;
-      client._accessToken = token;
-    } catch (error) {
-      console.error('Error validating user accessToken:', error.message);
+    // Validate user/owner token
+    if (!wsAuthMiddleware(idOrToken, client)) {
       client.close();
       return;
     }
+    const decoded = client._user;
+    if (decoded.isOwner) {
+      entity = await Owner.findOne({ email: decoded.email, groupId: decoded.groupId, accessToken: idOrToken });
+    } else {
+      entity = await User.findOne({ id: decoded.id, groupId: decoded.groupId, accessToken: idOrToken });
+    }
+    if (!entity) {
+      console.error('Invalid access token');
+      client.close();
+      return;
+    }
+    groupId = decoded.groupId;
+
+  } else if (type === 'camera' || type === 'controller') {
+    // Validate cameraId or controllerId
+    const field = type === 'camera' ? 'cameraId' : 'controllerId';
+    const dbGroup = await Group.findOne({ [field]: idOrToken });
+    if (!dbGroup) {
+      console.error(`Invalid ${field}`);
+      client.close();
+      return;
+    }
+    groupId = dbGroup.id;
+
+    // Generate JWT for camera/controller
+    jwtToken = jwt.sign({ [field]: idOrToken, groupId: groupId }, SECRET_KEY, { expiresIn: '7d' });
   } else {
-    groupId = token;
+    console.error(`Invalid connection type: ${type}`);
+    client.close();
+    return;
   }
 
-  // New group if received a new id
+  // Initialize local group if new
   if (!groups.has(groupId)) {
     groups.set(groupId, {
       id: groupId,
       state: 'Impossible',
-      clients: { camera: null, user: null, controller: null },
-      fcmToken: null,
+      clients: { camera: null, user: null, controller: null }
     });
-    console.log(`New group added:\n${JSON.stringify(groups.get(groupId))}`);
+    console.log(`New group added: ${JSON.stringify(groups.get(groupId))}`);
   }
-
-  console.log(groups);
 
   const group = groups.get(groupId);
 
+  // Check for existing client of the same type
+  if (['camera', 'user', 'controller'].includes(type) && group.clients[type]) {
+    console.error(`Group ${groupId} already has a ${type} connected`);
+    client.send(`ERROR: Group is busy - ${type} already connected`);
+    client.close();
+    return;
+  }
+
+  // Assign client to group
   if (['camera', 'user', 'controller'].includes(type)) {
     group.clients[type] = client;
-    client._groupId = groupId;  // groupId for WebSocket instance
-    client._type = type;        // type of WebSocket instance
+    client._groupId = groupId;
+    client._type = type;
     console.log(`${type} connected with group ID: ${groupId}`);
   }
 
-  try {
-    const dbGroup = await Group.findOne({ id: groupId });
-    if (!dbGroup) {
-      await Group.create({
-        id: groupId,
-        state: 'Impossible',
-        fcmToken: '',
-      });
-    } else if (type === 'user' && group.fcmToken) {
-      await Group.updateOne(
-        { id: groupId }, 
-        { $set: { state: 'Impossible' } }
-      );
-    }
+  // Send JWT for camera/controller after client assignment
+  if (type === 'camera') {
+    client.send(`TOKEN ${jwtToken}`);
+    await Group.updateOne({ id: groupId }, { $set: { cameraToken: jwtToken } });
+  } else if (type === 'controller') {
+    client.send(`TOKEN ${jwtToken}`);
+    await Group.updateOne({ id: groupId }, { $set: { controllerToken: jwtToken } });
+  }
 
-    // Gửi FCM notification khi controller kết nối
+  try {
+    // Send FCM notifications for controller connection
     if (type === 'controller') {
-      if (dbGroup && dbGroup.fcmToken) {
-        await sendFCMNotification(dbGroup.fcmToken);
-      } else {
-        console.log(`No user token found for group ${groupId}`);
+      const users = await User.find({ groupId, fcmToken: { $ne: '' } }, { fcmToken: 1 }).lean();
+      const owners = await Owner.find({ groupId, fcmToken: { $ne: '' } }, { fcmToken: 1 }).lean();
+      const fcmTokens = [...users, ...owners].map(entity => entity.fcmToken);
+      for (const fcmToken of fcmTokens) {
+        await sendFCMNotification(fcmToken);
+      }
+      if (fcmTokens.length === 0) {
+        console.log(`No FCM tokens found for group ${groupId}`);
       }
     }
 
-    // Cập nhật trạng thái group
-    const camera = group.clients.camera;
-    const user = group.clients.user;
-    const controller = group.clients.controller;
-
+    // Update group state
+    const { camera, user, controller } = group.clients;
     const newState = camera && user && controller ? 'Ready' : 'Impossible';
     group.state = newState;
 
-    await Group.updateOne(
-      { id: groupId }, 
-      { $set: { state: newState } }
-    );
-
+    await Group.updateOne({ id: groupId }, { $set: { state: newState } });
     notifyStateUpdate(groupId);
   } catch (error) {
     console.error('Error in handleConnect:', error.message);
+    client.close();
   }
 }
 
-// Handle disconnect
-async function handleDisconnect(client) {
-  if (client && client._groupId) {
-
-    const group = groups.get(client._groupId);
-
-    if (group) {
-
-      // Delete from group
-      group.clients[client._type] = null;
-      
-      // Update group state in collection and local
-      if (!group.clients.camera || !group.clients.user || !group.clients.controller) {
-        group.state = 'Impossible';
-        try {
-          await Group.updateOne(
-            { id: client._groupId },
-            { $set: { state: 'Impossible' } }
-          );
-          console.log(`Updated group ${client._groupId} state to Impossible`);
-        } catch (error) {
-          console.error(`Error updating group state: ${error.message}`);
-        }
-        notifyStateUpdate(client._groupId);
-      }
-
-      if (!group.clients.camera && !group.clients.user && !group.clients.controller) {
-        // Delete group in local
-        groups.delete(client._groupId);
-      }
-    }
-  }
-}
-
-module.exports = { handleConnect, handleDisconnect };
+module.exports = { handleConnect };
