@@ -20,6 +20,7 @@ async function unlock({ identifier, password, accessToken }) {
       throw new Error('Unauthorized');
     }
   } catch (error) {
+    console.error(error.message);
     throw new Error('Invalid or expired token');
   }
 
