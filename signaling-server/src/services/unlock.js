@@ -4,8 +4,6 @@ const User = require('../schemas/user');
 const Group = require('../schemas/group');
 const { groups } = require('../groups/groups');
 
-const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key';
-
 async function unlock({ identifier, password, decoded }) {
   if (!identifier || !password || !decoded) {
     throw new Error('Missing required fields');
