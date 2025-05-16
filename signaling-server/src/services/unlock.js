@@ -24,6 +24,7 @@ async function unlock({ identifier, password, accessToken }) {
     throw new Error('Invalid or expired token');
   }
 
+  console.log(decoded);
   const groupId = decoded.groupId;
   const isOwner = decoded.isOwner;
 
