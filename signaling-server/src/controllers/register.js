@@ -8,7 +8,7 @@ async function handleRegister(req, res) {
       const { accessToken } = await registerOwner({ email, password, groupId, fcmToken });
       res.status(201).json({ status: "success", message: accessToken });
     } else if (id && groupId && ownerToken) {
-      await registerUser({ id, password, groupId, ownerToken });
+      await registerUser({ id, password, ownerToken });
       res.status(201).json({ status: "success", message: "User registered" });
     } else {
       throw new Error('Missing required fields');
