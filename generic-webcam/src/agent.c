@@ -5,7 +5,6 @@
 #include <unistd.h>
 
 #include "agent.h"
-#include "base64.h"
 #include "ice.h"
 #include "ports.h"
 #include "socket.h"
@@ -38,14 +37,6 @@ int agent_create(Agent* agent) {
   addr_to_string(&agent->udp_sockets[0].bind_addr, astr, sizeof(astr));
   // LOGI("create IPv4 UDP socket with address: %s and port: %d", astr ,agent->udp_sockets[0].bind_addr.port);
 
-#if CONFIG_IPV6
-  if ((ret = udp_socket_open(&agent->udp_sockets[1], AF_INET6, 0)) < 0) {
-    LOGE("Failed to create IPv6 UDP socket.");
-    return ret;
-  }
-  // LOGI("create IPv6 UDP socket: %d", agent->udp_sockets[1].fd);
-#endif
-
   agent_clear_candidates(agent);
   return 0;
 }
@@ -55,11 +46,6 @@ void agent_destroy(Agent* agent) {
     udp_socket_close(&agent->udp_sockets[0]);
   }
 
-#if CONFIG_IPV6
-  if (agent->udp_sockets[1].fd > 0) {
-    udp_socket_close(&agent->udp_sockets[1]);
-  }
-#endif
   agent->turn_permission = 0;
   agent->requested = 0;
   agent->responded = 0;
@@ -72,11 +58,7 @@ static int agent_socket_recv(Agent* agent, Address* addr, uint8_t* buf, int len)
   int maxfd = -1;
   fd_set rfds;
   struct timeval tv;
-  int addr_type[] = { AF_INET,
-#if CONFIG_IPV6
-                      AF_INET6,
-#endif
-  };
+  int addr_type[] = { AF_INET };
 
   tv.tv_sec = 0;
   tv.tv_usec = AGENT_POLL_TIMEOUT * 1000;
@@ -137,11 +119,7 @@ static int agent_create_host_addr(Agent* agent) {
   const char* iface_prefx[] = {CONFIG_IFACE_PREFIX};
   IceCandidate* ice_candidate;
   // char astr[26];
-  int addr_type[] = { AF_INET,
-#if CONFIG_IPV6
-                      AF_INET6,
-#endif
-  };
+  int addr_type[] = { AF_INET };
 
   for (i = 0; i < sizeof(addr_type) / sizeof(addr_type[0]); i++) {
     for (j = 0; j < sizeof(iface_prefx) / sizeof(iface_prefx[0]); j++) {
@@ -149,14 +127,7 @@ static int agent_create_host_addr(Agent* agent) {
       // only copy port and family to addr of ice candidate
       ice_candidate_create(ice_candidate, agent->local_candidates_count, ICE_CANDIDATE_TYPE_HOST,
                            &agent->udp_sockets[i].bind_addr);
-        // addr_to_string(&agent->udp_sockets[i].bind_addr, astr, sizeof(astr));
-        // LOGI("ice_candidate_create with bind address: %s\n", astr);
-      // if resolve host addr, add to local candidate
       if (ports_get_host_addr(&ice_candidate->addr, iface_prefx[j])) {
-        // addr_to_string(&ice_candidate->addr, astr, sizeof(astr));
-          // LOGI("Resolved host address: %s\n", astr);
-          // LOGI("Resolved host port: %d\n", ice_candidate->addr.port);
-
         agent->local_candidates_count++;
       }
     }
@@ -365,7 +336,7 @@ int agent_send(Agent* agent, const uint8_t* buf, int len) {
   }
 }
 
-static void agent_create_permission_request(Agent* agent, StunMessage* msg, const Address* peer_addr) {
+static void agent_create_permission_request(Agent* agent, StunMessage* msg, Address* peer_addr) {
   char xor_peer_addr[32];
   int size = 0;
   uint8_t mask[16];
@@ -425,7 +396,7 @@ static void agent_create_binding_request(Agent* agent, StunMessage* msg) {
   stun_msg_finish(msg, STUN_CREDENTIAL_SHORT_TERM, agent->remote_upwd, strlen(agent->remote_upwd));
 }
 
-static void agent_create_send_indication(Agent* agent, StunMessage* msg, const Address* peer_addr, StunMessage* inner_msg) {
+static void agent_create_send_indication(Agent* agent, StunMessage* msg, Address* peer_addr, StunMessage* inner_msg) {
   int size = 0;
   char xor_peer_addr[32];
   char data[512];
@@ -448,7 +419,7 @@ static void agent_create_send_indication(Agent* agent, StunMessage* msg, const A
   stun_msg_finish(msg, STUN_CREDENTIAL_LONG_TERM, agent->turn_password, strlen(agent->turn_password));
 }
 
-static void agent_create_channel_bind_request(Agent* agent, StunMessage* msg, const Address* peer_addr, char* channel) {
+static void agent_create_channel_bind_request(Agent* agent, StunMessage* msg, Address* peer_addr, char* channel) {
   char xor_peer_addr[32];
   int size = 0;
   uint8_t mask[16];

@@ -6,52 +6,16 @@
 
 #include "config.h"
 
-#if CONFIG_USE_LWIP
-#include "lwip/ip_addr.h"
-#include "lwip/netdb.h"
-#include "lwip/netif.h"
-#include "lwip/sys.h"
-#else
 #include <ifaddrs.h>
 #include <net/if.h>
 #include <netdb.h>
 #include <sys/ioctl.h>
-#endif
 
 #include "ports.h"
 #include "utils.h"
 
 int ports_get_host_addr(Address* addr, const char* iface_prefix) {
   int ret = 0;
-
-#if CONFIG_USE_LWIP
-  struct netif* netif;
-  int i;
-  for (netif = netif_list; netif != NULL; netif = netif->next) {
-    switch (addr->family) {
-      case AF_INET6:
-        for (i = 0; i < LWIP_IPV6_NUM_ADDRESSES; i++) {
-          if (!ip6_addr_isany(netif_ip6_addr(netif, i))) {
-            memcpy(&addr->sin6.sin6_addr, netif_ip6_addr(netif, i), 16);
-            ret = 1;
-            break;
-          }
-        }
-        break;
-      case AF_INET:
-      default:
-        if (!ip_addr_isany(&netif->ip_addr)) {
-          memcpy(&addr->sin.sin_addr, &netif->ip_addr.u_addr.ip4, 4);
-          ret = 1;
-        }
-        break;
-    }
-
-    if (ret) {
-      break;
-    }
-  }
-#else
 
   struct ifaddrs *ifaddr, *ifa;
 
@@ -101,7 +65,6 @@ int ports_get_host_addr(Address* addr, const char* iface_prefix) {
     break;
   }
   freeifaddrs(ifaddr);
-#endif
   return ret;
 }
 

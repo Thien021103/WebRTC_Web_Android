@@ -20,14 +20,8 @@
 #define LOG_LEVEL LEVEL_INFO
 #endif
 
-#if LOG_REDIRECT
-void peer_log(char* level_tag, const char* file_name, int line_number, const char* fmt, ...);
-#define LOG_PRINT(level_tag, fmt, ...) \
-  peer_log(level_tag, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
-#else
 #define LOG_PRINT(level_tag, fmt, ...) \
   fprintf(stdout, "%s\t%s\t%d\t" fmt "\n", level_tag, __FILE__, __LINE__, ##__VA_ARGS__)
-#endif
 
 #if LOG_LEVEL >= LEVEL_DEBUG
 #define LOGD(fmt, ...) LOG_PRINT(DEBUG_TAG, fmt, ##__VA_ARGS__)
@@ -60,5 +54,9 @@ void utils_random_string(char* s, const int len);
 void utils_get_hmac_sha1(const char* input, size_t input_len, const char* key, size_t key_len, unsigned char* output);
 
 void utils_get_md5(const char* input, size_t input_len, unsigned char* output);
+
+void utils_decrypt_aes_token(const char *input, const char *key, char *output);
+
+void utils_encrypt_aes_token(const char *input, const char *key, char *output);
 
 #endif  // UTILS_H_

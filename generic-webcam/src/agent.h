@@ -6,7 +6,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "base64.h"
 #include "ice.h"
 #include "socket.h"
 #include "stun.h"

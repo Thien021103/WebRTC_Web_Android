@@ -4,27 +4,7 @@
 #define SCTP_MTU (1200)
 #define CONFIG_MTU (1300)
 
-#ifndef CONFIG_USE_LWIP
-#define CONFIG_USE_LWIP 0
-#endif
-
-#ifndef CONFIG_MBEDTLS_DEBUG
-#define CONFIG_MBEDTLS_DEBUG 0
-#endif
-
-#ifndef CONFIG_MBEDTLS_2_X
-#define CONFIG_MBEDTLS_2_X 0
-#endif
-
-#if CONFIG_MBEDTLS_2_X
-#define RSA_KEY_LENGTH 512
-#else
 #define RSA_KEY_LENGTH 1024
-#endif
-
-#ifndef CONFIG_DTLS_USE_ECDSA
-#define CONFIG_DTLS_USE_ECDSA 0
-#endif
 
 #ifndef CONFIG_VIDEO_BUFFER_SIZE
 #define CONFIG_VIDEO_BUFFER_SIZE (CONFIG_MTU * 1024)
@@ -57,8 +37,5 @@
 #define CONFIG_IPV6 0
 // empty will use first active interface
 #define CONFIG_IFACE_PREFIX ""
-
-// #define LOG_LEVEL LEVEL_DEBUG
-#define LOG_REDIRECT 0
 
 #endif  // CONFIG_H_

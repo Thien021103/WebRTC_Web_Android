@@ -6,7 +6,6 @@
 #include <sys/types.h>
 
 #include "ice.h"
-#include "mdns.h"
 #include "ports.h"
 #include "socket.h"
 #include "utils.h"
@@ -111,9 +110,7 @@ int ice_candidate_from_description(IceCandidate* candidate, char* description, c
         break;
       case 4:
         if (strstr(buf, "local") != 0) {
-          if (mdns_resolve_addr(buf, &candidate->addr) == 0) {
-            return -1;
-          }
+          return -1;
         } else if (addr_from_string(buf, &candidate->addr) == 0) {
           return -1;
         }
