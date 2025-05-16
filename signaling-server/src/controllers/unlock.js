@@ -1,9 +1,18 @@
-const { unlockGroup } = require('../services/unlock');
+const { unlock } = require('../services/unlock');
 
 async function handleUnlock(req, res) {
   try {
-    const { email, password, groupId } = req.body;
-    await unlockGroup({ email, password, groupId });
+    const { email, id, password } = req.body;
+    const accessToken = req.headers.authorization.split(' ')[1]; // Bearer token
+
+    if (email) {
+      await unlock({ identifier: email, password: password, accessToken: accessToken });
+    } else if (id) {
+      await unlock({ identifier: id, password: password, accessToken: accessToken });
+    } else {
+      throw new Error('Missing required fields');
+    }
+
     res.json({ status: "success", message: 'Unlocked' });
   } catch (error) {
     console.error(`Error in handleUnlock: ${error.message}`);

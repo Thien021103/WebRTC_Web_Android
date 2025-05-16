@@ -1,10 +1,19 @@
-const { logoutUser } = require('../services/logout');
+const { logoutUser, logoutOwner } = require('../services/logout');
 
 async function handleLogout(req, res) {
   try {
-    const { email, groupId, accessToken } = req.body;
-    await logoutUser({ email, groupId, accessToken });
-    res.json({ status: "success", message: '' });
+    const { id, email, groupId } = req.body;
+    const accessToken = req.headers.authorization.split(' ')[1]; // Bearer token
+
+    if (email && groupId) {
+      await logoutOwner({ email, groupId, accessToken });
+    } else if (id) {
+      await logoutUser({ id, accessToken });
+    } else {
+      throw new Error('Missing required fields');
+    }
+
+    res.json({ status: "success", message: 'Logged out' });
   } catch (error) {
     console.error(`Error in handleLogout: ${error.message}`);
     if (error.message === 'Missing required fields' || error.message === 'Invalid info'){

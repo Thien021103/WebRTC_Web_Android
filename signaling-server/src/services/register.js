@@ -1,52 +1,84 @@
 const bcrypt = require('bcrypt');
-const { v4: uuidv4 } = require('uuid');
-const User = require('../schemas/user');
-const { groups } = require('../groups/groups');
+const jwt = require('jsonwebtoken');
 const Group = require('../schemas/group');
+const Owner = require('../schemas/owner');
+const User = require('../schemas/user');
 
-async function registerUser({ email, password, groupId, fcmToken }) {
+const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key';
+
+async function registerOwner({ email, password, groupId, fcmToken }) {
   if (!email || !password || !groupId || !fcmToken) {
     throw new Error('Missing required fields');
   }
 
-  const existingUser = await User.findOne({ email });
-  if (existingUser) {
-    throw new Error('Email already registered');
+  const dbGroup = await Group.findOne({ id: groupId, ownerEmail: email });
+  if (!dbGroup) {
+    throw new Error('Invalid groupId or email not authorized');
+  }
+
+  const existingOwner = await Owner.findOne({ groupId });
+  if (existingOwner) {
+    throw new Error('GroupId already owned');
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const accessToken = uuidv4();
+  const accessToken = jwt.sign({ email: email, groupId: groupId, isOwner: true }, SECRET_KEY, { expiresIn: '7d' });
 
-  const user = new User({
-    email,
+  const dbOwner = new Owner({
+    email: email,
     password: hashedPassword,
-    groupId,
-    accessToken,
-    fcmToken,
+    groupId: groupId,
+    accessToken: accessToken,
+    fcmToken: fcmToken,
   });
-  await user.save();
+  await dbOwner.save();
 
-  // Update groups
-  const group = groups.get(groupId);
-  if (!group) {
-    groups.set(groupId, {
-      id: groupId,
-      state: 'Impossible',
-      clients: { camera: null, user: null, controller: null },
-      fcmToken,
-    });
-  } else {
-    group.fcmToken = fcmToken;
-  }
-
-  await Group.udateOne(
+  await Group.updateOne(
     { id: groupId },
     { $set: { fcmToken } },
     { upsert: true }
   );
 
-  console.log(`User registered: ${email}, group: ${groupId}, accessToken: ${accessToken}`);
+  console.log(`Owner registered: ${email}, group: ${groupId}, accessToken: ${accessToken}`);
   return { accessToken };
 }
 
-module.exports = { registerUser };
+async function registerUser({ id, password, ownerToken }) {
+  if (!id || !password || !groupId || !ownerToken) {
+    throw new Error('Missing required fields');
+  }
+
+  // Verify JWT
+  let decoded;
+  try {
+    decoded = jwt.verify(ownerToken, SECRET_KEY);
+    if (!decoded.isOwner) {
+      throw new Error('Unauthorized');
+    }
+  } catch (error) {
+    throw new Error('Invalid or expired token');
+  }
+
+  // Verify owner
+  const owner = await Owner.findOne({ email: decoded.email, groupId: decoded.groupId, accessToken: ownerToken });
+  if (!owner) {
+    throw new Error('Unauthorized');
+  }
+
+  const existingUser = await User.findOne({ id });
+  if (existingUser) {
+    throw new Error('User ID already registered');
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const user = new User({
+    id,
+    password: hashedPassword,
+    groupId
+  });
+  await user.save();
+
+  console.log(`User registered: ${id}, group: ${groupId}`);
+}
+
+module.exports = { registerOwner, registerUser };

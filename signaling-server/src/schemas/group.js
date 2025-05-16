@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 
 const groupSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
+  ownerEmail: { type: String, required: true} ,
+  deviceId: { type: String, unique: true },
   state: { type: String, required: true, enum: ['Impossible', 'Ready'], default: 'Impossible' },
   fcmToken: { type: String, default: '' },
   door: {

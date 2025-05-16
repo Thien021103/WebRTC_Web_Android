@@ -1,34 +1,35 @@
 const User = require('../schemas/user');
-const Group = require('../schemas/group');
-const { groups, notifyStateUpdate } = require('../groups/groups');
+const Owner = require('../schemas/owner')
 
-async function logoutUser({ email, groupId, accessToken }) {
+async function logoutOwner({ email, groupId, accessToken }) {
   if (!email || !groupId || !accessToken) {
     throw new Error('Missing required fields');
   }
 
-  const user = await User.findOne({ email, groupId, accessToken });
+  const owner = await Owner.findOne({ email, groupId, accessToken });
+  if (!owner) {
+    throw new Error('Invalid info');
+  }
+  await Owner.updateOne({ email, groupId }, { $unset: { accessToken: '' } });
+
+  console.log(`Owner logged out: ${email}, group: ${groupId}`);
+  return {};
+}
+
+async function logoutUser({ id, accessToken }) {
+  if (!id || !accessToken) {
+    throw new Error('Missing required fields');
+  }
+  
+  const user = await User.findOne({ id, accessToken });
   if (!user) {
     throw new Error('Invalid info');
   }
 
-  await User.updateOne({ email, groupId }, { $unset: { accessToken: '' } });
+  await User.updateOne({ id }, { $unset: { accessToken: '' } });
 
-  const group = groups.get(groupId);
-  if (group) {
-    group.clients.user = null;
-    group.state = 'Impossible';
-    notifyStateUpdate(groupId);
-    if (!group.clients.camera && !group.clients.user && !group.clients.controller) {
-      groups.delete(groupId);
-      await Group.deleteOne({ id: groupId });
-    }
-  }
-
-  await Group.updateOne({ id: groupId }, { $set: { state: 'Impossible' } });
-
-  console.log(`User logged out: ${email}, group: ${groupId}`);
+  console.log(`User logged out: ${id}`);
   return {};
 }
 
-module.exports = { logoutUser };
+module.exports = { logoutUser, logoutOwner };

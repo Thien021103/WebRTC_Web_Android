@@ -7,10 +7,11 @@ const { handleLogout } = require('../controllers/logout');
 const { handleLock } = require('../controllers/lock');
 const { handleUnlock } = require('../controllers/unlock');
 
+const { authMiddleware } = require('../middleware/auth');
+
 router.post('/login', handleLogin);
 router.post('/register', handleRegister);
-router.post('/logout', handleLogout);
-router.post('/lock', handleLock);
-router.post('/unlock', handleUnlock);
-
+router.post('/logout', authMiddleware, handleLogout);
+router.post('/lock', authMiddleware, handleLock);
+router.post('/unlock', authMiddleware, handleUnlock);
 module.exports = router;

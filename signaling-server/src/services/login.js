@@ -1,15 +1,53 @@
 const bcrypt = require('bcrypt');
-const { v4: uuidv4 } = require('uuid');
+const jwt = require('jsonwebtoken');
+const Owner = require('../schemas/owner');
 const User = require('../schemas/user');
 const Group = require('../schemas/group');
-const { groups } = require('../groups/groups');
 
-async function loginUser({ email, password, groupId, fcmToken }) {
+const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key';
+
+async function loginOwner({ email, password, groupId, fcmToken }) {
   if (!email || !password || !groupId || !fcmToken) {
     throw new Error('Missing required fields');
   }
 
-  const user = await User.findOne({ email, groupId });
+  const dbGroup = await Group.findOne({ id: groupId, ownerEmail: email });
+  if (!dbGroup) {
+    throw new Error('Invalid groupId or email not authorized');
+  }
+
+  const owner = await Owner.findOne({ email: email, groupId: groupId });
+  if (!owner) {
+    throw new Error('Invalid info');
+  }
+
+  const isPasswordValid = await bcrypt.compare(password, owner.password);
+  if (!isPasswordValid) {
+    throw new Error('Invalid password');
+  }
+
+  const accessToken = jwt.sign({ email: email, groupId: groupId, isOwner: true }, SECRET_KEY, { expiresIn: '7d' });
+  await Owner.updateOne(
+    { email, groupId }, 
+    { $set: { fcmToken: fcmToken, accessToken: accessToken } }
+  );
+
+  await Group.updateOne(
+    { id: groupId },
+    { $set: { fcmToken: fcmToken } },
+    { upsert: true }
+  );
+
+  console.log(`Owner logged in: ${email}, group: ${groupId}`);
+  return { accessToken };
+}
+
+async function loginUser({ id, password, fcmToken }) {
+  if (!id || !password) {
+    throw new Error('Missing required fields');
+  }
+
+  const user = await User.findOne({ id });
   if (!user) {
     throw new Error('Invalid info');
   }
@@ -19,32 +57,20 @@ async function loginUser({ email, password, groupId, fcmToken }) {
     throw new Error('Invalid password');
   }
 
-  const accessToken = uuidv4();
+  const accessToken = jwt.sign({ id: id, groupId: user.groupId, isOwner: false }, SECRET_KEY, { expiresIn: '7d' });
   await User.updateOne(
-    { email, groupId }, 
-    { $set: { accessToken, fcmToken } }
+    { id }, 
+    { $set: { fcmToken: fcmToken, accessToken: accessToken } }
   );
 
-  const group = groups.get(groupId);
-  if (!group) {
-    groups.set(groupId, {
-      id: groupId,
-      state: 'Impossible',
-      clients: { camera: null, user: null, controller: null },
-      fcmToken,
-    });
-  } else {
-    group.fcmToken = fcmToken;
-  }
-
   await Group.updateOne(
-    { id: groupId },
-    { $set: { fcmToken } },
+    { id: user.groupId },
+    { $set: { fcmToken: fcmToken } },
     { upsert: true }
   );
 
-  console.log(`User logged in: ${email}, group: ${groupId}`);
+  console.log(`User logged in: ${id}, group: ${user.groupId}`);
   return { accessToken };
 }
 
-module.exports = { loginUser };
+module.exports = { loginOwner, loginUser };
