@@ -1,4 +1,6 @@
 const jwt = require('jsonwebtoken');
+const Owner = require('../schemas/owner');
+const User = require('../schemas/user');
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key'; // Use env in production
 
