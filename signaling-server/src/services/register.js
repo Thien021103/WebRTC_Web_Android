@@ -44,7 +44,7 @@ async function registerOwner({ email, password, groupId, fcmToken }) {
 }
 
 async function registerUser({ id, password, ownerToken }) {
-  if (!id || !password || !groupId || !ownerToken) {
+  if (!id || !password || !ownerToken) {
     throw new Error('Missing required fields');
   }
 
@@ -72,13 +72,13 @@ async function registerUser({ id, password, ownerToken }) {
 
   const hashedPassword = await bcrypt.hash(password, 10);
   const user = new User({
-    id,
+    id: id,
     password: hashedPassword,
-    groupId
+    groupId: decoded.groupId,
   });
   await user.save();
 
-  console.log(`User registered: ${id}, group: ${groupId}`);
+  console.log(`User registered: ${id}, group: ${decoded.groupId}`);
 }
 
 module.exports = { registerOwner, registerUser };
