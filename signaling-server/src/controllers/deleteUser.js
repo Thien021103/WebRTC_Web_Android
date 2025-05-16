@@ -4,6 +4,9 @@ async function handleDeleteUser(req, res) {
   try {
     const decoded = req.user; // From authMiddleware
     const { id } = req.body;
+    if (!id) {
+      throw new Error('Missing user ID');
+    }
     const result = await deleteUser(decoded, id);
     res.json({ status: "success", message: result.message });
   } catch (error) {
