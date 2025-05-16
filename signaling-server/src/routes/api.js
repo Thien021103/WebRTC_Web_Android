@@ -9,6 +9,7 @@ const { handleLogout } = require('../controllers/logout');
 const { handleLock } = require('../controllers/lock');
 const { handleUnlock } = require('../controllers/unlock');
 const { handleGetUsers } = require('../controllers/getUser');
+const { handleDeleteUser } = require('../controllers/deleteUser');
 
 router.post('/login', handleLogin);
 router.post('/register', handleRegister);
@@ -18,5 +19,6 @@ router.post('/lock', authMiddleware, handleLock);
 router.post('/unlock', authMiddleware, handleUnlock);
 
 router.get('/users', authMiddleware, handleGetUsers);
+router.delete('/users/:id', authMiddleware, handleDeleteUser);
 
 module.exports = router;
