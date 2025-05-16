@@ -66,4 +66,4 @@ async function lock({ identifier, password, decoded }) {
   return {};
 }
 
-module.exports = { lockGroup };
+module.exports = { lock };
