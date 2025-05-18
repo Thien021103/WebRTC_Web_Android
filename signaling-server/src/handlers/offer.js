@@ -1,7 +1,8 @@
 const { groups, notifyStateUpdate } = require("../groups/groups");
 const WebSocket = require('ws');
+const { wsCameraAuth } = require("../middleware/auth");
 
-function handleOffer(message) {
+async function handleOffer(message, client) {
 
   // Use regex to extract senderType, id, ...
   /*
@@ -9,25 +10,37 @@ function handleOffer(message) {
   v=0
   ...
   */
-  const match = message.match(/^OFFER (\w+) (\w+)([\s\S]*)$/);
+  const msg = message.toString().trim();
+  const match = msg.match(/^OFFER\s+(\w+)\s+(\S+)([\s\S]*)$/);
   if (!match) {
     console.error('Invalid OFFER message format');
+    client.close();
     return;
   }
+  const [_, senderType, token, sdpData] = match;
 
-  const [_, senderType, id, sdpData] = match; // match[0] là toàn bộ chuỗi, bỏ qua
+  console.log(`Handling offer from ${senderType}`);
 
-  console.log(`Handling offer from ${senderType}, group ${id}`);
-
-  const group = groups.get(id);
-
-  if (!group || group.state !== 'Ready') {
-    console.error('Session must be Ready to handle offer');
-    return;
-  }
-
+  // Validate sender is camera
   if (senderType !== 'camera') {
     console.error('Only camera can send OFFER');
+    client.close();
+    return;
+  }
+
+  // Validate camera token
+  if (!(await wsCameraAuth(token, client))) {
+    console.error('Invalid camera token');
+    client.close();
+    return;
+  }
+
+  const groupId = client._camera.groupId;
+  const group = groups.get(groupId);
+
+  if (!group || group.state !== 'Ready') {
+    console.error(`Group ${groupId} not Ready or missing`);
+    client.close();
     return;
   }
 
@@ -37,12 +50,20 @@ function handleOffer(message) {
   // Forward OFFER
   const forwardMessage = `OFFER${sdpData}`;
 
-  if (group.clients.user && group.clients.user.readyState === WebSocket.OPEN) {
-    group.clients.user.send(forwardMessage);
-    console.log("Forwarded OFFER")
-  } else {
-    console.error(`No user in group ${group.id}`);
+  if (!group.clients.user) {
+    console.error(`No user in group ${groupId}`);
+    client.close();
+    return;
   }
+
+  if (group.clients.user.readyState !== WebSocket.OPEN) {
+    console.error(`User in group ${groupId} is not connected`);
+    client.close();
+    return;
+  }
+  
+  group.clients.user.send(forwardMessage);
+  console.log(`Forwarded OFFER to user in group ${groupId}`);
 }
 
 module.exports = { handleOffer };

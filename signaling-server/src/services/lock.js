@@ -1,7 +1,10 @@
 const bcrypt = require('bcrypt');
+const WebSocket = require('ws');
+
 const Owner = require('../schemas/owner');
 const User = require('../schemas/user');
 const Group = require('../schemas/group');
+const Door = require('../schemas/door');
 const { groups } = require('../groups/groups');
 
 async function lock({ identifier, password, decoded }) {
@@ -38,6 +41,8 @@ async function lock({ identifier, password, decoded }) {
     throw new Error('Already locked');
   }
 
+  const userIdentifier = isOwner ? `Owner ${identifier}` : `User ${identifier}`;
+ 
   // Update group state
   await Group.updateOne(
     { id: groupId },
@@ -45,12 +50,20 @@ async function lock({ identifier, password, decoded }) {
       $set: {
         door: {
           lock: 'Locked',
-          user: isOwner ? `Owner ${identifier}` : `User ${identifier}`,
+          user: userIdentifier,
           time: new Date()
         }
       }
     },
   );
+
+  // Log door history
+  await Door.create({
+    groupId,
+    state: 'Locked',
+    user: userIdentifier,
+    timestamp: new Date()
+  });
 
   // Notify controller
   const group = groups.get(groupId);
@@ -58,7 +71,7 @@ async function lock({ identifier, password, decoded }) {
     throw new Error('Group not found');
   }
   const controller = group.clients.controller;
-  if (controller && controller.readyState === controller.OPEN) {
+  if (controller && controller.readyState === WebSocket.OPEN) {
     controller.send(`LOCK ${groupId}`);
   }
 

@@ -2,7 +2,7 @@ const { handleConnect, handleDisconnect } = require('../handlers/connect');
 const { handleOffer } = require('../handlers/offer');
 const { handleAnswer } = require('../handlers/answer');
 const { handleIce } = require('../handlers/ice');
-const { handleConntrollerLock } = require('../handlers/controllerlock');
+const { handleControllerLock } = require('../handlers/controllerlock');
 
 module.exports = (wss) => {
   wss.on('connection', (ws) => {
@@ -18,13 +18,13 @@ module.exports = (wss) => {
       if (message.startsWith('CONNECT')) {
         handleConnect(message, ws);
       } else if (message.startsWith('OFFER')) {
-        handleOffer(message);
+        handleOffer(message, ws);
       } else if (message.startsWith('ANSWER')) {
-        handleAnswer(message);
+        handleAnswer(message, ws);
       } else if (message.startsWith('ICE')) {
-        handleIce(message);
+        handleIce(message, ws);
       } else if (message.startsWith('LOCK')) {
-        handleConntrollerLock(message);
+        handleControllerLock(message);
       }
     });
 

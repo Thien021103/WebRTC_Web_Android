@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const Owner = require('../schemas/owner');
 const User = require('../schemas/user');
+const Group = require('../schemas/group');
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key'; // Use env in production
 
@@ -22,7 +23,7 @@ const authMiddleware = async (req, res, next) => {
     }
 
     if (!entity) {
-      return res.status(401).json({ status: "false", message: 'Invalid or revoked token' });
+      return res.status(401).json({ status: "false", message: 'Invalid token' });
     }
 
     req.user = decoded; // { email | id, groupId, isOwner }
@@ -33,9 +34,20 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-const wsAuthMiddleware = (token, client) => {
+const wsUserAuth = async (token, client) => {
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
+    let entity;
+
+    if (decoded.isOwner) {
+      entity = await Owner.findOne({ email: decoded.email, groupId: decoded.groupId, accessToken: token });
+    } else {
+      entity = await User.findOne({ id: decoded.id, groupId: decoded.groupId, accessToken: token });
+    }
+    if (!entity) {
+      console.error('Invalid access token');
+      return false;
+    }
     client._user = decoded; // Store user data
     client._accessToken = token;
     return true;
@@ -45,4 +57,44 @@ const wsAuthMiddleware = (token, client) => {
   }
 };
 
-module.exports = { authMiddleware, wsAuthMiddleware };
+const wsCameraAuth = async (token, client) => {
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    if (!decoded.cameraId || !decoded.groupId) {
+      console.error('Invalid camera token: missing cameraId or groupId');
+      return false;
+    }
+    const group = await Group.findOne({ cameraId: decoded.cameraId, groupId: decoded.groupId, cameraToken: token });
+    if (!group) {
+      console.error('Invalid or revoked camera token');
+      return false;
+    }
+    client._camera = decoded; // { cameraId, groupId }
+    return true;
+  } catch (error) {
+    console.error('WebSocket camera auth failed:', error.message);
+    return false;
+  }
+};
+
+const wsControllerAuth = async (token, client) => {
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    if (!decoded.controllerId || !decoded.groupId) {
+      console.error('Invalid controller token: missing controllerId or groupId');
+      return false;
+    }
+    const group = await Group.findOne({ controllerId: decoded.controllerId, id: decoded.groupId, controllerToken: token });
+    if (!group) {
+      console.error('Invalid or revoked controller token');
+      return false;
+    }
+    client._controller = decoded; // { controllerId, groupId }
+    return true;
+  } catch (error) {
+    console.error('WebSocket controller auth failed:', error.message);
+    return false;
+  }
+};
+
+module.exports = { authMiddleware, wsUserAuth, wsCameraAuth, wsControllerAuth };

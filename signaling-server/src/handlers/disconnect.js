@@ -28,7 +28,7 @@ async function handleDisconnect(client) {
     } catch (error) {
       console.error(`Error updating group state: ${error.message}`);
     }
-    notifyStateUpdate(groupId);
+    notifyStateUpdate(group.id);
   }
 
   if (!camera && !user && !controller) {
@@ -37,4 +37,4 @@ async function handleDisconnect(client) {
   }
 }
 
-module.exports = { handleConnect, handleDisconnect };
+module.exports = { handleDisconnect };

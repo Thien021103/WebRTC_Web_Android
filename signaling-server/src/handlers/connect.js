@@ -4,7 +4,7 @@ const User = require('../schemas/user');
 const Group = require('../schemas/group');
 const { groups, notifyStateUpdate } = require('../groups/groups');
 const { sendFCMNotification } = require('../fcm/fcm');
-const { wsAuthMiddleware } = require('../middleware/auth');
+const { wsUserAuth } = require('../middleware/auth');
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -18,26 +18,16 @@ async function handleConnect(message, client) {
   }
   const [_, type, idOrToken] = match;
 
-  let groupId, jwtToken, entity;
+  let groupId, jwtToken;
 
   if (type === 'user') {
     // Validate user/owner token
-    if (!wsAuthMiddleware(idOrToken, client)) {
+    if (!wsUserAuth(idOrToken, client)) {
       client.close();
       return;
     }
-    const decoded = client._user;
-    if (decoded.isOwner) {
-      entity = await Owner.findOne({ email: decoded.email, groupId: decoded.groupId, accessToken: idOrToken });
-    } else {
-      entity = await User.findOne({ id: decoded.id, groupId: decoded.groupId, accessToken: idOrToken });
-    }
-    if (!entity) {
-      console.error('Invalid access token');
-      client.close();
-      return;
-    }
-    groupId = decoded.groupId;
+    groupId = client._user.groupId;
+    // client._accessToken = idOrToken;
 
   } else if (type === 'camera' || type === 'controller') {
     // Validate cameraId or controllerId
@@ -73,7 +63,7 @@ async function handleConnect(message, client) {
   // Check for existing client of the same type
   if (['camera', 'user', 'controller'].includes(type) && group.clients[type]) {
     console.error(`Group ${groupId} already has a ${type} connected`);
-    client.send(`ERROR: Group is busy - ${type} already connected`);
+    client.send(`ERROR Group is busy - ${type} already connected`);
     client.close();
     return;
   }
@@ -115,10 +105,9 @@ async function handleConnect(message, client) {
     group.state = newState;
 
     await Group.updateOne({ id: groupId }, { $set: { state: newState } });
-    notifyStateUpdate(groupId);
+    notifyStateUpdate(group.id);
   } catch (error) {
     console.error('Error in handleConnect:', error.message);
-    client.close();
   }
 }
 
