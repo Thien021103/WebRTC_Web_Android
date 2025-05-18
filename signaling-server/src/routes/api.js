@@ -10,6 +10,7 @@ const { handleLock } = require('../controllers/lock');
 const { handleUnlock } = require('../controllers/unlock');
 const { handleGetUsers } = require('../controllers/getUser');
 const { handleDeleteUser } = require('../controllers/deleteUser');
+const { handleGetDoorHistory } = require('../controllers/getDoorHistory');
 
 router.post('/login', handleLogin);
 router.post('/register', handleRegister);
@@ -20,5 +21,8 @@ router.post('/unlock', authMiddleware, handleUnlock);
 
 router.get('/users', authMiddleware, handleGetUsers);
 router.delete('/users', authMiddleware, handleDeleteUser);
+
+router.get('/door-history', authMiddleware, handleGetDoorHistory);
+
 
 module.exports = router;
