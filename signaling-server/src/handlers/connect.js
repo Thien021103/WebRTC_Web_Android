@@ -23,6 +23,7 @@ async function handleConnect(message, client) {
   if (type === 'user') {
     // Validate user/owner token
     if (!wsUserAuth(idOrToken, client)) {
+      console.log(client);
       client.close();
       return;
     }
