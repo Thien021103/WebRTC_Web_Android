@@ -47,7 +47,7 @@ const wsUserAuth = async (token, client) => {
       console.error('Invalid access token');
       return false;
     }
-    client._decoded = decoded; // Store user data
+    client._groupId = decoded.groupId; // Store user data
     client._accessToken = token;
     console.log(client);
     return true;
