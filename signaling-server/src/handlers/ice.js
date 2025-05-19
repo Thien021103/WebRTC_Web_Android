@@ -31,7 +31,7 @@ async function handleIce(message, client) {
       client.close();
       return;
     }
-    groupId = client._camera.groupId;
+    groupId = client._groupId;
   } else {
     if (!(await wsUserAuth(token, client))) {
       console.error('Invalid user token');

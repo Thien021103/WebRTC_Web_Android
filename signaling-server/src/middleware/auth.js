@@ -72,7 +72,7 @@ const wsCameraAuth = async (token, client) => {
     }
     console.log(`wsCameraAuth: Provided token: ${token}`);
     console.log(`wsCameraAuth: Stored token: ${group ? group.cameraToken : 'not found'}`);
-    client._camera = decoded; // { cameraId, groupId }
+    client._groupId = decoded.groupId; // { cameraId, groupId }
     return true;
   } catch (error) {
     console.error('WebSocket camera auth failed:', error.message);
