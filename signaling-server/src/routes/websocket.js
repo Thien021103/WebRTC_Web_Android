@@ -8,7 +8,7 @@ const { handleDisconnect } = require('../handlers/disconnect');
 module.exports = (wss) => {
   wss.on('connection', (ws) => {
     const sessionId = Math.random().toString(36).substring(2, 15);
-    console.log(`Client connected with temporary ID: ${sessionId}`);
+    // console.log(`Client connected with temporary ID: ${sessionId}`);
 
     ws.send(`STATE Impossible`);
 

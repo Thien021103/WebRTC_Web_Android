@@ -48,6 +48,7 @@ const wsUserAuth = async (token, client) => {
       return false;
     }
     client._groupId = decoded.groupId; // Store user data
+    console.log(`New client on group: ${client._groupId}`)
     client._accessToken = token;
     return true;
   } catch (error) {
