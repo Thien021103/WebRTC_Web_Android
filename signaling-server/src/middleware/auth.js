@@ -49,7 +49,7 @@ const wsUserAuth = async (token, client) => {
       return false;
     }
     client._user = decoded; // Store user data
-    console.log(client._user);
+    console.log(decoded);
     client._accessToken = token;
     return true;
   } catch (error) {
