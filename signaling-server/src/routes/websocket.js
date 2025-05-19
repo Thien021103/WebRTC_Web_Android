@@ -17,7 +17,11 @@ module.exports = (wss) => {
       console.log(`Message received: ${message}`);
 
       if (message.startsWith('CONNECT')) {
-        handleConnect(message, ws);
+        try {
+          handleConnect(message, ws);
+        } catch (error) {
+          console.error('Error in handleConnect:', error.message);
+        }
       } else if (message.startsWith('OFFER')) {
         handleOffer(message, ws);
       } else if (message.startsWith('ANSWER')) {
