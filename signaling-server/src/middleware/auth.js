@@ -48,7 +48,6 @@ const wsUserAuth = async (token, client) => {
       return false;
     }
     client._groupId = decoded.groupId;
-    console.log(`New client on group: ${client._groupId}`)
     client._accessToken = token;
     return true;
   } catch (error) {
@@ -64,14 +63,11 @@ const wsCameraAuth = async (token, client) => {
       console.error('Invalid camera token: missing cameraId or groupId');
       return false;
     }
-    const group = await Group.findOne({ cameraId: decoded.cameraId, id: decoded.groupId});
+    const group = await Group.findOne({ cameraId: decoded.cameraId, id: decoded.groupId, cameraToken: token });
     if (!group) {
       console.error(`Invalid camera token: ${token}`);
       return false;
     }
-    console.log(`wsCameraAuth: Provided token: ${token}`);
-    console.log(`wsCameraAuth: Stored token  : ${group ? group.cameraToken : 'not found'}`);
-    console.log(token === group.cameraToken)
     client._groupId = decoded.groupId;
     return true;
   } catch (error) {
@@ -92,7 +88,7 @@ const wsControllerAuth = async (token, client) => {
       console.error('Invalid or revoked controller token');
       return false;
     }
-    client._controller = decoded; // { controllerId, groupId }
+    client._groupId = decoded.groupId;
     return true;
   } catch (error) {
     console.error('WebSocket controller auth failed:', error.message);

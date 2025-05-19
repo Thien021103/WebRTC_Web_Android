@@ -28,7 +28,7 @@ async function handleControllerLock(message, client) {
     client.close();
     return;
   }
-  const groupId = client._controller.groupId;
+  const groupId = client._groupId;
 
   try {
     const dbGroup = await Group.findOne({ id: groupId });
