@@ -38,7 +38,6 @@ const wsUserAuth = async (token, client) => {
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
     let entity;
-    console.log(decoded);
     if (decoded.isOwner) {
       entity = await Owner.findOne({ email: decoded.email, groupId: decoded.groupId, accessToken: token });
     } else {

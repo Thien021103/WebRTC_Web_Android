@@ -23,11 +23,11 @@ async function handleConnect(message, client) {
   if (type === 'user') {
     // Validate user/owner token
     if (!wsUserAuth(idOrToken, client)) {
-      console.log(client);
       client.close();
       return;
     }
-    groupId = client._user.groupId;
+    let decoded = client._user;
+    groupId = decoded.groupId;
     // client._accessToken = idOrToken;
 
   } else if (type === 'camera' || type === 'controller') {
