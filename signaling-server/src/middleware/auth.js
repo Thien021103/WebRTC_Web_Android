@@ -64,10 +64,10 @@ const wsCameraAuth = async (token, client) => {
       console.error('Invalid camera token: missing cameraId or groupId');
       return false;
     }
-    console.log(decoded);
     const group = await Group.findOne({ cameraId: decoded.cameraId, groupId: decoded.groupId, cameraToken: token });
     if (!group) {
-      console.error(`Invalid camera token: ${token}`);
+      console.log(`Provided token: ${token}`);
+      console.log(`Stored token: ${group ? group.cameraToken : 'not found'}`);
       return false;
     }
     client._camera = decoded; // { cameraId, groupId }
