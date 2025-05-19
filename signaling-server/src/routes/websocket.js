@@ -25,7 +25,7 @@ module.exports = (wss) => {
       } else if (message.startsWith('ICE')) {
         handleIce(message, ws);
       } else if (message.startsWith('LOCK')) {
-        handleControllerLock(message);
+        handleControllerLock(message, ws);
       }
     });
 
