@@ -21,6 +21,7 @@ async function handleConnect(message, client) {
   let groupId, jwtToken;
 
   if (type === 'user') {
+    console.log(client);
     // Validate user/owner token
     if (!wsUserAuth(idOrToken, client)) {
       client.close();

@@ -48,8 +48,8 @@ const wsUserAuth = async (token, client) => {
       return false;
     }
     client._user = decoded; // Store user data
-    console.log(decoded);
     client._accessToken = token;
+    console.log(client);
     return true;
   } catch (error) {
     console.error('WebSocket auth failed:', error.message);
