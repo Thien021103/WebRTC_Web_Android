@@ -49,7 +49,6 @@ const wsUserAuth = async (token, client) => {
     }
     client._groupId = decoded.groupId; // Store user data
     client._accessToken = token;
-    console.log(client);
     return true;
   } catch (error) {
     console.error('WebSocket auth failed:', error.message);
