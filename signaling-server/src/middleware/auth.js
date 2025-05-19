@@ -65,7 +65,7 @@ const wsCameraAuth = async (token, client) => {
     }
     const group = await Group.findOne({ cameraId: decoded.cameraId, groupId: decoded.groupId, cameraToken: token });
     if (!group) {
-      console.error('Invalid or revoked camera token');
+      console.error(`Invalid camera token: ${token}`);
       return false;
     }
     client._camera = decoded; // { cameraId, groupId }
