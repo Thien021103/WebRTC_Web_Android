@@ -36,7 +36,7 @@ async function handleAnswer(message, client) {
     return;
   }
 
-  const groupId = client._user.groupId;
+  const groupId = client._decoded.groupId;
   const group = groups.get(groupId);
 
   if (!group || group.state !== 'Creating') {

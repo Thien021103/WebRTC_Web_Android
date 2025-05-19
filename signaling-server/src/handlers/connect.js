@@ -27,7 +27,7 @@ async function handleConnect(message, client) {
       client.close();
       return;
     }
-    groupId = client._user.groupId;
+    groupId = client._decoded.groupId;
     // client._accessToken = idOrToken;
 
   } else if (type === 'camera' || type === 'controller') {

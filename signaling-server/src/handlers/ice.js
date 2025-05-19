@@ -38,7 +38,7 @@ async function handleIce(message, client) {
       client.close();
       return;
     }
-    groupId = client._user.groupId;
+    groupId = client._decoded.groupId;
   }
   
   const group = groups.get(groupId);
