@@ -22,7 +22,7 @@ async function handleConnect(message, client) {
 
   if (type === 'user') {
     // Validate user/owner token
-    if (!wsUserAuth(idOrToken, client)) {
+    if (!(await wsUserAuth(idOrToken, client))) {
       client.close();
       return;
     }
