@@ -73,7 +73,7 @@ fun UserListScreen(
       try {
         val client = OkHttpClient()
         val request = Request.Builder()
-          .url("https://thientranduc.id.vn:444/api/users")
+          .url("https://thientranduc.id.vn:444/api/get-users")
           .addHeader("Authorization", "Bearer $accessToken")
           .get()
           .build()
@@ -264,7 +264,7 @@ fun performDeleteUser(
   onError: (String) -> Unit
 ) {
   val client = OkHttpClient()
-  val deleteUrl = "https://thientranduc.id.vn:444/api/users"
+  val deleteUrl = "https://thientranduc.id.vn:444/api/delete-users"
 
   val body = JSONObject().apply {
     put("id", userId)
