@@ -84,10 +84,7 @@ fun StageScreen(
   Scaffold(
     content = { padding ->
       Column(
-        modifier = Modifier
-          .fillMaxSize()
-          .padding(padding)
-          .padding(16.dp),
+        modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
       ) {
@@ -101,9 +98,7 @@ fun StageScreen(
         Button(
           onClick = onJoinCall,
           enabled = enabledCall,
-          modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp),
+          modifier = Modifier.fillMaxWidth().height(56.dp),
           shape = RoundedCornerShape(12.dp),
           elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
           colors = ButtonDefaults.buttonColors(
@@ -125,9 +120,7 @@ fun StageScreen(
         Spacer(modifier = Modifier.height(24.dp))
         Button(
           onClick = onBack,
-          modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp),
+          modifier = Modifier.fillMaxWidth().height(56.dp),
           shape = RoundedCornerShape(12.dp),
           elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
           colors = ButtonDefaults.buttonColors(

@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.VideoLibrary
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,11 +48,13 @@ import org.json.JSONObject
 
 @Composable
 fun MainScreen(
-  email: String,
+  role: String,
+  identifier: String,
   id: String,
   token: String,
   onVideosClick: () -> Unit,
   onSignallingClick: () -> Unit,
+  onUserManagementClick: () -> Unit,
   onLogout: () -> Unit
 ) {
   var askLogout by remember { mutableStateOf(false) }
@@ -61,7 +64,7 @@ fun MainScreen(
       TopAppBar(
         title = {
           Text(
-            text = if (id.isNotBlank()) "Welcome to camera group: $id!" else "Welcome!",
+            text = "Welcome!",
             fontSize = 20.sp
           )
         },
@@ -71,10 +74,7 @@ fun MainScreen(
     },
     content = { padding ->
       Column(
-        modifier = Modifier
-          .fillMaxSize()
-          .padding(padding)
-          .padding(16.dp),
+        modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
       ) {
@@ -120,7 +120,29 @@ fun MainScreen(
           )
           Text("View Videos", fontSize = 20.sp)
         }
-        Spacer(modifier = Modifier.height(24.dp))
+        if (role == "Owner") {
+          Spacer(modifier = Modifier.height(16.dp))
+          Button(
+            onClick = onUserManagementClick,
+            modifier = Modifier
+              .fillMaxWidth()
+              .height(56.dp),
+            shape = RoundedCornerShape(12.dp),
+            elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
+            colors = ButtonDefaults.buttonColors(
+              backgroundColor = MaterialTheme.colors.primary,
+              contentColor = MaterialTheme.colors.onPrimary
+            )
+          ) {
+            Icon(
+              imageVector = Icons.Filled.Group,
+              contentDescription = "Manage Users",
+              modifier = Modifier.padding(end = 8.dp)
+            )
+            Text("Manage Users", fontSize = 20.sp)
+          }
+        }
+        Spacer(modifier = Modifier.height(35.dp))
         Button(
           onClick = { askLogout = true },
           modifier = Modifier
@@ -162,7 +184,7 @@ fun MainScreen(
       confirmButton = {
         Button(
           onClick = {
-            performLogOut(email = email, groupId = id, accessToken = token)
+            performLogOut(role = role, identifier = identifier, groupId = id, accessToken = token)
             onLogout()
             askLogout = false
           },
@@ -199,7 +221,8 @@ fun MainScreen(
 }
 
 fun performLogOut (
-  email: String,
+  role: String,
+  identifier: String,
   groupId: String,
   accessToken: String
 ) {
@@ -208,14 +231,18 @@ fun performLogOut (
   val logOutUrl = "https://thientranduc.id.vn:444/api/logout"
 
   val body = JSONObject().apply {
-    put("email", email)
+    if (role == "Owner") {
+      put("email", identifier)
+    } else {
+      put("id", identifier)
+    }
     put("groupId", groupId)
-    put("accessToken", accessToken)
   }.toString()
   CoroutineScope(Dispatchers.IO).launch {
     try {
       val request = Request.Builder()
         .url(logOutUrl) // Replace with your server URL
+        .addHeader("Authorization", "Bearer $accessToken")
         .post(body.toRequestBody("application/json".toMediaType()))
         .build()
 

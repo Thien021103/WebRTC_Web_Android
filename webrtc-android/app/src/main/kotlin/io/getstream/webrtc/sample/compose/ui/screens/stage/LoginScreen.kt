@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
@@ -35,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -51,42 +53,45 @@ import org.json.JSONObject
 @Composable
 fun LoginScreen(
   fcmToken: String,
+  role: String,
   onSuccess: (String, String, String) -> Unit,
   onRegister: () -> Unit
 ) {
-
   val loginUrl = "https://thientranduc.id.vn:444/api/login"
 
-  var email by remember { mutableStateOf("") }
+  var emailOrId by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
-  var cameraId by remember { mutableStateOf("") }
+  var groupId by remember { mutableStateOf("") }
   var errorMessage by remember { mutableStateOf("") }
   var isLoading by remember { mutableStateOf(false) }
   var showPassword by remember { mutableStateOf(false) }
 
   val snackbarHostState = remember { SnackbarHostState() }
-
   val client = OkHttpClient()
 
   Scaffold(
     snackbarHost = { SnackbarHost(snackbarHostState) },
     content = { padding ->
       Column(
-        modifier = Modifier
-          .fillMaxSize()
-          .padding(padding)
-          .padding(16.dp),
+        modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
         verticalArrangement = Arrangement.Center
       ) {
-
-        Text("Login", fontSize = 24.sp, modifier = Modifier.padding(bottom = 16.dp))
+        Text(
+          text = "$role Login",
+          fontSize = 24.sp,
+          fontWeight = FontWeight.Bold,
+          modifier = Modifier.padding(bottom = 16.dp)
+        )
 
         OutlinedTextField(
-          value = email,
-          onValueChange = { email = it },
-          label = { Text("Email") },
+          value = emailOrId,
+          onValueChange = { emailOrId = it },
+          label = { Text(if (role == "Owner") "Email" else "User ID") },
           modifier = Modifier.fillMaxWidth(),
-          enabled = !isLoading
+          enabled = !isLoading,
+          keyboardOptions = KeyboardOptions(
+            keyboardType = if (role == "Owner") KeyboardType.Email else KeyboardType.Text
+          )
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
@@ -109,18 +114,24 @@ fun LoginScreen(
           enabled = !isLoading
         )
         Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(
-          value = cameraId,
-          onValueChange = { cameraId = it },
-          label = { Text("Camera ID") },
-          modifier = Modifier.fillMaxWidth(),
-          enabled = !isLoading
-        )
+        if (role == "Owner") {
+          OutlinedTextField(
+            value = groupId,
+            onValueChange = { groupId = it },
+            label = { Text("Group ID") },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !isLoading
+          )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
         if (fcmToken.isBlank()) {
           CircularProgressIndicator()
-          Text("Fetching FCM token...", fontSize = 16.sp, modifier = Modifier.padding(top = 8.dp))
+          Text(
+            text = "Fetching FCM token...",
+            fontSize = 16.sp,
+            modifier = Modifier.padding(top = 8.dp)
+          )
         }
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -129,32 +140,35 @@ fun LoginScreen(
             isLoading = true
             errorMessage = ""
             val body = JSONObject().apply {
-              put("email", email)
+              if (role == "Owner") {
+                put("email", emailOrId)
+              } else {
+                put("id", emailOrId)
+              }
               put("password", password)
-              put("groupId", cameraId)
+              put("groupId", groupId)
               put("fcmToken", fcmToken)
             }.toString()
             CoroutineScope(Dispatchers.IO).launch {
               try {
                 val request = Request.Builder()
-                  .url(loginUrl) // Replace with your server URL
+                  .url(loginUrl)
                   .post(body.toRequestBody("application/json".toMediaType()))
                   .build()
                 Log.d("Login Request", body)
 
-                // Response body will be: { "success": true, "accessToken": "xyz" }
                 val response = client.newCall(request).execute()
+                val responseBody = response.body?.string()
+                if (responseBody != null) {
+                  Log.d("Login Response", responseBody)
+                }
+                val json = JSONObject(responseBody ?: "{}")
                 if (response.isSuccessful) {
-                  val responseBody = response.body?.string()
-                  if (responseBody != null) {
-                    Log.d("Login Response", responseBody)
-                  }
-                  val json = JSONObject(responseBody ?: "{}")
                   val status = json.optString("status")
                   if (status == "success") {
                     val accessToken = json.optString("message", "")
                     CoroutineScope(Dispatchers.Main).launch {
-                      onSuccess(email, cameraId, accessToken)
+                      onSuccess(emailOrId, groupId, accessToken)
                       isLoading = false
                     }
                   } else {
@@ -165,7 +179,7 @@ fun LoginScreen(
                   }
                 } else {
                   CoroutineScope(Dispatchers.Main).launch {
-                    errorMessage = "Server error: ${response.body?.string()}"
+                    errorMessage = json.optString("message", "Login failed")
                     isLoading = false
                   }
                 }
@@ -184,7 +198,10 @@ fun LoginScreen(
             backgroundColor = MaterialTheme.colors.secondary,
             contentColor = MaterialTheme.colors.onSecondary
           ),
-          enabled = email.isNotBlank() && password.isNotBlank() && cameraId.isNotBlank() && fcmToken.isNotBlank() && !isLoading
+          enabled = emailOrId.isNotBlank()
+            && password.isNotBlank()
+            && (if (role == "Owner") groupId.isNotBlank() else true)
+            && fcmToken.isNotBlank() && !isLoading
         ) {
           if (isLoading) {
             CircularProgressIndicator(
@@ -198,8 +215,7 @@ fun LoginScreen(
               fontSize = 18.sp,
               fontWeight = FontWeight.Bold
             )
-          }
-          else {
+          } else {
             Icon(
               imageVector = Icons.AutoMirrored.Filled.Login,
               contentDescription = "Login",
@@ -213,20 +229,19 @@ fun LoginScreen(
           }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Change to Register button
-        TextButton(
-          onClick = onRegister,
-          modifier = Modifier.fillMaxWidth(),
-          enabled = !isLoading
-        ) {
-          Text("Don't have an account? Register", fontSize = 16.sp)
+        if (role == "Owner") {
+          Spacer(modifier = Modifier.height(8.dp))
+          TextButton(
+            onClick = onRegister,
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !isLoading
+          ) {
+            Text("Don't have an account? Register", fontSize = 16.sp)
+          }
         }
       }
     }
   )
-  // Error snackbar
   if (errorMessage.isNotEmpty()) {
     LaunchedEffect(errorMessage) {
       snackbarHostState.showSnackbar(errorMessage)

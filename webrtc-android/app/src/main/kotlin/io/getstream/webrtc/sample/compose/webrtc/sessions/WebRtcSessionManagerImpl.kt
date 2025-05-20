@@ -224,6 +224,8 @@ class WebRtcSessionManagerImpl(
 
   override fun enableMicrophone(enabled: Boolean) {
     audioManager?.isMicrophoneMute = !enabled
+    Log.d("Session Manager", "Microphone: $enabled")
+    localAudioTrack.setEnabled(enabled) // Control WebRTC AudioTrack
   }
 
 //  override fun enableCamera(enabled: Boolean) {
@@ -266,7 +268,7 @@ class WebRtcSessionManagerImpl(
 
   private suspend fun sendAnswer() {
     peerConnection.setRemoteDescription(
-      SessionDescription(SessionDescription.Type.OFFER, offer)
+      SessionDescription(SessionDescription.Type.OFFER, "$offer\r\n")
     )
     val answer = peerConnection.createAnswer().getOrThrow()
     val result = peerConnection.setLocalDescription(answer)
@@ -284,7 +286,7 @@ class WebRtcSessionManagerImpl(
   private suspend fun handleAnswer(sdp: String) {
     logger.d { "[SDP] handle answer: $sdp" }
     peerConnection.setRemoteDescription(
-      SessionDescription(SessionDescription.Type.ANSWER, sdp)
+      SessionDescription(SessionDescription.Type.ANSWER, "$sdp\r\n")
     )
   }
 

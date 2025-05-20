@@ -64,6 +64,8 @@ fun SignallingScreen(
 ) {
   var startedSignalling by remember { mutableStateOf(false) }
   var sessionManager by remember { mutableStateOf<WebRtcSessionManager?>(null) }
+  var onCallScreen by remember { mutableStateOf(false) }
+
   val context = LocalContext.current
 
   Scaffold(
@@ -100,7 +102,14 @@ fun SignallingScreen(
             onClick = {
               sessionManager = WebRtcSessionManagerImpl(
                 context = context,
-                signalingClient = SignalingClient(id = id, accessToken = accessToken),
+                signalingClient = SignalingClient(
+                  accessToken = accessToken,
+                  onWsClose = {
+                    onCallScreen = false
+                    startedSignalling = false
+                    sessionManager = null
+                  }
+                ),
                 peerConnectionFactory = StreamPeerConnectionFactory(context)
               )
               startedSignalling = true
@@ -129,7 +138,6 @@ fun SignallingScreen(
         }
         if (startedSignalling && sessionManager != null) {
           CompositionLocalProvider(LocalWebRtcSessionManager provides sessionManager!!) {
-            var onCallScreen by remember { mutableStateOf(false) }
             val state by sessionManager!!.signalingClient.sessionStateFlow.collectAsState()
             if (!onCallScreen) {
               StageScreen(
@@ -158,9 +166,7 @@ fun SignallingScreen(
           Spacer(modifier = Modifier.height(24.dp))
           Button(
             onClick = onBack,
-            modifier = Modifier
-              .fillMaxWidth()
-              .height(56.dp),
+            modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = RoundedCornerShape(12.dp),
             elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
             colors = ButtonDefaults.buttonColors(

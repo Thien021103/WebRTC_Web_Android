@@ -86,4 +86,5 @@ dependencies {
 
   implementation(platform(libs.firebase.bom))
   implementation(libs.firebase.perf.ktx)
+  implementation(libs.cloudinary.android)
 }

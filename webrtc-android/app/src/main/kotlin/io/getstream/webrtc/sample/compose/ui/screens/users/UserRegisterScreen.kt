@@ -1,14 +1,12 @@
-package io.getstream.webrtc.sample.compose.ui.screens.stage
+package io.getstream.webrtc.sample.compose.ui.screens.users
 
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
@@ -23,7 +21,9 @@ import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -33,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -49,39 +50,48 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 
 @Composable
-fun RegisterScreen(
-  fcmToken: String,
-  onSuccess: (String, String, String) -> Unit,
-  onLogin: () -> Unit
+fun RegisterUserScreen(
+  accessToken: String,
+  onBack: () -> Unit
 ) {
+  val snackbarHostState = remember { SnackbarHostState() }
 
-  val registerUrl = "https://thientranduc.id.vn:444/api/register"
-
-  var email by remember { mutableStateOf("") }
+  var userId by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
-  var cameraId by remember { mutableStateOf("") }
   var errorMessage by remember { mutableStateOf("") }
+  var successMessage by remember { mutableStateOf("") }
   var isLoading by remember { mutableStateOf(false) }
   var showPassword by remember { mutableStateOf(false) }
 
-  val snackbarHostState = remember { SnackbarHostState() }
-
-  val client = OkHttpClient()
-
   Scaffold(
     snackbarHost = { SnackbarHost(snackbarHostState) },
+    topBar = {
+      TopAppBar(
+        title = { Text("Register New User", fontSize = 20.sp) },
+        backgroundColor = MaterialTheme.colors.primary,
+        contentColor = MaterialTheme.colors.onPrimary
+      )
+    },
     content = { padding ->
       Column(
-        modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
-        verticalArrangement = Arrangement.Center
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(padding)
+          .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
       ) {
-
-        Text("Register", fontSize = 24.sp, modifier = Modifier.padding(bottom = 16.dp))
+        Text(
+          text = "Register New User",
+          fontSize = 24.sp,
+          fontWeight = FontWeight.Bold,
+          modifier = Modifier.padding(bottom = 16.dp)
+        )
 
         OutlinedTextField(
-          value = email,
-          onValueChange = { email = it },
-          label = { Text("Email") },
+          value = userId,
+          onValueChange = { userId = it },
+          label = { Text("User ID") },
           modifier = Modifier.fillMaxWidth(),
           enabled = !isLoading
         )
@@ -105,97 +115,52 @@ fun RegisterScreen(
           modifier = Modifier.fillMaxWidth(),
           enabled = !isLoading
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(
-          value = cameraId,
-          onValueChange = { cameraId = it },
-          label = { Text("Camera ID") },
-          modifier = Modifier.fillMaxWidth(),
-          enabled = !isLoading
-        )
-
         Spacer(modifier = Modifier.height(16.dp))
-        if (fcmToken.isBlank()) {
-          CircularProgressIndicator()
-          Text("Fetching FCM token...", fontSize = 16.sp, modifier = Modifier.padding(top = 8.dp))
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-
         Button(
           onClick = {
             isLoading = true
             errorMessage = ""
-            val body = JSONObject().apply {
-              put("email", email)
-              put("password", password)
-              put("groupId", cameraId)
-              put("fcmToken", fcmToken)
-            }.toString()
-            CoroutineScope(Dispatchers.IO).launch {
-              try {
-                val request = Request.Builder()
-                  .url(registerUrl) // Replace with your server URL
-                  .post(body.toRequestBody("application/json".toMediaType()))
-                  .build()
-
-                // Response body will be: { "success": true, "accessToken": "xyz" }
-                val response = client.newCall(request).execute()
-                val responseBody = response.body?.string()
-                if (responseBody != null) {
-                  Log.d("Login Response", responseBody)
-                }
-                val json = JSONObject(responseBody ?: "{}")
-                if (response.isSuccessful) {
-                  val status = json.optString("status")
-                  if (status == "success") {
-                    val accessToken = json.optString("message", "")
-                    CoroutineScope(Dispatchers.Main).launch {
-                      onSuccess(email, cameraId, accessToken)
-                      isLoading = false
-                    }
-                  } else {
-                    CoroutineScope(Dispatchers.Main).launch {
-                      errorMessage = json.optString("message", "Registration failed")
-                      isLoading = false
-                    }
-                  }
-                } else {
-                  CoroutineScope(Dispatchers.Main).launch {
-                    errorMessage = json.optString("message", "Login failed")
-                    isLoading = false
-                  }
-                }
-              } catch (e: Exception) {
+            successMessage = ""
+            performRegisterUser(
+              userId = userId,
+              password = password,
+              accessToken = accessToken,
+              onSuccess = {
                 CoroutineScope(Dispatchers.Main).launch {
-                  errorMessage = "Network error: ${e.message}"
+                  successMessage = "User registered successfully"
+                  isLoading = false
+                  userId = ""
+                  password = ""
+                }
+              },
+              onError = { message ->
+                CoroutineScope(Dispatchers.Main).launch {
+                  errorMessage = message
                   isLoading = false
                 }
               }
-            }
+            )
           },
-          modifier = Modifier.fillMaxWidth().height(56.dp),
+          modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp),
           shape = RoundedCornerShape(12.dp),
           elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
           colors = ButtonDefaults.buttonColors(
             backgroundColor = MaterialTheme.colors.secondary,
             contentColor = MaterialTheme.colors.onSecondary
           ),
-          enabled = email.isNotBlank() && password.isNotBlank() && cameraId.isNotBlank() && fcmToken.isNotBlank() && !isLoading
+          enabled = userId.isNotBlank() && password.isNotBlank() && !isLoading
         ) {
           if (isLoading) {
-            CircularProgressIndicator(
-              modifier = Modifier.size(24.dp),
-              color = MaterialTheme.colors.onSecondary,
-              strokeWidth = 2.dp
-            )
+            CircularProgressIndicator()
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-              text = "Registering ...",
+              text = "Registering...",
               fontSize = 18.sp,
               fontWeight = FontWeight.Bold
             )
-          }
-          else {
+          } else {
             Icon(
               imageVector = Icons.Filled.PersonAdd,
               contentDescription = "Register",
@@ -208,24 +173,93 @@ fun RegisterScreen(
             )
           }
         }
-
         Spacer(modifier = Modifier.height(8.dp))
-
-        // Change to Login button
-        TextButton(
-          onClick = onLogin,
-          modifier = Modifier.fillMaxWidth(),
-          enabled = !isLoading
+        Button(
+          onClick = onBack,
+          modifier = Modifier.fillMaxWidth().height(56.dp),
+          shape = RoundedCornerShape(12.dp),
+          elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
+          colors = ButtonDefaults.buttonColors(
+            backgroundColor = MaterialTheme.colors.primary,
+            contentColor = MaterialTheme.colors.onPrimary
+          )
         ) {
-          Text("Already have an account? Login", fontSize = 16.sp)
+          Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = "Back",
+            modifier = Modifier.padding(end = 8.dp)
+          )
+          Text(
+            text = "Back",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold
+          )
         }
       }
     }
   )
-  // Error snackbar
+
   if (errorMessage.isNotEmpty()) {
     LaunchedEffect(errorMessage) {
       snackbarHostState.showSnackbar(errorMessage)
+    }
+  }
+  if (successMessage.isNotEmpty()) {
+    LaunchedEffect(successMessage) {
+      snackbarHostState.showSnackbar(successMessage)
+    }
+  }
+}
+
+fun performRegisterUser(
+  userId: String,
+  password: String,
+  accessToken: String,
+  onSuccess: () -> Unit,
+  onError: (String) -> Unit
+) {
+  val client = OkHttpClient()
+  val registerUrl = "https://thientranduc.id.vn:444/api/register"
+
+  val body = JSONObject().apply {
+    put("id", userId)
+    put("password", password)
+    put("ownerToken", accessToken)
+  }.toString()
+
+  CoroutineScope(Dispatchers.IO).launch {
+    try {
+      val request = Request.Builder()
+        .url(registerUrl)
+        .post(body.toRequestBody("application/json".toMediaType()))
+        .build()
+
+      val response = client.newCall(request).execute()
+      val responseBody = response.body?.string()
+      if (responseBody != null) {
+        Log.d("RegisterUser Response", responseBody)
+      }
+      val json = JSONObject(responseBody ?: "{}")
+      if (response.isSuccessful) {
+        val status = json.optString("status")
+        if (status == "success") {
+          CoroutineScope(Dispatchers.Main).launch {
+            onSuccess()
+          }
+        } else {
+          CoroutineScope(Dispatchers.Main).launch {
+            onError(json.optString("message", "Registration failed"))
+          }
+        }
+      } else {
+        CoroutineScope(Dispatchers.Main).launch {
+          onError(json.optString("message", "Server error"))
+        }
+      }
+    } catch (e: Exception) {
+      CoroutineScope(Dispatchers.Main).launch {
+        onError("Network error: ${e.message}")
+      }
     }
   }
 }

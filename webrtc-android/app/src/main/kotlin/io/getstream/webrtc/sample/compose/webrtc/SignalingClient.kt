@@ -33,8 +33,8 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 
 class SignalingClient(
-  private val id: String,
-  private val accessToken: String
+  private val accessToken: String,
+  private val onWsClose: () -> Unit
 ) {
   private val logger by taggedLogger("Call:SignalingClient")
   private val signalingScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -59,11 +59,11 @@ class SignalingClient(
   fun sendCommand(signalingCommand: SignalingCommand, message: String) {
     if(signalingCommand === SignalingCommand.CONNECT) {
       logger.d { "[sendCommand] $signalingCommand $message" }
-      ws.send("$signalingCommand user $accessToken$message")
+      ws.send("$signalingCommand user $accessToken")
     }
     else {
       logger.d { "[sendCommand] $signalingCommand $message" }
-      ws.send("$signalingCommand user $id\n$message")
+      ws.send("$signalingCommand user $accessToken\n$message")
     }
   }
 
@@ -84,6 +84,24 @@ class SignalingClient(
     override fun onOpen(webSocket: WebSocket, response: Response) {
       super.onOpen(webSocket, response)
       sendCommand(SignalingCommand.CONNECT, "")
+    }
+
+    override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+      super.onClosed(webSocket, code, reason)
+      logger.d { "[websocket] closed $code $reason" }
+      onWsClose.invoke()
+    }
+
+    override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+      super.onClosing(webSocket, code, reason)
+      logger.d { "[websocket] closing $code $reason" }
+      onWsClose.invoke()
+    }
+
+    override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+      super.onFailure(webSocket, t, response)
+      logger.d { "[websocket] failure" }
+      onWsClose.invoke()
     }
   }
 

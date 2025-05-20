@@ -32,13 +32,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.cloudinary.android.MediaManager
+import io.getstream.webrtc.sample.compose.ui.screens.users.RegisterUserScreen
+import io.getstream.webrtc.sample.compose.ui.screens.users.UserManagementScreen
 import com.google.firebase.messaging.FirebaseMessaging
 import io.getstream.webrtc.sample.compose.ui.screens.list.VideoListScreen
 import io.getstream.webrtc.sample.compose.ui.screens.list.VideoListViewModel
 import io.getstream.webrtc.sample.compose.ui.screens.stage.LoginScreen
 import io.getstream.webrtc.sample.compose.ui.screens.stage.MainScreen
 import io.getstream.webrtc.sample.compose.ui.screens.stage.RegisterScreen
+import io.getstream.webrtc.sample.compose.ui.screens.stage.RoleSelectionScreen
 import io.getstream.webrtc.sample.compose.ui.screens.stage.SignallingScreen
+import io.getstream.webrtc.sample.compose.ui.screens.users.UserListScreen
 import io.getstream.webrtc.sample.compose.ui.theme.WebrtcSampleComposeTheme
 import kotlinx.coroutines.tasks.await
 
@@ -48,6 +53,10 @@ sealed class Screen {
   object Main : Screen()
   object Videos : Screen()
   object Signalling : Screen()
+  object RoleSelection : Screen()
+  object RegisterUser : Screen()
+  object UserManagement : Screen()
+  object  UserList : Screen()
 }
 
 class MainActivity : ComponentActivity() {
@@ -62,6 +71,14 @@ class MainActivity : ComponentActivity() {
       Manifest.permission.POST_NOTIFICATIONS
     )
     requestPermissions(permissions, 0)
+
+    // Initialize Cloudinary (do this once, e.g., in Application class or before upload)
+    val config = mapOf(
+      "cloud_name" to "dvarse6wk",
+      "api_key" to "573435389774623",
+      "api_secret" to "CZmauvR9SiOsysGNak67f9DVTjc"
+    )
+    MediaManager.init(this, config)
 
     setContent {
       WebrtcSampleComposeTheme {
@@ -78,17 +95,25 @@ class MainActivity : ComponentActivity() {
               println("Failed to get FCM token: $e")
             }
           }
-          var currentScreen: Screen by remember { mutableStateOf(Screen.Login) }
-          var userEmail by remember { mutableStateOf("") }
-          var cameraId by remember { mutableStateOf("") }
+          var currentScreen: Screen by remember { mutableStateOf(Screen.RoleSelection) }
+          var identifier by remember { mutableStateOf("") }
+          var groupId by remember { mutableStateOf("") }
           var accessToken by remember { mutableStateOf("") }
+          var role by remember { mutableStateOf("") }
 
           when (currentScreen) {
+            Screen.RoleSelection -> RoleSelectionScreen(
+              onRoleSelected = { selectedRole ->
+                role = selectedRole
+                currentScreen = Screen.Login
+              }
+            )
             Screen.Login -> LoginScreen(
               fcmToken = fcmToken,
-              onSuccess = { email, id, token ->
-                userEmail = email
-                cameraId = id
+              role = role,
+              onSuccess = { emailOrId, id, token ->
+                identifier = emailOrId
+                groupId = id
                 accessToken = token
                 currentScreen = Screen.Main
               },
@@ -97,35 +122,51 @@ class MainActivity : ComponentActivity() {
             Screen.Register -> RegisterScreen(
               fcmToken = fcmToken,
               onSuccess = { email, id, token ->
-                userEmail = email
-                cameraId = id
+                identifier = email
+                groupId = id
                 accessToken = token
                 currentScreen = Screen.Main
               },
-              onLogin = { currentScreen = Screen.Login }
+              onLogin = { currentScreen = Screen.RoleSelection }
             )
             Screen.Main -> MainScreen(
-              email = userEmail,
-              id = cameraId,
+              role = role,
+              identifier = identifier,
+              id = groupId,
               token = accessToken,
               onVideosClick = { currentScreen = Screen.Videos },
               onSignallingClick = { currentScreen = Screen.Signalling },
+              onUserManagementClick = { currentScreen = Screen.UserManagement },
               onLogout = {
-                userEmail = ""
-                cameraId = ""
+                identifier = ""
+                groupId = ""
                 accessToken = ""
-                currentScreen = Screen.Login
+                role = ""
+                currentScreen = Screen.RoleSelection
               }
             )
             Screen.Videos -> VideoListScreen(
-              viewModel = VideoListViewModel(context = this, cameraId = cameraId),
+              viewModel = VideoListViewModel(context = this, cameraId = groupId),
               onBack = { currentScreen = Screen.Main }
             )
             Screen.Signalling -> SignallingScreen(
-              email = userEmail,
-              id = cameraId,
+              email = identifier,
+              id = groupId,
               accessToken = accessToken,
               onBack = { currentScreen = Screen.Main }
+            )
+            Screen.UserManagement -> UserManagementScreen(
+              onRegisterUserClick = { currentScreen = Screen.RegisterUser },
+              onUserListClick = { currentScreen = Screen.UserList },
+              onBack = { currentScreen = Screen.Main }
+            )
+            Screen.RegisterUser -> RegisterUserScreen(
+              accessToken = accessToken,
+              onBack = { currentScreen = Screen.UserManagement }
+            )
+            Screen.UserList -> UserListScreen(
+              accessToken = accessToken,
+              onBack = { currentScreen = Screen.UserManagement }
             )
           }
         }
