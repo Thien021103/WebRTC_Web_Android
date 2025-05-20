@@ -19,8 +19,8 @@ router.post('/logout', authMiddleware, handleLogout);
 router.post('/lock', authMiddleware, handleLock);
 router.post('/unlock', authMiddleware, handleUnlock);
 
-router.get('/users', authMiddleware, handleGetUsers);
-router.delete('/users', authMiddleware, handleDeleteUser);
+router.get('/get-users', authMiddleware, handleGetUsers);
+router.delete('/delete-users', authMiddleware, handleDeleteUser);
 
 router.get('/door-history', authMiddleware, handleGetDoorHistory);
 

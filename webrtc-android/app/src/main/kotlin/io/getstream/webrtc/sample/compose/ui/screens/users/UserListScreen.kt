@@ -2,6 +2,7 @@ package io.getstream.webrtc.sample.compose.ui.screens.users
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -42,6 +43,8 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -62,8 +65,10 @@ fun UserListScreen(
   var isLoading by remember { mutableStateOf(true) }
   var errorMessage by remember { mutableStateOf("") }
 
-  // Fetch users on screen load
-  LaunchedEffect(Unit) {
+  // Fetch users function
+  fun fetchUsers() {
+    isLoading = true
+    errorMessage = ""
     CoroutineScope(Dispatchers.IO).launch {
       try {
         val client = OkHttpClient()
@@ -119,6 +124,10 @@ fun UserListScreen(
       }
     }
   }
+  // Initial fetch on screen load
+  LaunchedEffect(Unit) {
+    fetchUsers()
+  }
 
   Scaffold(
     snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -137,11 +146,7 @@ fun UserListScreen(
       ) {
         if (isLoading) {
           CircularProgressIndicator()
-          Text(
-            text = "Fetching users...",
-            fontSize = 16.sp,
-            modifier = Modifier.padding(top = 8.dp)
-          )
+          Text(text = "Fetching users...", fontSize = 16.sp, modifier = Modifier.padding(top = 8.dp))
         } else if (users.isNotEmpty()) {
           LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f)) {
             items(users) { user ->
@@ -151,37 +156,66 @@ fun UserListScreen(
                 shape = RoundedCornerShape(8.dp)
               ) {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                  Text(text = "User ID: ${user.id}", fontSize = 18.sp, fontWeight = FontWeight.Bold
-                  )
-                  Text(text = "Group ID: ${user.groupId}", fontSize = 16.sp)
-                  Text(
-                    text = "Created: ${
-                      SimpleDateFormat(
-                        "MMM dd, yyyy HH:mm",
-                        Locale.getDefault()
-                      ).format(
-                        SimpleDateFormat(
-                          "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
-                          Locale.getDefault()
-                        ).parse(user.createdAt) ?: user.createdAt
+                  Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                  ) {
+                    Column {
+                      Text(text = "User ID: ${user.id}", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                      Text(text = "Group ID: ${user.groupId}", fontSize = 16.sp)
+                      Text(
+                        text = "Created: ${
+                          SimpleDateFormat(
+                            "MMM dd, yyyy HH:mm",
+                            Locale.getDefault()
+                          ).format(
+                            SimpleDateFormat(
+                              "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                              Locale.getDefault()
+                            ).parse(user.createdAt) ?: user.createdAt
+                          )
+                        }",
+                        fontSize = 14.sp
                       )
-                    }",
-                    fontSize = 14.sp
-                  )
-                  Text(
-                    text = "Updated: ${
-                      SimpleDateFormat(
-                        "MMM dd, yyyy HH:mm",
-                        Locale.getDefault()
-                      ).format(
-                        SimpleDateFormat(
-                          "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
-                          Locale.getDefault()
-                        ).parse(user.updatedAt) ?: user.updatedAt
+                      Text(
+                        text = "Updated: ${
+                          SimpleDateFormat(
+                            "MMM dd, yyyy HH:mm",
+                            Locale.getDefault()
+                          ).format(
+                            SimpleDateFormat(
+                              "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                              Locale.getDefault()
+                            ).parse(user.updatedAt) ?: user.updatedAt
+                          )
+                        }",
+                        fontSize = 14.sp
                       )
-                    }",
-                    fontSize = 14.sp
-                  )
+                    }
+                    TextButton(
+                      onClick = {
+                        performDeleteUser(
+                          userId = user.id,
+                          accessToken = accessToken,
+                          onSuccess = {
+                            CoroutineScope(Dispatchers.Main).launch {
+                              isLoading = true
+                              snackbarHostState.showSnackbar("User deleted successfully")
+                              fetchUsers() // Refresh list
+                            }
+                          },
+                          onError = { message ->
+                            CoroutineScope(Dispatchers.Main).launch {
+                              errorMessage = message
+                            }
+                          }
+                        )
+                      }
+                    ) {
+                      Text(text = "Delete", color = MaterialTheme.colors.error, fontSize = 14.sp)
+                    }
+                  }
                 }
               }
             }
@@ -210,11 +244,7 @@ fun UserListScreen(
             contentDescription = "Back",
             modifier = Modifier.padding(end = 8.dp)
           )
-          Text(
-            text = "Back",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
-          )
+          Text(text = "Back", fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
       }
     }
@@ -223,6 +253,57 @@ fun UserListScreen(
   if (errorMessage.isNotEmpty()) {
     LaunchedEffect(errorMessage) {
       snackbarHostState.showSnackbar(errorMessage)
+    }
+  }
+}
+
+fun performDeleteUser(
+  userId: String,
+  accessToken: String,
+  onSuccess: () -> Unit,
+  onError: (String) -> Unit
+) {
+  val client = OkHttpClient()
+  val deleteUrl = "https://thientranduc.id.vn:444/api/users"
+
+  val body = JSONObject().apply {
+    put("id", userId)
+  }.toString()
+
+  CoroutineScope(Dispatchers.IO).launch {
+    try {
+      val request = Request.Builder()
+        .url(deleteUrl)
+        .addHeader("Authorization", "Bearer $accessToken")
+        .delete(body.toRequestBody("application/json".toMediaType()))
+        .build()
+
+      val response = client.newCall(request).execute()
+      val responseBody = response.body?.string()
+      if (responseBody != null) {
+        Log.d("DeleteUser Response", responseBody)
+      }
+      val json = JSONObject(responseBody ?: "{}")
+      if (response.isSuccessful) {
+        val status = json.optString("status")
+        if (status == "success") {
+          CoroutineScope(Dispatchers.Main).launch {
+            onSuccess()
+          }
+        } else {
+          CoroutineScope(Dispatchers.Main).launch {
+            onError(json.optString("message", "Failed to delete user"))
+          }
+        }
+      } else {
+        CoroutineScope(Dispatchers.Main).launch {
+          onError(json.optString("message", "Server error"))
+        }
+      }
+    } catch (e: Exception) {
+      CoroutineScope(Dispatchers.Main).launch {
+        onError("Network error: ${e.message}")
+      }
     }
   }
 }
