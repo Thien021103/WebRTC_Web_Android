@@ -1,41 +1,28 @@
-/*
- * Copyright 2023 Stream.IO, Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package io.getstream.webrtc.sample.compose.ui.screens.video
 
-import android.app.Activity
 import android.content.Context
 import android.media.MediaMuxer
 import android.os.Build
-import android.os.Environment
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,22 +33,19 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.getstream.webrtc.sample.compose.ui.components.VideoRenderer
 import io.getstream.webrtc.sample.compose.webrtc.sessions.LocalWebRtcSessionManager
-import io.getstream.log.taggedLogger
 import io.getstream.webrtc.sample.compose.ui.components.AudioRecorder
 import io.getstream.webrtc.sample.compose.ui.components.RecordingManager
-import kotlinx.coroutines.delay
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun getOutputFilePath(
+fun getOutputFile(
   context: Context,
   cameraId: String
-): String {
+): File {
   // Format: |day-month-year|hour:min:sec|recorded.mp4
   val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH-mm-ss")
   val timestamp = LocalDateTime.now().format(formatter)
@@ -74,9 +58,9 @@ fun getOutputFilePath(
     if (!idDir.exists()) {
       idDir.mkdirs()
     }
-    return File(idDir, fileName).absolutePath
+    return File(idDir, fileName)
   } catch (_: Exception) {
-    return File(baseDir, fileName).absolutePath
+    return File(baseDir, fileName)
   }
 }
 
@@ -89,9 +73,9 @@ fun VideoCallScreen(
 ) {
   val sessionManager = LocalWebRtcSessionManager.current
   val context = LocalContext.current
-  val outputFilePath = getOutputFilePath(cameraId = cameraId, context = context)
-  val mediaMuxer = remember { MediaMuxer(outputFilePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4) }
-  val recordingManager = remember { RecordingManager(context, mediaMuxer) }
+  val outputFile = getOutputFile(cameraId = cameraId, context = context)
+  val mediaMuxer = remember { MediaMuxer(outputFile.absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4) }
+  val recordingManager = remember { RecordingManager(context = context, mediaMuxer = mediaMuxer, outputFile = outputFile) }
 
   val remoteVideoTrackState by sessionManager.remoteVideoTrackFlow.collectAsState(null)
   val remoteVideoTrack = remoteVideoTrackState
@@ -99,19 +83,17 @@ fun VideoCallScreen(
 //  val localVideoTrackState by sessionManager.localVideoTrackFlow.collectAsState(null)
 //  val localVideoTrack = localVideoTrackState
 
-  val remoteAudioTrackState by sessionManager.remoteAudioTrackFlow.collectAsState(initial = null)
-  val remoteAudioTrack = remoteAudioTrackState
-
+//  val remoteAudioTrackState by sessionManager.remoteAudioTrackFlow.collectAsState(initial = null)
+//  val remoteAudioTrack = remoteAudioTrackState
 
   var callMediaState by remember { mutableStateOf(CallMediaState()) }
+  var showUploadDialog by remember { mutableStateOf(false) }
+  var uploadProgress by remember { mutableFloatStateOf(0f) } // 0 to 1
+  var uploadCompleted by remember { mutableStateOf(false) }
+  var uploadFailed by remember { mutableStateOf(false) }
+
   LaunchedEffect(key1 = Unit) {
     sessionManager.onSessionScreenReady()
-  }
-
-  DisposableEffect(remoteVideoTrack, remoteAudioTrack) {
-    onDispose {
-      recordingManager.stopRecording()
-    }
   }
 
   Box(
@@ -129,12 +111,13 @@ fun VideoCallScreen(
           .onSizeChanged { parentSize = it }
       )
     }
-    if(remoteAudioTrack != null) {
+/*    if(remoteAudioTrack != null) {
       AudioRecorder(
         audioTrack = remoteAudioTrack,
         recordingManager = recordingManager
       )
-    }
+    }*/
+
 // Enhanced logging for local video condition
 //    if (localVideoTrack != null) {
 ////      if (callMediaState.isCameraEnabled) {
@@ -172,16 +155,56 @@ fun VideoCallScreen(
             callMediaState = callMediaState.copy(isMicrophoneEnabled = enabled)
             sessionManager.enableMicrophone(enabled)
           }
-//          is CallAction.ToggleCamera -> {
-//            val enabled = callMediaState.isCameraEnabled.not()
-//            callMediaState = callMediaState.copy(isCameraEnabled = enabled)
-//            sessionManager.enableCamera(enabled)
-//          }
-//          CallAction.FlipCamera -> sessionManager.flipCamera()
           CallAction.LeaveCall -> {
+            Log.d("Upload Dialog", "Show Upload dialog")
+            showUploadDialog = true
+            recordingManager.stopRecording (
+              onUploadUpdate = { url, progress, isComplete ->
+                uploadProgress = progress
+                uploadCompleted = isComplete && url != null
+                uploadFailed = isComplete && url == null
+              }
+            )
             sessionManager.disconnect()
-            onCancelCall.invoke()
-            recordingManager.stopRecording()
+          }
+        }
+      }
+    )
+  }
+  // Upload Dialog
+  if (showUploadDialog) {
+    AlertDialog(
+      onDismissRequest = { /* Prevent dismiss until complete */ },
+      title = { Text("Uploading Video") },
+      text = {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+          if (uploadCompleted) {
+            Text("Upload Complete!")
+            Log.d("Upload Dialog", "Close dialog on success")
+            showUploadDialog = false
+            onCancelCall.invoke() // Proceed to parent screen
+          } else if (uploadFailed) {
+            Text("Upload Failed. Please try again.")
+            Log.d("Upload Dialog", "Close dialog on failed")
+            showUploadDialog = false
+            onCancelCall.invoke() // Proceed to parent screen
+          } else {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              CircularProgressIndicator()
+              Spacer(modifier = Modifier.height(8.dp))
+              Text("Progress: ${(uploadProgress * 100).toInt()}%")
+            }
+          }
+        }
+      },
+      confirmButton = {
+        if (uploadCompleted || uploadFailed) {
+          TextButton(onClick = {
+            Log.d("Upload Dialog", "Close dialog")
+            showUploadDialog = false
+            onCancelCall.invoke() // Proceed to parent screen
+          }) {
+            Text("OK")
           }
         }
       }

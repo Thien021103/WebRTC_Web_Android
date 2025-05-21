@@ -105,9 +105,8 @@ fun SignallingScreen(
                 signalingClient = SignalingClient(
                   accessToken = accessToken,
                   onWsClose = {
-                    onCallScreen = false
-                    startedSignalling = false
-                    sessionManager = null
+//                    onCallScreen = false
+//                    sessionManager = null
                   }
                 ),
                 peerConnectionFactory = StreamPeerConnectionFactory(context)
@@ -135,34 +134,6 @@ fun SignallingScreen(
               fontWeight = FontWeight.Bold
             )
           }
-        }
-        if (startedSignalling && sessionManager != null) {
-          CompositionLocalProvider(LocalWebRtcSessionManager provides sessionManager!!) {
-            val state by sessionManager!!.signalingClient.sessionStateFlow.collectAsState()
-            if (!onCallScreen) {
-              StageScreen(
-                state = state,
-                onJoinCall = { onCallScreen = true },
-                onBack = {
-                  startedSignalling = false
-                  sessionManager!!.disconnect()
-                  sessionManager = null
-                }
-              )
-            } else {
-              VideoCallScreen (
-                email = email,
-                cameraId = id,
-                onCancelCall = {
-                  onCallScreen = false
-                  startedSignalling = false
-                  sessionManager = null
-                }
-              )
-            }
-          }
-        }
-        if (!startedSignalling) {
           Spacer(modifier = Modifier.height(24.dp))
           Button(
             onClick = onBack,
@@ -184,6 +155,33 @@ fun SignallingScreen(
               fontSize = 18.sp,
               fontWeight = FontWeight.Bold
             )
+          }
+        }
+        if (startedSignalling && sessionManager != null) {
+          CompositionLocalProvider(LocalWebRtcSessionManager provides sessionManager!!) {
+            val state by sessionManager!!.signalingClient.sessionStateFlow.collectAsState()
+            if (!onCallScreen) {
+              StageScreen(
+                state = state,
+                onJoinCall = { onCallScreen = true },
+                onBack = {
+                  startedSignalling = false
+                  sessionManager!!.disconnect()
+                  sessionManager = null
+                }
+              )
+            } else {
+              VideoCallScreen (
+                email = email,
+                cameraId = id,
+                onCancelCall = {
+                  Log.d("Upload Dialog", "Cancel call, startedSignalling = false")
+                  onCallScreen = false
+                  startedSignalling = false
+                  sessionManager = null
+                }
+              )
+            }
           }
         }
       }
