@@ -59,7 +59,8 @@ import org.json.JSONObject
 fun VideoCallControls(
   context: Context,
   email: String,
-  id: String,
+  role: String,
+  accessToken: String,
   modifier: Modifier,
   callMediaState: CallMediaState,
   actions: List<VideoCallControlAction> = buildDefaultCallControlActions(callMediaState = callMediaState),
@@ -79,16 +80,10 @@ fun VideoCallControls(
   ) {
     items(actions) { action ->
       Box(
-        modifier = Modifier
-          .size(56.dp)
-          .clip(CircleShape)
-          .background(action.background)
+        modifier = Modifier.size(56.dp).clip(CircleShape).background(action.background)
       ) {
         Icon(
-          modifier = Modifier
-            .padding(10.dp)
-            .align(Alignment.Center)
-            .clickable { onCallAction(action.callAction) },
+          modifier = Modifier.padding(10.dp).align(Alignment.Center).clickable { onCallAction(action.callAction) },
           tint = action.iconTint,
           painter = action.icon,
           contentDescription = null
@@ -125,14 +120,18 @@ fun VideoCallControls(
     unlockMessage = "Unlocking ..."
 
     val body = JSONObject().apply {
-      put("email", email)
-      put("groupId", id)
+      if(role == "Owner") {
+        put("email", email)
+      } else {
+        put("id", email)
+      }
       put("password", password)
     }.toString()
     CoroutineScope(Dispatchers.IO).launch {
       try {
         val request = Request.Builder()
           .url("https://thientranduc.id.vn:444/api/unlock")
+          .addHeader("Authorization", "Bearer $accessToken")
           .post(body.toRequestBody("application/json".toMediaType()))
           .build()
         val response = client.newCall(request).execute()

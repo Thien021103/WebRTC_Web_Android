@@ -57,9 +57,10 @@ import org.json.JSONObject
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SignallingScreen(
+  role: String,
   email: String,
-  id: String,
   accessToken: String,
+  cloudFolder: String,
   onBack: () -> Unit
 ) {
   var startedSignalling by remember { mutableStateOf(false) }
@@ -113,9 +114,7 @@ fun SignallingScreen(
               )
               startedSignalling = true
             },
-            modifier = Modifier
-              .fillMaxWidth()
-              .height(56.dp),
+            modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = RoundedCornerShape(12.dp),
             elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
             colors = ButtonDefaults.buttonColors(
@@ -172,8 +171,10 @@ fun SignallingScreen(
               )
             } else {
               VideoCallScreen (
+                role = role,
                 email = email,
-                cameraId = id,
+                accessToken = accessToken,
+                cloudFolder = cloudFolder,
                 onCancelCall = {
                   Log.d("Upload Dialog", "Cancel call, startedSignalling = false")
                   onCallScreen = false

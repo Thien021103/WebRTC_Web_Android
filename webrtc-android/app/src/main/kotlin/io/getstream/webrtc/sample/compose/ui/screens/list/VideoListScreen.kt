@@ -1,7 +1,11 @@
 package io.getstream.webrtc.sample.compose.ui.screens.list
 
-import VideoItem
+import android.app.Activity
+import android.util.Log
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,11 +14,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -26,6 +32,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,9 +44,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
-import androidx.media3.common.VideoSize
-import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import com.cloudinary.android.cldvideoplayer.CldVideoPlayer
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.net.URL
 
 @Composable
 fun VideoListScreen(
@@ -48,61 +58,84 @@ fun VideoListScreen(
 ) {
   val videos by viewModel.videos.collectAsState()
   val context = LocalContext.current
+  var selectedVideo by remember { mutableStateOf<Video?>(null) }
+  var downloadVideo by remember { mutableStateOf<Video?>(null) }
+  val coroutineScope = rememberCoroutineScope()
 
-  // Single ExoPlayer instance for the screen
-  val exoPlayer = remember {
-    ExoPlayer.Builder(context).build()
+  val cldVideoPlayer = remember {
+    CldVideoPlayer(context, "") // Empty URL initially
   }
 
-  // Track the currently selected video
-  var selectedVideo by remember { mutableStateOf<Video?>(null) }
-
-  // Cleanup ExoPlayer when screen is disposed
   DisposableEffect(Unit) {
     onDispose {
-      exoPlayer.release()
+      cldVideoPlayer.player?.release()
+      Log.d("VideoListScreen", "CldVideoPlayer released")
     }
   }
 
+  val downloadLauncher = rememberLauncherForActivityResult(
+    contract = ActivityResultContracts.StartActivityForResult(),
+    onResult = { result ->
+      if (result.resultCode == Activity.RESULT_OK) {
+        result.data?.data?.let { uri ->
+          coroutineScope.launch(Dispatchers.IO) {
+            try {
+              context.contentResolver.openOutputStream(uri)?.use { output ->
+                URL(downloadVideo!!.url).openStream().use { input ->
+                  input.copyTo(output)
+                }
+              }
+              withContext(Dispatchers.Main) {
+                Toast.makeText(context, "Downloaded to $uri", Toast.LENGTH_SHORT).show()
+              }
+            } catch (e: Exception) {
+              withContext(Dispatchers.Main) {
+                Toast.makeText(context, "Download failed: ${e.message}", Toast.LENGTH_SHORT).show()
+              }
+            }
+          }
+        }
+      }
+    }
+  )
+
   Column(
-    modifier = Modifier
-      .fillMaxSize()
-      .padding(16.dp),
+    modifier = Modifier.fillMaxSize().padding(16.dp),
     verticalArrangement = Arrangement.spacedBy(10.dp)
   ) {
     Text(
-      text = if (selectedVideo != null) selectedVideo!!.displayName else "Select a video to play",
+      text = selectedVideo?.displayName ?: "Select a video to play",
       color = Color.Black,
       fontSize = 24.sp,
       textAlign = TextAlign.Center
     )
-    // Dedicated Player View at the top
     Box(
       modifier = Modifier
         .fillMaxWidth()
-        .height(280.dp) // Fixed height for player
+        .height(280.dp)
         .background(Color.Black),
       contentAlignment = Alignment.Center
     ) {
       if (selectedVideo != null) {
         AndroidView(
-          factory = {
-            PlayerView(context).apply {
-              player = exoPlayer
+          factory = { ctx ->
+            PlayerView(ctx).apply {
+              player = cldVideoPlayer.player
               useController = true
               layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
               )
+              Log.d("VideoListScreen", "PlayerView created")
             }
           },
-          update = { playerView ->
-            // Update media when selectedVideo changes
-            if (selectedVideo != null) {
-              exoPlayer.setMediaItem(MediaItem.fromUri(selectedVideo!!.file.toURI().toString()))
-              exoPlayer.prepare()
-              exoPlayer.play()
+          update = {
+            cldVideoPlayer.player?.apply {
+              setMediaItem(MediaItem.fromUri(selectedVideo!!.url))
+              prepare()
+              play()
             }
+            Log.d("VideoListScreen", "Playing video: ${selectedVideo!!.id}")
           },
           modifier = Modifier.fillMaxSize()
         )
@@ -114,7 +147,13 @@ fun VideoListScreen(
         )
       }
     }
-    // List of videos below the player
+    if (videos.isEmpty()) {
+      CircularProgressIndicator(
+        modifier = Modifier.size(50.dp).align(Alignment.CenterHorizontally),
+        color = MaterialTheme.colors.onSecondary,
+        strokeWidth = 2.dp
+      )
+    }
     LazyColumn(
       modifier = Modifier.weight(1f),
       verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -122,25 +161,20 @@ fun VideoListScreen(
       items(videos) { video ->
         VideoItem(
           video = video,
-          onVideoSelected = { selected ->
-            selectedVideo = selected
+          onVideoSelected = { selectedVideo = it },
+          onDownload = {
+            downloadVideo = it
+            viewModel.downloadVideo(video = it, launcher = downloadLauncher)
           },
-          onDelete = { vid -> viewModel.deleteVideo(vid) }
+          onDelete = { viewModel.deleteVideo(it) }
         )
       }
     }
-    // Back button
     Button(
       onClick = onBack,
-      modifier = Modifier
-        .fillMaxWidth()
-        .height(56.dp),
+      modifier = Modifier.fillMaxWidth().height(56.dp),
       shape = RoundedCornerShape(12.dp),
-      elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
-      colors = ButtonDefaults.buttonColors(
-        backgroundColor = MaterialTheme.colors.primary,
-        contentColor = MaterialTheme.colors.onPrimary
-      )
+      elevation = ButtonDefaults.elevation(defaultElevation = 4.dp)
     ) {
       Icon(
         imageVector = Icons.AutoMirrored.Filled.ArrowBack,

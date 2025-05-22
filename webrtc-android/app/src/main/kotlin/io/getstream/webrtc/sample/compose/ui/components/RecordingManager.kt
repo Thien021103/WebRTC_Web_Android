@@ -6,18 +6,22 @@ import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.media.MediaMuxer
 import android.util.Log
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 import org.webrtc.AudioTrackSink
 import org.webrtc.VideoFrame
 import org.webrtc.VideoSink
-//import java.io.File
+import java.io.File
 import java.nio.ByteBuffer
 
 class RecordingManager (
+  private var cloudFolder: String,
   private var context: Context,
   private var mediaMuxer: MediaMuxer,
+  private val outputFile: File,
 ) : AudioTrackSink, VideoSink {
 
-//  private var outputFile: File? = null
   private val muxerLock = Any()
   private var isMuxerStarted = false
 
@@ -147,46 +151,6 @@ class RecordingManager (
     }
   }
 
-  fun stopRecording() {
-    if (!isVideoRecording && !isAudioRecording) return
-    isVideoRecording = false
-    isAudioRecording = false
-
-    videoMediaCodec?.let { codec ->
-      try {
-        codec.stop()
-      } catch (e: IllegalStateException) {
-        Log.e("RecordingManager", "Error stopping video codec", e)
-      }
-      codec.release()
-    }
-    audioMediaCodec?.let { codec ->
-      try {
-        codec.stop()
-      } catch (e: IllegalStateException) {
-        Log.e("RecordingManager", "Error stopping audio codec", e)
-      }
-      codec.release()
-    }
-
-    mediaMuxer.let { muxer ->
-      if (isMuxerStarted) {
-        try {
-          muxer.stop()
-        } catch (e: IllegalStateException) {
-          Log.e("RecordingManager", "Error stopping muxer", e)
-        }
-      }
-      muxer.release()
-    }
-
-    videoMediaCodec = null
-//    mediaMuxer = null
-    videoTrackIndex = -1
-    isMuxerStarted = false
-//    outputFile = null
-  }
-
   private fun recordVideoFrame(
     videoFrame: VideoFrame,
     timestamp: Long
@@ -228,7 +192,7 @@ class RecordingManager (
         if (videoTrackIndex < 0) {
           videoTrackIndex = mediaMuxer.addTrack(videoMediaCodec!!.outputFormat) ?: -1
           isVideoRecording = true
-          if (!isMuxerStarted && audioTrackIndex >= 0 && videoTrackIndex >= 0 ) {
+          if (!isMuxerStarted /*&& audioTrackIndex >= 0 */&& videoTrackIndex >= 0 ) {
             mediaMuxer.start()
             Log.d("RecordingManager", "Muxer started for video")
             isMuxerStarted = true
@@ -304,5 +268,79 @@ class RecordingManager (
       audioMediaCodec?.releaseOutputBuffer(outputBufferIndex, false)
       outputBufferIndex = audioMediaCodec?.dequeueOutputBuffer(bufferInfo, 0) ?: -1
     }
+  }
+
+  fun stopRecording(onUploadUpdate: (String?, Float, Boolean) -> Unit = { _, _, _ -> }) {
+    Log.d("Recording Manager", "Stopping recording")
+    if (!isVideoRecording && !isAudioRecording) return
+    isVideoRecording = false
+    isAudioRecording = false
+
+    videoMediaCodec?.let { codec ->
+      try {
+        codec.stop()
+      } catch (e: IllegalStateException) {
+        Log.e("RecordingManager", "Error stopping video codec", e)
+      }
+      codec.release()
+    }
+    audioMediaCodec?.let { codec ->
+      try {
+        codec.stop()
+      } catch (e: IllegalStateException) {
+        Log.e("RecordingManager", "Error stopping audio codec", e)
+      }
+      codec.release()
+    }
+
+    mediaMuxer.let { muxer ->
+      if (isMuxerStarted) {
+        try {
+          muxer.stop()
+          uploadToCloudinary(file = outputFile, onUploadUpdate = onUploadUpdate)
+        } catch (e: IllegalStateException) {
+          Log.e("RecordingManager", "Error stopping muxer", e)
+        }
+      }
+      muxer.release()
+    }
+
+    videoMediaCodec = null
+    videoTrackIndex = -1
+    audioTrackIndex = -1
+    isMuxerStarted = false
+  }
+
+  private fun uploadToCloudinary(file: File, onUploadUpdate: (String?, Float, Boolean) -> Unit) {
+    val publicId = "${file.nameWithoutExtension}}"
+    Log.d("Recording Manager", "Uploading file $cloudFolder/${file.nameWithoutExtension}" )
+    MediaManager.get().upload(file.absolutePath)
+      .option("resource_type", "video")
+      .option("folder", cloudFolder) // Explicitly create folder
+      .option("public_id", publicId)
+      .callback(object : UploadCallback {
+        override fun onStart(requestId: String) {
+          onUploadUpdate(null, 0f, false)
+        }
+
+        override fun onProgress(requestId: String, bytes: Long, totalBytes: Long) {
+          val progress = (bytes * 100 / totalBytes).toFloat() / 100
+          onUploadUpdate(null, progress, false)
+        }
+
+        override fun onSuccess(requestId: String, resultData: Map<*, *>) {
+          val publicUrl = resultData["url"].toString()
+          onUploadUpdate(publicUrl, 1f, true)
+        }
+
+        override fun onError(requestId: String, error: ErrorInfo) {
+          onUploadUpdate(null, 0f, false)
+        }
+
+        override fun onReschedule(requestId: String, error: ErrorInfo) {
+          // Retry logic if needed
+        }
+      })
+      .dispatch()
   }
 }

@@ -44,7 +44,7 @@ import java.time.format.DateTimeFormatter
 @RequiresApi(Build.VERSION_CODES.O)
 fun getOutputFile(
   context: Context,
-  cameraId: String
+  cloudFolder: String
 ): File {
   // Format: |day-month-year|hour:min:sec|recorded.mp4
   val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH-mm-ss")
@@ -53,7 +53,7 @@ fun getOutputFile(
   val baseDir = context.getExternalFilesDir(null)
   try {
     // Try Downloads directory first
-    val idDir = File(baseDir, cameraId) // /storage/emulated/0/Android/data/<package_name>/files/$cameraId/
+    val idDir = File(baseDir, cloudFolder) // /storage/emulated/0/Android/data/<package_name>/files/cloudFolder/
     // Ensure /id directory exists
     if (!idDir.exists()) {
       idDir.mkdirs()
@@ -67,15 +67,17 @@ fun getOutputFile(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun VideoCallScreen(
+  role: String,
   email: String,
-  cameraId: String,
+  accessToken: String,
+  cloudFolder: String,
   onCancelCall: () -> Unit
 ) {
   val sessionManager = LocalWebRtcSessionManager.current
   val context = LocalContext.current
-  val outputFile = getOutputFile(cameraId = cameraId, context = context)
+  val outputFile = getOutputFile(cloudFolder = cloudFolder, context = context)
   val mediaMuxer = remember { MediaMuxer(outputFile.absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4) }
-  val recordingManager = remember { RecordingManager(context = context, mediaMuxer = mediaMuxer, outputFile = outputFile) }
+  val recordingManager = remember { RecordingManager(cloudFolder = cloudFolder, context = context, mediaMuxer = mediaMuxer, outputFile = outputFile) }
 
   val remoteVideoTrackState by sessionManager.remoteVideoTrackFlow.collectAsState(null)
   val remoteVideoTrack = remoteVideoTrackState
@@ -143,7 +145,8 @@ fun VideoCallScreen(
     VideoCallControls(
       context = context,
       email = email,
-      id = cameraId,
+      role = role,
+      accessToken = accessToken,
       modifier = Modifier
         .fillMaxWidth()
         .align(Alignment.BottomCenter),

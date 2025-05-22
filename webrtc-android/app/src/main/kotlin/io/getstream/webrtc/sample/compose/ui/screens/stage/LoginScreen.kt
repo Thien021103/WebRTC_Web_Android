@@ -54,7 +54,7 @@ import org.json.JSONObject
 fun LoginScreen(
   fcmToken: String,
   role: String,
-  onSuccess: (String, String, String) -> Unit,
+  onSuccess: (String, String, String, String) -> Unit,
   onRegister: () -> Unit
 ) {
   val loginUrl = "https://thientranduc.id.vn:444/api/login"
@@ -68,6 +68,63 @@ fun LoginScreen(
 
   val snackbarHostState = remember { SnackbarHostState() }
   val client = OkHttpClient()
+
+  fun performLogin () {
+    isLoading = true
+    errorMessage = ""
+    val body = JSONObject().apply {
+      if (role == "Owner") {
+        put("email", emailOrId)
+      } else {
+        put("id", emailOrId)
+      }
+      put("password", password)
+      put("groupId", groupId)
+      put("fcmToken", fcmToken)
+    }.toString()
+    CoroutineScope(Dispatchers.IO).launch {
+      try {
+        val request = Request.Builder()
+          .url(loginUrl)
+          .post(body.toRequestBody("application/json".toMediaType()))
+          .build()
+        Log.d("Login Request", body)
+
+        val response = client.newCall(request).execute()
+        val responseBody = response.body?.string()
+        if (responseBody != null) {
+          Log.d("Login Response", responseBody)
+        }
+        val json = JSONObject(responseBody ?: "{}")
+        if (response.isSuccessful) {
+          val status = json.optString("status")
+          if (status == "success") {
+            val accessToken = json.optString("message", "")
+            val folder = json.optString("cloud", "")
+            CoroutineScope(Dispatchers.Main).launch {
+              onSuccess(emailOrId, groupId, accessToken, folder)
+              isLoading = false
+            }
+          } else {
+            CoroutineScope(Dispatchers.Main).launch {
+              errorMessage = json.optString("message", "Login failed")
+              isLoading = false
+            }
+          }
+        } else {
+          CoroutineScope(Dispatchers.Main).launch {
+            errorMessage = json.optString("message", "Login failed")
+            isLoading = false
+          }
+        }
+      } catch (e: Exception) {
+        CoroutineScope(Dispatchers.Main).launch {
+          errorMessage = "Network error: ${e.message}"
+          isLoading = false
+        }
+      }
+    }
+  }
 
   Scaffold(
     snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -136,61 +193,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-          onClick = {
-            isLoading = true
-            errorMessage = ""
-            val body = JSONObject().apply {
-              if (role == "Owner") {
-                put("email", emailOrId)
-              } else {
-                put("id", emailOrId)
-              }
-              put("password", password)
-              put("groupId", groupId)
-              put("fcmToken", fcmToken)
-            }.toString()
-            CoroutineScope(Dispatchers.IO).launch {
-              try {
-                val request = Request.Builder()
-                  .url(loginUrl)
-                  .post(body.toRequestBody("application/json".toMediaType()))
-                  .build()
-                Log.d("Login Request", body)
-
-                val response = client.newCall(request).execute()
-                val responseBody = response.body?.string()
-                if (responseBody != null) {
-                  Log.d("Login Response", responseBody)
-                }
-                val json = JSONObject(responseBody ?: "{}")
-                if (response.isSuccessful) {
-                  val status = json.optString("status")
-                  if (status == "success") {
-                    val accessToken = json.optString("message", "")
-                    CoroutineScope(Dispatchers.Main).launch {
-                      onSuccess(emailOrId, groupId, accessToken)
-                      isLoading = false
-                    }
-                  } else {
-                    CoroutineScope(Dispatchers.Main).launch {
-                      errorMessage = json.optString("message", "Login failed")
-                      isLoading = false
-                    }
-                  }
-                } else {
-                  CoroutineScope(Dispatchers.Main).launch {
-                    errorMessage = json.optString("message", "Login failed")
-                    isLoading = false
-                  }
-                }
-              } catch (e: Exception) {
-                CoroutineScope(Dispatchers.Main).launch {
-                  errorMessage = "Network error: ${e.message}"
-                  isLoading = false
-                }
-              }
-            }
-          },
+          onClick = { performLogin() },
           modifier = Modifier.fillMaxWidth().height(56.dp),
           shape = RoundedCornerShape(12.dp),
           elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),

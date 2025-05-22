@@ -1,19 +1,3 @@
-/*
- * Copyright 2023 Stream.IO, Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package io.getstream.webrtc.sample.compose
 
 import android.Manifest
@@ -100,6 +84,7 @@ class MainActivity : ComponentActivity() {
           var groupId by remember { mutableStateOf("") }
           var accessToken by remember { mutableStateOf("") }
           var role by remember { mutableStateOf("") }
+          var cloudFolder by remember { mutableStateOf("") }
 
           when (currentScreen) {
             Screen.RoleSelection -> RoleSelectionScreen(
@@ -111,21 +96,24 @@ class MainActivity : ComponentActivity() {
             Screen.Login -> LoginScreen(
               fcmToken = fcmToken,
               role = role,
-              onSuccess = { emailOrId, id, token ->
+              onSuccess = { emailOrId, id, token, folder ->
                 identifier = emailOrId
                 groupId = id
                 accessToken = token
                 currentScreen = Screen.Main
+                cloudFolder = folder
               },
               onRegister = { currentScreen = Screen.Register }
             )
             Screen.Register -> RegisterScreen(
               fcmToken = fcmToken,
-              onSuccess = { email, id, token ->
+              onSuccess = { email, id, token, folder ->
                 identifier = email
                 groupId = id
                 accessToken = token
                 currentScreen = Screen.Main
+                cloudFolder = folder
+                role = "Owner"
               },
               onLogin = { currentScreen = Screen.RoleSelection }
             )
@@ -146,13 +134,20 @@ class MainActivity : ComponentActivity() {
               }
             )
             Screen.Videos -> VideoListScreen(
-              viewModel = VideoListViewModel(context = this, cameraId = groupId),
+              viewModel = VideoListViewModel(
+                context = this,
+                cameraId = groupId,
+                cloudName = "dvarse6wk",
+                cloudFolder = cloudFolder,
+                token = accessToken
+              ),
               onBack = { currentScreen = Screen.Main }
             )
             Screen.Signalling -> SignallingScreen(
+              role = role,
               email = identifier,
-              id = groupId,
               accessToken = accessToken,
+              cloudFolder = cloudFolder,
               onBack = { currentScreen = Screen.Main }
             )
             Screen.UserManagement -> UserManagementScreen(

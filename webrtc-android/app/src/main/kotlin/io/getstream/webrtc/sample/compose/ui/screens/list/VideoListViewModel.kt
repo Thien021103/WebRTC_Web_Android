@@ -1,7 +1,10 @@
 package io.getstream.webrtc.sample.compose.ui.screens.list
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.result.ActivityResult
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -10,18 +13,34 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
 import java.io.File
 
 data class Video(
-  val id: Long, // Can use file.lastModified() or a counter for uniqueness
+  val id: String, // Cloudinary public_id
   val displayName: String,
-  val file: File
+  val url: String, // Cloudinary secure_url
+  val thumbnailUrl: String? = null,
 )
 
 class VideoListViewModel(
+  val cloudName: String,
+  private val cloudFolder: String,
   context: Context,
-  cameraId: String
+  private val cameraId: String,
+  private val token: String
 ) : ViewModel() {
+
   private val _videos = MutableStateFlow<List<Video>>(emptyList())
   val videos: StateFlow<List<Video>> = _videos.asStateFlow()
 
@@ -29,38 +48,95 @@ class VideoListViewModel(
   private val videoDir = File(externalDir, cameraId)
 
   init {
-    viewModelScope.launch {
-      _videos.value = loadVideos()
-    }
+    fetchVideos()
   }
 
-  private suspend fun loadVideos(): List<Video> = withContext(Dispatchers.IO) {
-    val dir = videoDir ?: return@withContext emptyList()
-    Log.d("Directory", videoDir.path)
-    dir.listFiles { file -> file.isFile && file.extension in listOf("mp4", "mkv", "avi") }
-      ?.mapIndexed { index, file ->
-        Video(
-          id = index.toLong(), // Simple ID; could use file.lastModified() for uniqueness
-          displayName = file.name,
-          file = file
-        )
-      } ?: emptyList()
+  private fun generateThumbnailUrl(videoUrl: String): String {
+    // Generate thumbnail by modifying Cloudinary URL
+    return videoUrl.replace("/upload/", "/upload/so_0/") // Start of video frame
+      .replace(".mp4", ".jpg") // Convert to image
+  }
+
+  private fun fetchVideos() {
+    viewModelScope.launch {
+      withContext(Dispatchers.IO) {
+        try {
+          val client = OkHttpClient()
+          val getUrl = "https://thientranduc.id.vn:444/api/get-videos"
+
+          val body = JSONObject().apply {
+            put("cloudFolder", cloudFolder)
+          }.toString()
+          val request = Request.Builder()
+            .url(getUrl)
+            .addHeader("Authorization", "Bearer $token")
+            .post(body.toRequestBody("application/json".toMediaType()))
+            .build()
+
+          val response = client.newCall(request).execute()
+          if (response.isSuccessful) {
+            val responseBody = response.body?.string() ?: """{"videos":[]}"""
+            val jsonObject = Json.decodeFromString<JsonObject>(responseBody)
+            val videosArray = jsonObject["videos"]?.jsonArray ?: JsonArray(emptyList())
+            val videos = videosArray.mapNotNull { json ->
+              val obj = json.jsonObject
+              Video(
+                id = obj["public_id"]?.jsonPrimitive?.content ?: "",
+                displayName = obj["name"]?.jsonPrimitive?.content ?: "",
+                url = obj["secure_url"]?.jsonPrimitive?.content ?: "",
+                thumbnailUrl = obj["secure_url"]?.jsonPrimitive?.content
+                  ?.replace("/upload/", "/upload/so_0/")
+                  ?.replace(".mp4", ".jpg")
+              )
+            }
+            _videos.value = videos
+            Log.d("VideoListViewModel", "Fetched ${videos.size} videos from folder: $cameraId/videos")
+          } else {
+            Log.e("VideoListViewModel", "Failed to fetch videos: ${response.code}")
+          }
+        } catch (e: Exception) {
+          Log.e("VideoListViewModel", "Failed to fetch videos: ${e.message}")
+        }
+      }
+    }
   }
   fun deleteVideo(video: Video) {
     viewModelScope.launch {
       withContext(Dispatchers.IO) {
         try {
-          if (video.file.delete()) {
+          val client = OkHttpClient()
+          val deleteUrl = "https://thientranduc.id.vn:444/api/delete-videos"
+
+          val body = JSONObject().apply {
+            put("publicId", video.id.substringAfterLast("/"))
+          }.toString()
+          val request = Request.Builder()
+            .url(deleteUrl)
+            .addHeader("Authorization", "Bearer $token")
+            .delete(body.toRequestBody("application/json".toMediaType()))
+            .build()
+
+          val response = client.newCall(request).execute()
+          if (response.isSuccessful) {
             Log.d("VideoListViewModel", "Deleted ${video.displayName}")
-            // Refresh the list
-            _videos.value = loadVideos()
+            fetchVideos()
           } else {
-            Log.e("VideoListViewModel", "Failed to delete ${video.displayName}")
+            Log.e("VideoListViewModel", "Failed to delete ${video.displayName}: ${response.code}")
           }
         } catch (e: Exception) {
           Log.e("VideoListViewModel", "Error deleting ${video.displayName}: ${e.message}")
         }
       }
     }
+  }
+
+  fun downloadVideo(launcher: ManagedActivityResultLauncher<Intent,ActivityResult>, video: Video) {
+    launcher.launch(
+      Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+        addCategory(Intent.CATEGORY_OPENABLE)
+        type = "video/mp4"
+        putExtra(Intent.EXTRA_TITLE, video.displayName)
+      }
+    )
   }
 }

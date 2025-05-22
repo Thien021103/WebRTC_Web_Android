@@ -51,7 +51,7 @@ import org.json.JSONObject
 @Composable
 fun RegisterScreen(
   fcmToken: String,
-  onSuccess: (String, String, String) -> Unit,
+  onSuccess: (String, String, String, String) -> Unit,
   onLogin: () -> Unit
 ) {
 
@@ -149,8 +149,9 @@ fun RegisterScreen(
                   val status = json.optString("status")
                   if (status == "success") {
                     val accessToken = json.optString("message", "")
+                    val folder = json.optString("cloud", "")
                     CoroutineScope(Dispatchers.Main).launch {
-                      onSuccess(email, cameraId, accessToken)
+                      onSuccess(email, cameraId, accessToken, folder)
                       isLoading = false
                     }
                   } else {

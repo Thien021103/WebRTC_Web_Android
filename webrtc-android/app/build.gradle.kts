@@ -84,7 +84,13 @@ dependencies {
   implementation(libs.androidx.media3.exoplayer)
   implementation(libs.firebase.messaging.ktx)
 
+  // firebase
   implementation(platform(libs.firebase.bom))
   implementation(libs.firebase.perf.ktx)
+
+  // cloudinary
   implementation(libs.cloudinary.android)
+
+  // json
+  implementation(libs.kotlinx.serialization.json)
 }
