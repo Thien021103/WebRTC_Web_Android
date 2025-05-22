@@ -16,6 +16,8 @@ const groupSchema = new mongoose.Schema({
 
   state: { type: String, required: true, enum: ['Impossible', 'Ready'], default: 'Impossible' },
   
+  cloudFolder: { type: String, unique: true, required: true },
+
   door: {
     lock: { type: String, enum: ['Locked', 'Unlocked'], default: 'Locked' },
     user: { type: String },

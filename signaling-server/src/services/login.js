@@ -15,6 +15,7 @@ async function loginOwner({ email, password, groupId, fcmToken }) {
   if (!dbGroup) {
     throw new Error('Invalid groupId or email not authorized');
   }
+  const cloudFolder = dbGroup.cloudFolder;
 
   const owner = await Owner.findOne({ email: email, groupId: groupId });
   if (!owner) {
@@ -33,7 +34,7 @@ async function loginOwner({ email, password, groupId, fcmToken }) {
   );
 
   console.log(`Owner logged in: ${email}, group: ${groupId}`);
-  return { accessToken };
+  return { accessToken, cloudFolder };
 }
 
 async function loginUser({ id, password, fcmToken }) {
@@ -45,6 +46,12 @@ async function loginUser({ id, password, fcmToken }) {
   if (!user) {
     throw new Error('Invalid info');
   }
+
+  const dbGroup = await Group.findOne({ id: user.groupId });
+  if (!dbGroup) {
+    throw new Error('Invalid info');
+  }
+  const cloudFolder = dbGroup.cloudFolder;
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
@@ -58,7 +65,7 @@ async function loginUser({ id, password, fcmToken }) {
   );
 
   console.log(`User logged in: ${id}, group: ${user.groupId}`);
-  return { accessToken };
+  return { accessToken, cloudFolder };
 }
 
 module.exports = { loginOwner, loginUser };

@@ -12,9 +12,9 @@ async function handleLogin(req, res) {
     } else {
       throw new Error('Missing required fields');
     }
-    const { accessToken } = result;
+    const { accessToken, cloudFolder } = result;
     
-    res.json({ status: "success", message: accessToken });
+    res.json({ status: "success", message: accessToken, cloud: cloudFolder });
   } catch (error) {
     console.error(`Error in handleLogin: ${error.message}`);
     if (error.message === 'Missing required fields' || error.message === 'Invalid info') {
