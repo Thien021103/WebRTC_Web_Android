@@ -10,7 +10,7 @@ const getVideos = async (folder) => {
   try {
     const result = await cloudinary.api.resources({
       resource_type: 'video',
-      prefix: 'group1/',
+      prefix: 'group1',
       max_results: 100,
     });
     return result 
@@ -21,7 +21,7 @@ const getVideos = async (folder) => {
     }))
     : {public_id: "",name: "", secure_url:""};
   } catch (error) {
-    console.error(`Cloudinary getVideos error: ${error.message}`);
+    console.error(`Cloudinary getVideos error: ${error}`);
     throw new Error('Failed to fetch videos');
   }
 };
