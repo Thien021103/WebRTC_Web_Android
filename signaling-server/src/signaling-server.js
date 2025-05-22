@@ -1,5 +1,6 @@
 const http = require('http');
 const express = require('express');
+const cors = require('cors');
 const WebSocket = require('ws');
 const { connect } = require('./db/db');
 const apiRoutes = require('./routes/api');
@@ -22,6 +23,7 @@ async function startServer() {
 
   // Middleware
   app.use(express.json());
+  app.use(cors());
   app.use(requestLogger);
 
   // Routes

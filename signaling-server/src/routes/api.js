@@ -11,6 +11,7 @@ const { handleUnlock } = require('../controllers/unlock');
 const { handleGetUsers } = require('../controllers/getUser');
 const { handleDeleteUser } = require('../controllers/deleteUser');
 const { handleGetDoorHistory } = require('../controllers/getDoorHistory');
+const { handleGetVideos, handleDeleteVideo } = require('../controllers/cloudVideo');
 
 router.post('/login', handleLogin);
 router.post('/register', handleRegister);
@@ -24,5 +25,7 @@ router.delete('/delete-users', authMiddleware, handleDeleteUser);
 
 router.get('/door-history', authMiddleware, handleGetDoorHistory);
 
+router.get('/videos', authMiddleware, handleGetVideos);
+router.delete('/video', authMiddleware, handleDeleteVideo);
 
 module.exports = router;
