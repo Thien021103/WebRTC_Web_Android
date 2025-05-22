@@ -8,20 +8,24 @@ cloudinary.config({
 
 const getVideos = async (folder) => {
   try {
+    console.log(`getVideos: Fetching videos for folder: ${folder}`);
     const result = await cloudinary.api.resources({
       resource_type: 'video',
-      prefix: 'group1',
+      prefix: `${folder}/`, // Ensure exact folder
       max_results: 100,
     });
-    return result 
-    ? result.resources.map(video => ({
-      public_id: video.public_id,
-      name: video.public_id.split('/').pop(), // Extract file name
-      secure_url: video.secure_url,
-    }))
-    : {public_id: "",name: "", secure_url:""};
+    console.log(`getVideos: Cloudinary response: ${JSON.stringify(result, null, 2)}`);
+    const videos = result.resources
+      .filter(video => video.public_id.startsWith(`${folder}/`))
+      .map(video => ({
+        public_id: video.public_id,
+        name: video.public_id.split('/').pop(),
+        secure_url: video.secure_url,
+      }));
+    console.log(`getVideos: Found ${videos.length} videos`);
+    return videos;
   } catch (error) {
-    console.error(`Cloudinary getVideos error: ${error}`);
+    console.error(`getVideos: Error: ${JSON.stringify(error, null, 2)}`);
     throw new Error('Failed to fetch videos');
   }
 };
