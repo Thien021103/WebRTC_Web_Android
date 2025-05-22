@@ -11,6 +11,7 @@ const getVideos = async (folder) => {
     console.log(`getVideos: Fetching videos for folder: ${folder}`);
     const result = await cloudinary.api.resources({
       resource_type: 'video',
+      type: 'upload',
       prefix: `${folder}/`, // Ensure exact folder
       max_results: 100,
     });
