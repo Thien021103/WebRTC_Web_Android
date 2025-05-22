@@ -7,17 +7,9 @@ cloudinary.config({
 });
 
 const getVideos = async (folder) => {
-  // console.log(
-  //   {
-  //     name: process.env.CLOUDINARY_CLOUD_NAME,
-  //     key:  process.env.CLOUDINARY_API_KEY,
-  //     sec: process.env.CLOUDINARY_API_SECRET
-  //   }
-  // );
   try {
     const result = await cloudinary.api.resources({
       resource_type: 'video',
-      prefix: folder,
       max_results: 100,
     });
     return result.resources.map(video => ({
