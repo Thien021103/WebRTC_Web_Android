@@ -10,7 +10,7 @@ const getVideos = async (folder) => {
   try {
     const result = await cloudinary.api.resources({
       resource_type: 'video',
-      prefix: folder,
+      prefix: `${folder}/`,
       max_results: 100,
     });
     return result 
