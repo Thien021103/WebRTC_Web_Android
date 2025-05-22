@@ -15,7 +15,6 @@ const getVideos = async (folder) => {
       prefix: `${folder}/`, // Ensure exact folder
       max_results: 100,
     });
-    console.log(`getVideos: Cloudinary response: ${JSON.stringify(result, null, 2)}`);
     const videos = result.resources
       .filter(video => video.public_id.startsWith(`${folder}/`))
       .map(video => ({
@@ -26,7 +25,7 @@ const getVideos = async (folder) => {
     console.log(`getVideos: Found ${videos.length} videos`);
     return videos;
   } catch (error) {
-    console.error(`getVideos: Error: ${JSON.stringify(error, null, 2)}`);
+    console.error(`getVideos: Error: ${error.error.message}`);
     throw new Error('Failed to fetch videos');
   }
 };

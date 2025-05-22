@@ -2,8 +2,8 @@ const { getVideos, deleteVideo } = require("../services/cloudVideo");
 
 const handleGetVideos = async (req, res) => {
   try {
-    const { groupId } = req.user;
-    const videos = await getVideos(groupId);
+    const { cloudFolder } = req.body;
+    const videos = await getVideos(cloudFolder);
     res.json({ status: "success", videos });
   } catch (error) {
     console.error(`Error in handleGetVideos: ${error.message}`);
