@@ -2,6 +2,9 @@ const http = require('http');
 const express = require('express');
 const cors = require('cors');
 const WebSocket = require('ws');
+
+require('dotenv').config(); // Load .env
+
 const { connect } = require('./db/db');
 const apiRoutes = require('./routes/api');
 const websocketHandler = require('./routes/websocket');

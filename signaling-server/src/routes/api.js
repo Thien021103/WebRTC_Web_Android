@@ -25,7 +25,7 @@ router.delete('/delete-users', authMiddleware, handleDeleteUser);
 
 router.get('/door-history', authMiddleware, handleGetDoorHistory);
 
-router.post('/get-videos', authMiddleware, handleGetVideos);
+router.get('/get-videos', authMiddleware, handleGetVideos);
 router.delete('/delete-videos', authMiddleware, handleDeleteVideo);
 
 module.exports = router;

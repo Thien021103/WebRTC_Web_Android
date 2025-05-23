@@ -6,14 +6,23 @@ async function handleRegister(req, res) {
 
     if ( email && groupId && fcmToken ) {
       const { accessToken, cloudFolder } = await registerOwner({ email, password, groupId, fcmToken });
-      res.status(201).json({ status: "success", message: accessToken, cloud: cloudFolder });
+      res.status(201).json({ 
+        status: "success", 
+        message: accessToken,
+        cloudFolder: cloudFolder,
+        cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+        cloudKey: process.env.CLOUDINARY_API_KEY,
+        cloudSec: process.env.CLOUDINARY_API_SECRET
+      });
     } else if ( id && ownerToken ) {
       await registerUser({ id, password, ownerToken });
-      res.status(201).json({ status: "success", message: "User registered" });
+      res.status(201).json({ 
+        status: "success",
+        message: "User registered" 
+      });
     } else {
       throw new Error('Missing required fields');
     }
-    
   } catch (error) {
     console.error(`Error in handleRegister: ${error.message}`);
     if (error.message === 'Missing required fields' || error.message === 'Email already registered' || error.message === 'User ID already registered'){

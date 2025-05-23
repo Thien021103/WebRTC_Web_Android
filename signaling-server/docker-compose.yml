@@ -25,6 +25,8 @@ services:
       - mongodb
     networks:
       - thien-network
+    env_file:
+      - .env
 
 volumes:
   thien-mongo-data:

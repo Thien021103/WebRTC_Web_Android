@@ -13,8 +13,15 @@ async function handleLogin(req, res) {
       throw new Error('Missing required fields');
     }
     const { accessToken, cloudFolder } = result;
-    
-    res.json({ status: "success", message: accessToken, cloud: cloudFolder });
+  
+    res.status(201).json({ 
+      status: "success", 
+      message: accessToken, 
+      cloudFolder: cloudFolder,
+      cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+      cloudKey: process.env.CLOUDINARY_API_KEY,
+      cloudSec: process.env.CLOUDINARY_API_SECRET
+    });
   } catch (error) {
     console.error(`Error in handleLogin: ${error.message}`);
     if (error.message === 'Missing required fields' || error.message === 'Invalid info') {

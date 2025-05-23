@@ -1,13 +1,28 @@
+const Group = require('../schemas/group');
 const cloudinary = require('cloudinary').v2;
 
-cloudinary.config({
-  cloud_name: "dvarse6wk",
-  api_key: "573435389774623",
-  api_secret: "CZmauvR9SiOsysGNak67f9DVTjc",
+console.log('Cloudinary config:', {
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const getVideos = async (folder) => {
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const getVideos = async (groupId) => {
+  
   try {
+
+    const dbGroup = await Group.findOne({ id: groupId });
+    if (!dbGroup) {
+      throw new Error('Group not found');
+    }
+    const folder = dbGroup.cloudFolder;
+
     console.log(`getVideos: Fetching videos for folder: ${folder}`);
     const result = await cloudinary.api.resources({
       resource_type: 'video',
