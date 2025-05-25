@@ -14,9 +14,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Delete
@@ -27,12 +29,14 @@ import com.skydoves.landscapist.glide.GlideImage
 @Composable
 fun VideoItem(
   video: Video,
-  onVideoSelected: (Video) -> Unit,
-  onDownload: (Video) -> Unit,
-  onDelete: (Video) -> Unit
+  onVideoSelected: () -> Unit,
+  onDownload: () -> Unit,
+  onDelete: () -> Unit
 ) {
+  var showDeleteDialog by remember { mutableStateOf(false) }
+
   Card(
-    modifier = Modifier.fillMaxWidth().clickable { onVideoSelected(video) },
+    modifier = Modifier.fillMaxWidth().clickable { onVideoSelected() },
     elevation = 4.dp
   ) {
     Row(
@@ -77,7 +81,7 @@ fun VideoItem(
         modifier = Modifier.weight(1f)
       )
       // Download button
-      IconButton(onClick = { onDownload(video) }) {
+      IconButton(onClick = { onDownload() }) {
         Icon(
           imageVector = Icons.Filled.CloudDownload,
           contentDescription = "Download ${video.displayName}",
@@ -85,7 +89,7 @@ fun VideoItem(
         )
       }
       // Delete button
-      IconButton(onClick = { onDelete(video) }) {
+      IconButton(onClick = { showDeleteDialog = true }) {
         Icon(
           imageVector = Icons.Default.Delete,
           contentDescription = "Delete ${video.displayName}",
@@ -93,5 +97,29 @@ fun VideoItem(
         )
       }
     }
+  }
+
+  // Delete Confirmation Dialog
+  if (showDeleteDialog) {
+    AlertDialog(
+      onDismissRequest = { showDeleteDialog = false },
+      title = { Text("Confirm Delete") },
+      text = { Text("Are you sure you want to delete this user?") },
+      confirmButton = {
+        TextButton(
+          onClick = {
+            onDelete()
+            showDeleteDialog = false
+          }
+        ) {
+          Text("Delete", color = MaterialTheme.colors.error)
+        }
+      },
+      dismissButton = {
+        TextButton(onClick = { showDeleteDialog = false }) {
+          Text("Cancel")
+        }
+      }
+    )
   }
 }

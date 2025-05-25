@@ -51,7 +51,7 @@ import org.json.JSONObject
 @Composable
 fun RegisterScreen(
   fcmToken: String,
-  onSuccess: (String, String, String, String) -> Unit,
+  onSuccess: (String, String, String, String, Map<String, String>) -> Unit,
   onLogin: () -> Unit
 ) {
 
@@ -59,14 +59,71 @@ fun RegisterScreen(
 
   var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
-  var cameraId by remember { mutableStateOf("") }
+  var groupId by remember { mutableStateOf("") }
   var errorMessage by remember { mutableStateOf("") }
   var isLoading by remember { mutableStateOf(false) }
   var showPassword by remember { mutableStateOf(false) }
 
   val snackbarHostState = remember { SnackbarHostState() }
-
   val client = OkHttpClient()
+
+  fun performRegister () {
+    isLoading = true
+    errorMessage = ""
+    val body = JSONObject().apply {
+      put("email", email)
+      put("password", password)
+      put("groupId", groupId)
+      put("fcmToken", fcmToken)
+    }.toString()
+    CoroutineScope(Dispatchers.IO).launch {
+      try {
+        val request = Request.Builder()
+          .url(registerUrl) // Replace with your server URL
+          .post(body.toRequestBody("application/json".toMediaType()))
+          .build()
+
+        // Response body will be: { "success": true, "accessToken": "xyz" }
+        val response = client.newCall(request).execute()
+        val responseBody = response.body?.string()
+        if (responseBody != null) {
+          Log.d("Login Response", responseBody)
+        }
+        val json = JSONObject(responseBody ?: "{}")
+        if (response.isSuccessful) {
+          val status = json.optString("status")
+          if (status == "success") {
+            val accessToken = json.optString("message", "")
+            val cloudFolder = json.optString("cloudFolder", "")
+            val cloudinaryConfig = mapOf(
+              "cloud_name" to json.optString("cloudName", ""),
+              "api_key" to json.optString("cloudKey", ""),
+              "api_secret" to json.optString("cloudSec", "")
+            )
+            CoroutineScope(Dispatchers.Main).launch {
+              onSuccess(email, groupId, accessToken, cloudFolder, cloudinaryConfig)
+              isLoading = false
+            }
+          } else {
+            CoroutineScope(Dispatchers.Main).launch {
+              errorMessage = json.optString("message", "Registration failed")
+              isLoading = false
+            }
+          }
+        } else {
+          CoroutineScope(Dispatchers.Main).launch {
+            errorMessage = json.optString("message", "Registration failed")
+            isLoading = false
+          }
+        }
+      } catch (e: Exception) {
+        CoroutineScope(Dispatchers.Main).launch {
+          errorMessage = "Network error: ${e.message}"
+          isLoading = false
+        }
+      }
+    }
+  }
 
   Scaffold(
     snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -107,8 +164,8 @@ fun RegisterScreen(
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
-          value = cameraId,
-          onValueChange = { cameraId = it },
+          value = groupId,
+          onValueChange = { groupId = it },
           label = { Text("Camera ID") },
           modifier = Modifier.fillMaxWidth(),
           enabled = !isLoading
@@ -122,58 +179,7 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-          onClick = {
-            isLoading = true
-            errorMessage = ""
-            val body = JSONObject().apply {
-              put("email", email)
-              put("password", password)
-              put("groupId", cameraId)
-              put("fcmToken", fcmToken)
-            }.toString()
-            CoroutineScope(Dispatchers.IO).launch {
-              try {
-                val request = Request.Builder()
-                  .url(registerUrl) // Replace with your server URL
-                  .post(body.toRequestBody("application/json".toMediaType()))
-                  .build()
-
-                // Response body will be: { "success": true, "accessToken": "xyz" }
-                val response = client.newCall(request).execute()
-                val responseBody = response.body?.string()
-                if (responseBody != null) {
-                  Log.d("Login Response", responseBody)
-                }
-                val json = JSONObject(responseBody ?: "{}")
-                if (response.isSuccessful) {
-                  val status = json.optString("status")
-                  if (status == "success") {
-                    val accessToken = json.optString("message", "")
-                    val folder = json.optString("cloud", "")
-                    CoroutineScope(Dispatchers.Main).launch {
-                      onSuccess(email, cameraId, accessToken, folder)
-                      isLoading = false
-                    }
-                  } else {
-                    CoroutineScope(Dispatchers.Main).launch {
-                      errorMessage = json.optString("message", "Registration failed")
-                      isLoading = false
-                    }
-                  }
-                } else {
-                  CoroutineScope(Dispatchers.Main).launch {
-                    errorMessage = json.optString("message", "Login failed")
-                    isLoading = false
-                  }
-                }
-              } catch (e: Exception) {
-                CoroutineScope(Dispatchers.Main).launch {
-                  errorMessage = "Network error: ${e.message}"
-                  isLoading = false
-                }
-              }
-            }
-          },
+          onClick = { performRegister() },
           modifier = Modifier.fillMaxWidth().height(56.dp),
           shape = RoundedCornerShape(12.dp),
           elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
@@ -181,7 +187,7 @@ fun RegisterScreen(
             backgroundColor = MaterialTheme.colors.secondary,
             contentColor = MaterialTheme.colors.onSecondary
           ),
-          enabled = email.isNotBlank() && password.isNotBlank() && cameraId.isNotBlank() && fcmToken.isNotBlank() && !isLoading
+          enabled = email.isNotBlank() && password.isNotBlank() && groupId.isNotBlank() && fcmToken.isNotBlank() && !isLoading
         ) {
           if (isLoading) {
             CircularProgressIndicator(

@@ -23,7 +23,10 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarHost
 import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
@@ -98,94 +101,104 @@ fun VideoListScreen(
       }
     }
   )
-
-  Column(
-    modifier = Modifier.fillMaxSize().padding(16.dp),
-    verticalArrangement = Arrangement.spacedBy(10.dp)
-  ) {
-    Text(
-      text = selectedVideo?.displayName ?: "Select a video to play",
-      color = Color.Black,
-      fontSize = 24.sp,
-      textAlign = TextAlign.Center
-    )
-    Box(
-      modifier = Modifier
-        .fillMaxWidth()
-        .height(280.dp)
-        .background(Color.Black),
-      contentAlignment = Alignment.Center
-    ) {
-      if (selectedVideo != null) {
-        AndroidView(
-          factory = { ctx ->
-            PlayerView(ctx).apply {
-              player = cldVideoPlayer.player
-              useController = true
-              layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-              )
-              Log.d("VideoListScreen", "PlayerView created")
-            }
-          },
-          update = {
-            cldVideoPlayer.player?.apply {
-              setMediaItem(MediaItem.fromUri(selectedVideo!!.url))
-              prepare()
-              play()
-            }
-            Log.d("VideoListScreen", "Playing video: ${selectedVideo!!.id}")
-          },
-          modifier = Modifier.fillMaxSize()
-        )
-      } else {
+  Scaffold(
+    topBar = {
+      TopAppBar(
+        title = { Text("Video List", fontSize = 20.sp) },
+        backgroundColor = MaterialTheme.colors.primary,
+        contentColor = MaterialTheme.colors.onPrimary
+      )
+    },
+    content = { padding ->
+      Column(
+        modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+      ) {
         Text(
-          text = "Select a video to play",
-          color = Color.White,
-          fontSize = 16.sp
+          text = selectedVideo?.displayName ?: "Select a video to play",
+          color = Color.Black,
+          fontSize = 24.sp,
+          textAlign = TextAlign.Center
         )
+        Box(
+          modifier = Modifier
+            .fillMaxWidth()
+            .height(280.dp)
+            .background(Color.Black),
+          contentAlignment = Alignment.Center
+        ) {
+          if (selectedVideo != null) {
+            AndroidView(
+              factory = { ctx ->
+                PlayerView(ctx).apply {
+                  player = cldVideoPlayer.player
+                  useController = true
+                  layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                  )
+                  Log.d("VideoListScreen", "PlayerView created")
+                }
+              },
+              update = {
+                cldVideoPlayer.player?.apply {
+                  setMediaItem(MediaItem.fromUri(selectedVideo!!.url))
+                  prepare()
+                  play()
+                }
+                Log.d("VideoListScreen", "Playing video: ${selectedVideo!!.id}")
+              },
+              modifier = Modifier.fillMaxSize()
+            )
+          } else {
+            Text(
+              text = "Select a video to play",
+              color = Color.White,
+              fontSize = 16.sp
+            )
+          }
+        }
+        if (videos.isEmpty()) {
+          CircularProgressIndicator(
+            modifier = Modifier.size(50.dp).align(Alignment.CenterHorizontally),
+            color = MaterialTheme.colors.onSecondary,
+            strokeWidth = 2.dp
+          )
+        }
+        LazyColumn(
+          modifier = Modifier.weight(1f),
+          verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+          items(videos) { video ->
+            VideoItem(
+              video = video,
+              onVideoSelected = { selectedVideo = video },
+              onDownload = {
+                downloadVideo = video
+                viewModel.downloadVideo(video = video, launcher = downloadLauncher)
+              },
+              onDelete = { viewModel.deleteVideo(video) }
+            )
+          }
+        }
+        Button(
+          onClick = onBack,
+          modifier = Modifier.fillMaxWidth().height(56.dp),
+          shape = RoundedCornerShape(12.dp),
+          elevation = ButtonDefaults.elevation(defaultElevation = 4.dp)
+        ) {
+          Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = "Back",
+            modifier = Modifier.padding(end = 8.dp)
+          )
+          Text(
+            text = "Back",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold
+          )
+        }
       }
     }
-    if (videos.isEmpty()) {
-      CircularProgressIndicator(
-        modifier = Modifier.size(50.dp).align(Alignment.CenterHorizontally),
-        color = MaterialTheme.colors.onSecondary,
-        strokeWidth = 2.dp
-      )
-    }
-    LazyColumn(
-      modifier = Modifier.weight(1f),
-      verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-      items(videos) { video ->
-        VideoItem(
-          video = video,
-          onVideoSelected = { selectedVideo = it },
-          onDownload = {
-            downloadVideo = it
-            viewModel.downloadVideo(video = it, launcher = downloadLauncher)
-          },
-          onDelete = { viewModel.deleteVideo(it) }
-        )
-      }
-    }
-    Button(
-      onClick = onBack,
-      modifier = Modifier.fillMaxWidth().height(56.dp),
-      shape = RoundedCornerShape(12.dp),
-      elevation = ButtonDefaults.elevation(defaultElevation = 4.dp)
-    ) {
-      Icon(
-        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-        contentDescription = "Back",
-        modifier = Modifier.padding(end = 8.dp)
-      )
-      Text(
-        text = "Back",
-        fontSize = 18.sp,
-        fontWeight = FontWeight.Bold
-      )
-    }
-  }
+  )
 }

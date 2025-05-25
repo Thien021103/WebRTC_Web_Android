@@ -20,7 +20,6 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -58,11 +57,64 @@ fun RegisterUserScreen(
 
   var userId by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
-  var errorMessage by remember { mutableStateOf("") }
-  var successMessage by remember { mutableStateOf("") }
+  var registerMessage by remember { mutableStateOf("") }
   var isLoading by remember { mutableStateOf(false) }
   var showPassword by remember { mutableStateOf(false) }
 
+  fun performRegisterUser() {
+    isLoading = true
+    registerMessage = ""
+    val client = OkHttpClient()
+    val registerUrl = "https://thientranduc.id.vn:444/api/register"
+
+    val body = JSONObject().apply {
+      put("id", userId)
+      put("password", password)
+      put("ownerToken", accessToken)
+    }.toString()
+
+    CoroutineScope(Dispatchers.IO).launch {
+      try {
+        val request = Request.Builder()
+          .url(registerUrl)
+          .post(body.toRequestBody("application/json".toMediaType()))
+          .build()
+
+        val response = client.newCall(request).execute()
+        val responseBody = response.body?.string()
+        if (responseBody != null) {
+          Log.d("RegisterUser Response", responseBody)
+        }
+        val json = JSONObject(responseBody ?: "{}")
+        if (response.isSuccessful) {
+          val status = json.optString("status")
+          if (status == "success") {
+            CoroutineScope(Dispatchers.Main).launch {
+              registerMessage = "User registered successfully"
+              isLoading = false
+              userId = ""
+              password = ""
+            }
+          } else {
+            CoroutineScope(Dispatchers.Main).launch {
+              registerMessage = json.optString("message", "Registration failed")
+              isLoading = false
+            }
+          }
+        } else {
+          CoroutineScope(Dispatchers.Main).launch {
+            registerMessage = json.optString("message", "Registration failed")
+            isLoading = false
+          }
+        }
+      } catch (e: Exception) {
+        CoroutineScope(Dispatchers.Main).launch {
+          registerMessage = "Network error: ${e.message.toString()}"
+          isLoading = false
+        }
+      }
+    }
+  }
   Scaffold(
     snackbarHost = { SnackbarHost(snackbarHostState) },
     topBar = {
@@ -117,33 +169,8 @@ fun RegisterUserScreen(
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(
-          onClick = {
-            isLoading = true
-            errorMessage = ""
-            successMessage = ""
-            performRegisterUser(
-              userId = userId,
-              password = password,
-              accessToken = accessToken,
-              onSuccess = {
-                CoroutineScope(Dispatchers.Main).launch {
-                  successMessage = "User registered successfully"
-                  isLoading = false
-                  userId = ""
-                  password = ""
-                }
-              },
-              onError = { message ->
-                CoroutineScope(Dispatchers.Main).launch {
-                  errorMessage = message
-                  isLoading = false
-                }
-              }
-            )
-          },
-          modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp),
+          onClick = { performRegisterUser() },
+          modifier = Modifier.fillMaxWidth().height(56.dp),
           shape = RoundedCornerShape(12.dp),
           elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
           colors = ButtonDefaults.buttonColors(
@@ -199,67 +226,9 @@ fun RegisterUserScreen(
     }
   )
 
-  if (errorMessage.isNotEmpty()) {
-    LaunchedEffect(errorMessage) {
-      snackbarHostState.showSnackbar(errorMessage)
-    }
-  }
-  if (successMessage.isNotEmpty()) {
-    LaunchedEffect(successMessage) {
-      snackbarHostState.showSnackbar(successMessage)
-    }
-  }
-}
-
-fun performRegisterUser(
-  userId: String,
-  password: String,
-  accessToken: String,
-  onSuccess: () -> Unit,
-  onError: (String) -> Unit
-) {
-  val client = OkHttpClient()
-  val registerUrl = "https://thientranduc.id.vn:444/api/register"
-
-  val body = JSONObject().apply {
-    put("id", userId)
-    put("password", password)
-    put("ownerToken", accessToken)
-  }.toString()
-
-  CoroutineScope(Dispatchers.IO).launch {
-    try {
-      val request = Request.Builder()
-        .url(registerUrl)
-        .post(body.toRequestBody("application/json".toMediaType()))
-        .build()
-
-      val response = client.newCall(request).execute()
-      val responseBody = response.body?.string()
-      if (responseBody != null) {
-        Log.d("RegisterUser Response", responseBody)
-      }
-      val json = JSONObject(responseBody ?: "{}")
-      if (response.isSuccessful) {
-        val status = json.optString("status")
-        if (status == "success") {
-          CoroutineScope(Dispatchers.Main).launch {
-            onSuccess()
-          }
-        } else {
-          CoroutineScope(Dispatchers.Main).launch {
-            onError(json.optString("message", "Registration failed"))
-          }
-        }
-      } else {
-        CoroutineScope(Dispatchers.Main).launch {
-          onError(json.optString("message", "Server error"))
-        }
-      }
-    } catch (e: Exception) {
-      CoroutineScope(Dispatchers.Main).launch {
-        onError("Network error: ${e.message}")
-      }
+  if (registerMessage.isNotEmpty()) {
+    LaunchedEffect(registerMessage) {
+      snackbarHostState.showSnackbar(registerMessage)
     }
   }
 }

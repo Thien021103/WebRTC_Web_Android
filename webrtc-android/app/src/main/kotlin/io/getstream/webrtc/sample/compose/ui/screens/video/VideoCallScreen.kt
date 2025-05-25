@@ -187,7 +187,7 @@ fun VideoCallScreen(
             showUploadDialog = false
             onCancelCall.invoke() // Proceed to parent screen
           } else if (uploadFailed) {
-            Text("Upload Failed. Please try again.")
+            Text("Upload Failed.")
             Log.d("Upload Dialog", "Close dialog on failed")
             showUploadDialog = false
             onCancelCall.invoke() // Proceed to parent screen

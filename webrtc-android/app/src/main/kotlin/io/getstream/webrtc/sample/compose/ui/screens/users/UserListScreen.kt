@@ -38,6 +38,7 @@ import org.json.JSONObject
 import android.util.Log
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
@@ -64,6 +65,8 @@ fun UserListScreen(
   var users by remember { mutableStateOf<List<User>>(emptyList()) }
   var isLoading by remember { mutableStateOf(true) }
   var errorMessage by remember { mutableStateOf("") }
+  var showDeleteDialog by remember { mutableStateOf(false) }
+  var deleteId by remember { mutableStateOf("") }
 
   // Fetch users function
   fun fetchUsers() {
@@ -124,6 +127,62 @@ fun UserListScreen(
       }
     }
   }
+
+  fun performDeleteUser(
+    userId: String,
+  ) {
+    errorMessage = ""
+    val client = OkHttpClient()
+    val deleteUrl = "https://thientranduc.id.vn:444/api/delete-users"
+
+    val body = JSONObject().apply {
+      put("id", userId)
+    }.toString()
+
+    CoroutineScope(Dispatchers.IO).launch {
+      try {
+        val request = Request.Builder()
+          .url(deleteUrl)
+          .addHeader("Authorization", "Bearer $accessToken")
+          .delete(body.toRequestBody("application/json".toMediaType()))
+          .build()
+
+        val response = client.newCall(request).execute()
+        val responseBody = response.body?.string()
+        if (responseBody != null) {
+          Log.d("DeleteUser Response", responseBody)
+        }
+        val json = JSONObject(responseBody ?: "{}")
+        if (response.isSuccessful) {
+          val status = json.optString("status")
+          if (status == "success") {
+            CoroutineScope(Dispatchers.Main).launch {
+              isLoading = true
+              errorMessage = "User deleted successfully"
+              deleteId = ""
+              fetchUsers() // Refresh list
+            }
+          } else {
+            CoroutineScope(Dispatchers.Main).launch {
+              errorMessage = json.optString("message", "Failed to delete user")
+              deleteId = ""
+            }
+          }
+        } else {
+          CoroutineScope(Dispatchers.Main).launch {
+            errorMessage = json.optString("message", "Server error")
+            deleteId = ""
+          }
+        }
+      } catch (e: Exception) {
+        CoroutineScope(Dispatchers.Main).launch {
+          errorMessage = "Network error: ${e.message}"
+          deleteId = ""
+        }
+      }
+    }
+  }
+
   // Initial fetch on screen load
   LaunchedEffect(Unit) {
     fetchUsers()
@@ -195,22 +254,8 @@ fun UserListScreen(
                     }
                     TextButton(
                       onClick = {
-                        performDeleteUser(
-                          userId = user.id,
-                          accessToken = accessToken,
-                          onSuccess = {
-                            CoroutineScope(Dispatchers.Main).launch {
-                              isLoading = true
-                              snackbarHostState.showSnackbar("User deleted successfully")
-                              fetchUsers() // Refresh list
-                            }
-                          },
-                          onError = { message ->
-                            CoroutineScope(Dispatchers.Main).launch {
-                              errorMessage = message
-                            }
-                          }
-                        )
+                        deleteId = user.id
+                        showDeleteDialog = true
                       }
                     ) {
                       Text(text = "Delete", color = MaterialTheme.colors.error, fontSize = 14.sp)
@@ -255,55 +300,36 @@ fun UserListScreen(
       snackbarHostState.showSnackbar(errorMessage)
     }
   }
-}
 
-fun performDeleteUser(
-  userId: String,
-  accessToken: String,
-  onSuccess: () -> Unit,
-  onError: (String) -> Unit
-) {
-  val client = OkHttpClient()
-  val deleteUrl = "https://thientranduc.id.vn:444/api/delete-users"
-
-  val body = JSONObject().apply {
-    put("id", userId)
-  }.toString()
-
-  CoroutineScope(Dispatchers.IO).launch {
-    try {
-      val request = Request.Builder()
-        .url(deleteUrl)
-        .addHeader("Authorization", "Bearer $accessToken")
-        .delete(body.toRequestBody("application/json".toMediaType()))
-        .build()
-
-      val response = client.newCall(request).execute()
-      val responseBody = response.body?.string()
-      if (responseBody != null) {
-        Log.d("DeleteUser Response", responseBody)
-      }
-      val json = JSONObject(responseBody ?: "{}")
-      if (response.isSuccessful) {
-        val status = json.optString("status")
-        if (status == "success") {
-          CoroutineScope(Dispatchers.Main).launch {
-            onSuccess()
+  // Delete Confirmation Dialog
+  if (showDeleteDialog) {
+    AlertDialog(
+      onDismissRequest = {
+        showDeleteDialog = false
+        deleteId = ""
+      },
+      title = { Text("Confirm Delete") },
+      text = { Text("Are you sure you want to delete this user?") },
+      confirmButton = {
+        TextButton(
+          onClick = {
+            performDeleteUser(deleteId)
+            showDeleteDialog = false
           }
-        } else {
-          CoroutineScope(Dispatchers.Main).launch {
-            onError(json.optString("message", "Failed to delete user"))
-          }
+        ) {
+          Text("Delete", color = MaterialTheme.colors.error)
         }
-      } else {
-        CoroutineScope(Dispatchers.Main).launch {
-          onError(json.optString("message", "Server error"))
+      },
+      dismissButton = {
+        TextButton(
+          onClick = {
+            showDeleteDialog = false
+            deleteId = ""
+          }
+        ) {
+          Text("Cancel")
         }
       }
-    } catch (e: Exception) {
-      CoroutineScope(Dispatchers.Main).launch {
-        onError("Network error: ${e.message}")
-      }
-    }
+    )
   }
 }

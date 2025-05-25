@@ -1,6 +1,5 @@
 package io.getstream.webrtc.sample.compose.ui.screens.list
 
-import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -24,7 +23,6 @@ import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
-import java.io.File
 
 data class Video(
   val id: String, // Cloudinary public_id
@@ -34,27 +32,14 @@ data class Video(
 )
 
 class VideoListViewModel(
-  val cloudName: String,
-  private val cloudFolder: String,
-  context: Context,
-  private val cameraId: String,
   private val token: String
 ) : ViewModel() {
 
   private val _videos = MutableStateFlow<List<Video>>(emptyList())
   val videos: StateFlow<List<Video>> = _videos.asStateFlow()
 
-  private val externalDir = context.getExternalFilesDir(null)
-  private val videoDir = File(externalDir, cameraId)
-
   init {
     fetchVideos()
-  }
-
-  private fun generateThumbnailUrl(videoUrl: String): String {
-    // Generate thumbnail by modifying Cloudinary URL
-    return videoUrl.replace("/upload/", "/upload/so_0/") // Start of video frame
-      .replace(".mp4", ".jpg") // Convert to image
   }
 
   private fun fetchVideos() {
@@ -64,13 +49,10 @@ class VideoListViewModel(
           val client = OkHttpClient()
           val getUrl = "https://thientranduc.id.vn:444/api/get-videos"
 
-          val body = JSONObject().apply {
-            put("cloudFolder", cloudFolder)
-          }.toString()
           val request = Request.Builder()
             .url(getUrl)
             .addHeader("Authorization", "Bearer $token")
-            .post(body.toRequestBody("application/json".toMediaType()))
+            .get()
             .build()
 
           val response = client.newCall(request).execute()
@@ -90,7 +72,7 @@ class VideoListViewModel(
               )
             }
             _videos.value = videos
-            Log.d("VideoListViewModel", "Fetched ${videos.size} videos from folder: $cameraId/videos")
+            Log.d("VideoListViewModel", "Fetched ${videos.size} videos")
           } else {
             Log.e("VideoListViewModel", "Failed to fetch videos: ${response.code}")
           }
@@ -108,7 +90,7 @@ class VideoListViewModel(
           val deleteUrl = "https://thientranduc.id.vn:444/api/delete-videos"
 
           val body = JSONObject().apply {
-            put("publicId", video.id.substringAfterLast("/"))
+            put("publicId", video.id)
           }.toString()
           val request = Request.Builder()
             .url(deleteUrl)
@@ -118,7 +100,7 @@ class VideoListViewModel(
 
           val response = client.newCall(request).execute()
           if (response.isSuccessful) {
-            Log.d("VideoListViewModel", "Deleted ${video.displayName}")
+            Log.d("VideoListViewModel", "Deleted ${video.id.substringAfterLast("/")}")
             fetchVideos()
           } else {
             Log.e("VideoListViewModel", "Failed to delete ${video.displayName}: ${response.code}")

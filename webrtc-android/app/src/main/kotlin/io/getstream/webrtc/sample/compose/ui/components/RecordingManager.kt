@@ -9,6 +9,7 @@ import android.util.Log
 import com.cloudinary.android.MediaManager
 import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
+import io.getstream.webrtc.sample.compose.WebRTCApp
 import org.webrtc.AudioTrackSink
 import org.webrtc.VideoFrame
 import org.webrtc.VideoSink
@@ -302,6 +303,9 @@ class RecordingManager (
           Log.e("RecordingManager", "Error stopping muxer", e)
         }
       }
+      else {
+        onUploadUpdate(null, 0f, false)
+      }
       muxer.release()
     }
 
@@ -312,6 +316,13 @@ class RecordingManager (
   }
 
   private fun uploadToCloudinary(file: File, onUploadUpdate: (String?, Float, Boolean) -> Unit) {
+    val config = (context.applicationContext as WebRTCApp).getCloudinaryConfig()
+    if (config["cloud_name"].isNullOrEmpty()) {
+      onUploadUpdate(null, 0f, true)
+      Log.e("RecordingManager", "Cannot upload: MediaManager not initialized")
+      return
+    }
+
     val publicId = "${file.nameWithoutExtension}}"
     Log.d("Recording Manager", "Uploading file $cloudFolder/${file.nameWithoutExtension}" )
     MediaManager.get().upload(file.absolutePath)
@@ -334,7 +345,7 @@ class RecordingManager (
         }
 
         override fun onError(requestId: String, error: ErrorInfo) {
-          onUploadUpdate(null, 0f, false)
+          onUploadUpdate(null, 0f, true)
         }
 
         override fun onReschedule(requestId: String, error: ErrorInfo) {

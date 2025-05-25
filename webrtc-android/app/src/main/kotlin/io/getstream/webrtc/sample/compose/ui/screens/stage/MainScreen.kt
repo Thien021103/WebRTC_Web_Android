@@ -24,6 +24,7 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.History
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +55,7 @@ fun MainScreen(
   token: String,
   onVideosClick: () -> Unit,
   onSignallingClick: () -> Unit,
+  onDoorClick: () -> Unit,
   onUserManagementClick: () -> Unit,
   onLogout: () -> Unit
 ) {
@@ -87,9 +89,7 @@ fun MainScreen(
         )
         Button(
           onClick = onSignallingClick,
-          modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp),
+          modifier = Modifier.fillMaxWidth().height(56.dp),
           shape = RoundedCornerShape(12.dp),
           elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
           colors = ButtonDefaults.buttonColors(
@@ -107,9 +107,7 @@ fun MainScreen(
         Spacer(modifier = Modifier.height(16.dp))
         Button(
           onClick = onVideosClick,
-          modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp),
+          modifier = Modifier.fillMaxWidth().height(56.dp),
           shape = RoundedCornerShape(12.dp),
           elevation = ButtonDefaults.elevation(defaultElevation = 4.dp)
         ) {
@@ -120,13 +118,29 @@ fun MainScreen(
           )
           Text("View Videos", fontSize = 20.sp)
         }
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+          onClick = onDoorClick,
+          modifier = Modifier.fillMaxWidth().height(56.dp),
+          shape = RoundedCornerShape(12.dp),
+          elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
+          colors = ButtonDefaults.buttonColors(
+            backgroundColor = MaterialTheme.colors.primary,
+            contentColor = MaterialTheme.colors.onPrimary
+          )
+        ) {
+          Icon(
+            imageVector = Icons.Filled.History,
+            contentDescription = "Door History",
+            modifier = Modifier.padding(end = 8.dp)
+          )
+          Text("Door Management", fontSize = 20.sp)
+        }
         if (role == "Owner") {
           Spacer(modifier = Modifier.height(16.dp))
           Button(
             onClick = onUserManagementClick,
-            modifier = Modifier
-              .fillMaxWidth()
-              .height(56.dp),
+            modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = RoundedCornerShape(12.dp),
             elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
             colors = ButtonDefaults.buttonColors(
@@ -145,9 +159,7 @@ fun MainScreen(
         Spacer(modifier = Modifier.height(35.dp))
         Button(
           onClick = { askLogout = true },
-          modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp),
+          modifier = Modifier.fillMaxWidth().height(56.dp),
           shape = RoundedCornerShape(12.dp),
           elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
           colors = ButtonDefaults.buttonColors(

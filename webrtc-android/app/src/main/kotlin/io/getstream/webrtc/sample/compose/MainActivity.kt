@@ -16,10 +16,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.cloudinary.android.MediaManager
 import io.getstream.webrtc.sample.compose.ui.screens.users.RegisterUserScreen
 import io.getstream.webrtc.sample.compose.ui.screens.users.UserManagementScreen
 import com.google.firebase.messaging.FirebaseMessaging
+import io.getstream.webrtc.sample.compose.ui.screens.door.DoorHistoryScreen
+import io.getstream.webrtc.sample.compose.ui.screens.door.DoorScreen
 import io.getstream.webrtc.sample.compose.ui.screens.list.VideoListScreen
 import io.getstream.webrtc.sample.compose.ui.screens.list.VideoListViewModel
 import io.getstream.webrtc.sample.compose.ui.screens.stage.LoginScreen
@@ -40,7 +41,9 @@ sealed class Screen {
   object RoleSelection : Screen()
   object RegisterUser : Screen()
   object UserManagement : Screen()
-  object  UserList : Screen()
+  object UserList : Screen()
+  object Door : Screen()
+  object DoorHistory : Screen()
 }
 
 class MainActivity : ComponentActivity() {
@@ -55,14 +58,6 @@ class MainActivity : ComponentActivity() {
       Manifest.permission.POST_NOTIFICATIONS
     )
     requestPermissions(permissions, 0)
-
-    // Initialize Cloudinary (do this once, e.g., in Application class or before upload)
-    val config = mapOf(
-      "cloud_name" to "dvarse6wk",
-      "api_key" to "573435389774623",
-      "api_secret" to "CZmauvR9SiOsysGNak67f9DVTjc"
-    )
-    MediaManager.init(this, config)
 
     setContent {
       WebrtcSampleComposeTheme {
@@ -96,24 +91,26 @@ class MainActivity : ComponentActivity() {
             Screen.Login -> LoginScreen(
               fcmToken = fcmToken,
               role = role,
-              onSuccess = { emailOrId, id, token, folder ->
+              onSuccess = { emailOrId, id, token, folder, config ->
                 identifier = emailOrId
                 groupId = id
                 accessToken = token
-                currentScreen = Screen.Main
                 cloudFolder = folder
+                currentScreen = Screen.Main
+                (this.applicationContext as WebRTCApp).initializeMediaManager(config)
               },
               onRegister = { currentScreen = Screen.Register }
             )
             Screen.Register -> RegisterScreen(
               fcmToken = fcmToken,
-              onSuccess = { email, id, token, folder ->
+              onSuccess = { email, id, token, folder, config ->
                 identifier = email
                 groupId = id
                 accessToken = token
-                currentScreen = Screen.Main
                 cloudFolder = folder
+                currentScreen = Screen.Main
                 role = "Owner"
+                (this.applicationContext as WebRTCApp).initializeMediaManager(config)
               },
               onLogin = { currentScreen = Screen.RoleSelection }
             )
@@ -124,6 +121,7 @@ class MainActivity : ComponentActivity() {
               token = accessToken,
               onVideosClick = { currentScreen = Screen.Videos },
               onSignallingClick = { currentScreen = Screen.Signalling },
+              onDoorClick = { currentScreen = Screen.Door },
               onUserManagementClick = { currentScreen = Screen.UserManagement },
               onLogout = {
                 identifier = ""
@@ -131,16 +129,11 @@ class MainActivity : ComponentActivity() {
                 accessToken = ""
                 role = ""
                 currentScreen = Screen.RoleSelection
+                (this.applicationContext as WebRTCApp).clearConfig()
               }
             )
             Screen.Videos -> VideoListScreen(
-              viewModel = VideoListViewModel(
-                context = this,
-                cameraId = groupId,
-                cloudName = "dvarse6wk",
-                cloudFolder = cloudFolder,
-                token = accessToken
-              ),
+              viewModel = VideoListViewModel(token = accessToken),
               onBack = { currentScreen = Screen.Main }
             )
             Screen.Signalling -> SignallingScreen(
@@ -162,6 +155,15 @@ class MainActivity : ComponentActivity() {
             Screen.UserList -> UserListScreen(
               accessToken = accessToken,
               onBack = { currentScreen = Screen.UserManagement }
+            )
+            Screen.Door -> DoorScreen(
+              accessToken = accessToken,
+              onHistoryClick = { currentScreen = Screen.DoorHistory },
+              onBack = { currentScreen = Screen.Main }
+            )
+            Screen.DoorHistory -> DoorHistoryScreen(
+              accessToken = accessToken,
+              onBack = { currentScreen = Screen.Door }
             )
           }
         }

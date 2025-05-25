@@ -54,7 +54,7 @@ import org.json.JSONObject
 fun LoginScreen(
   fcmToken: String,
   role: String,
-  onSuccess: (String, String, String, String) -> Unit,
+  onSuccess: (String, String, String, String, Map<String, String>) -> Unit,
   onRegister: () -> Unit
 ) {
   val loginUrl = "https://thientranduc.id.vn:444/api/login"
@@ -100,9 +100,14 @@ fun LoginScreen(
           val status = json.optString("status")
           if (status == "success") {
             val accessToken = json.optString("message", "")
-            val folder = json.optString("cloud", "")
+            val cloudFolder = json.optString("cloudFolder", "")
+            val cloudinaryConfig = mapOf(
+              "cloud_name" to json.optString("cloudName", ""),
+              "api_key" to json.optString("cloudKey", ""),
+              "api_secret" to json.optString("cloudSec", "")
+            )
             CoroutineScope(Dispatchers.Main).launch {
-              onSuccess(emailOrId, groupId, accessToken, folder)
+              onSuccess(emailOrId, groupId, accessToken, cloudFolder, cloudinaryConfig)
               isLoading = false
             }
           } else {
