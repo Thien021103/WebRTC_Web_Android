@@ -4,6 +4,7 @@ const { handleAnswer } = require('../handlers/answer');
 const { handleIce } = require('../handlers/ice');
 const { handleControllerLock } = require('../handlers/controllerlock');
 const { handleDisconnect } = require('../handlers/disconnect');
+const { handleControllerNotify } = require('../handlers/controllernotify');
 
 module.exports = (wss) => {
   wss.on('connection', (ws) => {
@@ -26,6 +27,8 @@ module.exports = (wss) => {
         handleIce(message, ws);
       } else if (message.startsWith('LOCK')) {
         handleControllerLock(message, ws);
+      } else if (message.startsWith('NOTIFY')) {
+        handleControllerNotify(message, ws);
       }
     });
 

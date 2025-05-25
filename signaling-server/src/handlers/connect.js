@@ -87,17 +87,17 @@ async function handleConnect(message, client) {
 
   try {
     // Send FCM notifications for controller connection
-    if (type === 'controller') {
-      const users = await User.find({ groupId, fcmToken: { $ne: '' } }, { fcmToken: 1 }).lean();
-      const owners = await Owner.find({ groupId, fcmToken: { $ne: '' } }, { fcmToken: 1 }).lean();
-      const fcmTokens = [...users, ...owners].map(entity => entity.fcmToken);
-      for (const fcmToken of fcmTokens) {
-        await sendFCMNotification(fcmToken);
-      }
-      if (fcmTokens.length === 0) {
-        console.log(`No FCM tokens found for group ${groupId}`);
-      }
-    }
+    // if (type === 'controller') {
+    //   const users = await User.find({ groupId, fcmToken: { $ne: '' } }, { fcmToken: 1 }).lean();
+    //   const owners = await Owner.find({ groupId, fcmToken: { $ne: '' } }, { fcmToken: 1 }).lean();
+    //   const fcmTokens = [...users, ...owners].map(entity => entity.fcmToken);
+    //   for (const fcmToken of fcmTokens) {
+    //     await sendFCMNotification(fcmToken);
+    //   }
+    //   if (fcmTokens.length === 0) {
+    //     console.log(`No FCM tokens found for group ${groupId}`);
+    //   }
+    // }
 
     // Update group state
     const { camera, user, controller } = group.clients;
