@@ -14,20 +14,20 @@ const { groups } = require('../groups/groups')
 // Heartbeat mechanism
 function startHeartbeat(wss) {
   setInterval(() => {
-    console.log('Heartbeat: Sending PING to wss.clients');
+    console.log('Heartbeat');
     const now = Date.now();
     wss.clients.forEach(ws => {
 
       // Check state
       if (ws.readyState === WebSocket.CLOSED || ws.readyState === WebSocket.CLOSING) {
-        console.log(`Client ${ws.id} is closed, disconnecting`);
+        console.log(`Client ${ws._id} is closed, disconnecting`);
         ws.close();
         return;
       }
 
       // 30s timeout
       if (!ws._isAlive && ws._lastPong && now - ws._lastPong > 30000) { 
-        console.log(`Client ${ws.id} is unresponsive`);
+        console.log(`Client ${ws._id} is unresponsive`);
         ws.close();
         return; 
       }
@@ -38,7 +38,7 @@ function startHeartbeat(wss) {
       try {
         ws.send('PING');
       } catch (error) {
-        console.error(`Client ${ws.id} PING error: ${error.message}`);
+        console.error(`Client ${ws._id} PING error: ${error.message}`);
         ws._isAlive = false;
         ws.close();
         return;
@@ -67,6 +67,7 @@ function websocketHandler(wss) {
     ws.send(`STATE Impossible`);
     
     // Initialize state, last pong
+    ws._id = sessionId;
     ws._isAlive = true;
     ws._lastPong = Date.now(); 
 
