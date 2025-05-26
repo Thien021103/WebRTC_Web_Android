@@ -1,3 +1,6 @@
+const WebSocket = require('ws');
+const { v4: uuidv4 } = require('uuid');
+
 const { handleConnect } = require('../handlers/connect');
 const { handleOffer } = require('../handlers/offer');
 const { handleAnswer } = require('../handlers/answer');
@@ -6,12 +9,64 @@ const { handleControllerLock } = require('../handlers/controllerlock');
 const { handleDisconnect } = require('../handlers/disconnect');
 const { handleControllerNotify } = require('../handlers/controllernotify');
 
-module.exports = (wss) => {
+const { groups } = require('../groups/groups')
+
+// Heartbeat mechanism
+function startHeartbeat(wss) {
+  setInterval(() => {
+    console.log('Heartbeat: Sending PING to wss.clients');
+    const now = Date.now();
+    wss.clients.forEach(ws => {
+
+      // Check state
+      if (ws.readyState === WebSocket.CLOSED || ws.readyState === WebSocket.CLOSING) {
+        console.log(`Client ${ws.id} is closed, disconnecting`);
+        return handleDisconnect(ws);
+      }
+
+      // 30s timeout
+      if (!ws._isAlive && ws._lastPong && now - ws._lastPong > 30000) { 
+        console.log(`Client ${ws.id} is unresponsive`);
+        return handleDisconnect(ws);      
+      }
+
+      // Mark as not responsed
+      ws._isAlive = false;
+
+      try {
+        ws.send('PING');
+      } catch (error) {
+        console.error(`Client ${ws.id} PING error: ${error.message}`);
+        ws._isAlive = false;
+        handleDisconnect(ws);
+      }
+    });
+  }, 10000); // Check every 10 seconds
+
+  setInterval(() => {
+    console.log('Cleaning up stale clients in groups');
+    groups.forEach((group, groupId) => {
+      ['camera', 'user', 'controller'].forEach(type => {
+        const client = group.clients[type];
+        if (client && (!client._isAlive || client.readyState !== WebSocket.OPEN)) {
+          console.log(`Removing stale ${type} client from group ${groupId}`);
+          handleDisconnect(client);
+        }
+      });
+    });
+  }, 90000); // Check every 90 seconds
+}
+
+function websocketHandler(wss) {
   wss.on('connection', (ws) => {
-    const sessionId = Math.random().toString(36).substring(2, 15);
+    const sessionId = uuidv4();
     // console.log(`Client connected with temporary ID: ${sessionId}`);
 
     ws.send(`STATE Impossible`);
+    
+    // Initialize state, last pong
+    ws._isAlive = true;
+    ws._lastPong = Date.now(); 
 
     ws.on('message', (data) => {
       const message = data.toString().trim();
@@ -29,6 +84,9 @@ module.exports = (wss) => {
         handleControllerLock(message, ws);
       } else if (message.startsWith('NOTIFY')) {
         handleControllerNotify(message, ws);
+      } else if (message.startsWith('PONG')) {
+        ws._isAlive = true;
+        ws._lastPong = Date.now(); // Update on PONG
       }
     });
 
@@ -43,3 +101,5 @@ module.exports = (wss) => {
     });
   });
 };
+
+module.exports = { websocketHandler, startHeartbeat }

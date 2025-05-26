@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const Websocket = require('ws');
+const WebSocket = require('ws');
 const Owner = require('../schemas/owner');
 const User = require('../schemas/user');
 const Group = require('../schemas/group');
@@ -70,7 +70,7 @@ async function unlock({ identifier, password, decoded }) {
     throw new Error('Group not found');
   }
   const controller = group.clients.controller;
-  if (controller && controller.readyState === Websocket.OPEN) {
+  if (controller && controller.readyState === WebSocket.OPEN) {
     controller.send(`UNLOCK ${groupId}`);
   }
 

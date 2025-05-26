@@ -7,7 +7,7 @@ require('dotenv').config(); // Load .env
 
 const { connect } = require('./db/db');
 const apiRoutes = require('./routes/api');
-const websocketHandler = require('./routes/websocket');
+const { websocketHandler, startHeartbeat } = require('./routes/websocket');
 const { requestLogger, errorHandler } = require('./middleware/middleware');
 
 async function startServer() {
@@ -45,6 +45,7 @@ async function startServer() {
   // Create Websocket server
   const wss = new WebSocket.Server({ server });
   websocketHandler(wss);
+  startHeartbeat(wss);
 
   const PORT = process.env.PORT || 8000;
 
