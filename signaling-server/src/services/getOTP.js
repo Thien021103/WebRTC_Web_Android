@@ -5,7 +5,7 @@ const { createAndSendOTP } = require("../otp/otp");
 
 async function getOTP(email, groupId) {
 
-  if (!email || !password || !groupId || !fcmToken) {
+  if (!email || !groupId) {
     throw new Error('Missing required fields');
   }
 
