@@ -25,6 +25,7 @@ import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -55,7 +56,8 @@ fun LoginScreen(
   fcmToken: String,
   role: String,
   onSuccess: (String, String, String, String, Map<String, String>) -> Unit,
-  onRegister: () -> Unit
+  onRegister: () -> Unit,
+  onBack: () -> Unit
 ) {
   val loginUrl = "https://thientranduc.id.vn:444/api/login"
 
@@ -236,7 +238,28 @@ fun LoginScreen(
             )
           }
         }
-
+        Spacer(modifier = Modifier.height(24.dp))
+        Button(
+          onClick = onBack,
+          modifier = Modifier.fillMaxWidth().height(56.dp),
+          shape = RoundedCornerShape(12.dp),
+          elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
+          colors = ButtonDefaults.buttonColors(
+            backgroundColor = MaterialTheme.colors.primary,
+            contentColor = MaterialTheme.colors.onPrimary
+          )
+        ) {
+          Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = "Back",
+            modifier = Modifier.padding(end = 8.dp)
+          )
+          Text(
+            text = "Back",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold
+          )
+        }
         if (role == "Owner") {
           Spacer(modifier = Modifier.height(8.dp))
           TextButton(
@@ -244,7 +267,7 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth(),
             enabled = !isLoading
           ) {
-            Text("Don't have an account? Register", fontSize = 16.sp)
+            Text("Need registration?", fontSize = 16.sp)
           }
         }
       }

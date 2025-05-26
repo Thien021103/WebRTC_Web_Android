@@ -44,8 +44,10 @@ class SignalingClient(
     if(signalingCommand === SignalingCommand.CONNECT) {
       logger.d { "[sendCommand] $signalingCommand $message" }
       ws.send("$signalingCommand user $accessToken")
-    }
-    else {
+    } else if (signalingCommand === SignalingCommand.PONG) {
+      logger.d { "[sendCommand] $signalingCommand" }
+      ws.send("$signalingCommand")
+    } else {
       logger.d { "[sendCommand] $signalingCommand $message" }
       ws.send("$signalingCommand user $accessToken\n$message")
     }
@@ -62,6 +64,8 @@ class SignalingClient(
           handleSignalingCommand(SignalingCommand.ANSWER, text)
         text.startsWith(SignalingCommand.ICE.toString(), true) ->
           handleSignalingCommand(SignalingCommand.ICE, text)
+        text.startsWith(SignalingCommand.PING.toString(), true) ->
+          sendCommand(SignalingCommand.PONG, "")
       }
     }
 
@@ -129,5 +133,7 @@ enum class SignalingCommand {
   OFFER, // to send or receive offer
   ANSWER, // to send or receive answer
   ICE, // to send and receive ice candidates
-  CONNECT // to connect to server
+  CONNECT, // to connect to server
+  PING,
+  PONG
 }

@@ -99,7 +99,8 @@ class MainActivity : ComponentActivity() {
                 currentScreen = Screen.Main
                 (this.applicationContext as WebRTCApp).initializeMediaManager(config)
               },
-              onRegister = { currentScreen = Screen.Register }
+              onRegister = { currentScreen = Screen.Register },
+              onBack = { currentScreen = Screen.RoleSelection }
             )
             Screen.Register -> RegisterScreen(
               fcmToken = fcmToken,
@@ -112,7 +113,8 @@ class MainActivity : ComponentActivity() {
                 role = "Owner"
                 (this.applicationContext as WebRTCApp).initializeMediaManager(config)
               },
-              onLogin = { currentScreen = Screen.RoleSelection }
+              onLogin = { currentScreen = Screen.Login },
+              onBack = { currentScreen = Screen.RoleSelection }
             )
             Screen.Main -> MainScreen(
               role = role,

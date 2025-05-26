@@ -24,6 +24,7 @@ import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -52,7 +53,8 @@ import org.json.JSONObject
 fun RegisterScreen(
   fcmToken: String,
   onSuccess: (String, String, String, String, Map<String, String>) -> Unit,
-  onLogin: () -> Unit
+  onLogin: () -> Unit,
+  onBack: () -> Unit
 ) {
 
   val registerUrl = "https://thientranduc.id.vn:444/api/register"
@@ -215,9 +217,29 @@ fun RegisterScreen(
             )
           }
         }
-
+        Spacer(modifier = Modifier.height(24.dp))
+        Button(
+          onClick = onBack,
+          modifier = Modifier.fillMaxWidth().height(56.dp),
+          shape = RoundedCornerShape(12.dp),
+          elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
+          colors = ButtonDefaults.buttonColors(
+            backgroundColor = MaterialTheme.colors.primary,
+            contentColor = MaterialTheme.colors.onPrimary
+          )
+        ) {
+          Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = "Back",
+            modifier = Modifier.padding(end = 8.dp)
+          )
+          Text(
+            text = "Back",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold
+          )
+        }
         Spacer(modifier = Modifier.height(8.dp))
-
         // Change to Login button
         TextButton(
           onClick = onLogin,
