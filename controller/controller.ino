@@ -86,6 +86,9 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
           updateDisplay("State " + WEBRTC_STATE);
         }
       }
+      else if (message.startsWith("PING")) {
+        webSocket.sendTXT("PONG");
+      }
       else if (message.startsWith("TOKEN ")) {
         // Extract token
         int index = message.indexOf(' ');
