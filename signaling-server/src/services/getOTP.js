@@ -18,10 +18,7 @@ async function getOTP(email, groupId) {
   if (existingOwner) {
     throw new Error('Unauthorized');
   }
-
-  createAndSendOTP(email);
-  console.log(`OTP sent to ${email}`);
-  return true;
+  await createAndSendOTP(email);
 }
 
 module.exports = { getOTP };
