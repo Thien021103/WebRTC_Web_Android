@@ -21,16 +21,18 @@ function startHeartbeat(wss) {
       // Check state
       if (ws.readyState === WebSocket.CLOSED || ws.readyState === WebSocket.CLOSING) {
         console.log(`Client ${ws.id} is closed, disconnecting`);
-        return handleDisconnect(ws);
+        ws.close();
+        return;
       }
 
       // 30s timeout
       if (!ws._isAlive && ws._lastPong && now - ws._lastPong > 30000) { 
         console.log(`Client ${ws.id} is unresponsive`);
-        return handleDisconnect(ws);      
+        ws.close();
+        return; 
       }
 
-      // Mark as not responsed
+      // Mark as not responding
       ws._isAlive = false;
 
       try {
@@ -38,7 +40,8 @@ function startHeartbeat(wss) {
       } catch (error) {
         console.error(`Client ${ws.id} PING error: ${error.message}`);
         ws._isAlive = false;
-        handleDisconnect(ws);
+        ws.close();
+        return;
       }
     });
   }, 10000); // Check every 10 seconds
@@ -49,12 +52,11 @@ function startHeartbeat(wss) {
       ['camera', 'user', 'controller'].forEach(type => {
         const client = group.clients[type];
         if (client && (!client._isAlive || client.readyState !== WebSocket.OPEN)) {
-          console.log(`Removing stale ${type} client from group ${groupId}`);
-          handleDisconnect(client);
+          client.close();
         }
       });
     });
-  }, 90000); // Check every 90 seconds
+  }, 300000); // Check every 300 seconds
 }
 
 function websocketHandler(wss) {
