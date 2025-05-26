@@ -13,10 +13,13 @@ const { handleDeleteUser } = require('../controllers/deleteUser');
 const { handleGetDoorHistory } = require('../controllers/getDoorHistory');
 const { handleGetVideos, handleDeleteVideo } = require('../controllers/cloudVideo');
 const { handleGetDoor } = require('../controllers/door');
+const { handleSendOTP } = require('../controllers/otp');
 
 router.post('/login', handleLogin);
 router.post('/register', handleRegister);
 router.post('/logout', authMiddleware, handleLogout);
+
+router.post('/otp', handleSendOTP);
 
 router.post('/lock', authMiddleware, handleLock);
 router.post('/unlock', authMiddleware, handleUnlock);
