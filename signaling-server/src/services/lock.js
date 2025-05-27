@@ -48,7 +48,7 @@ async function lock({ identifier, password, decoded }) {
   }
   const controller = group.clients.controller;
   if (controller && controller.readyState === WebSocket.OPEN) {
-    controller.send(`LOCK ${groupId}`);
+    controller.send(`LOCK ${dbGroup.controllerId}`);
   }
 
   const userIdentifier = isOwner ? `Owner ${identifier}` : `User ${identifier}`;
