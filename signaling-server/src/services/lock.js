@@ -41,8 +41,18 @@ async function lock({ identifier, password, decoded }) {
     throw new Error('Already locked');
   }
 
+  // Notify controller
+  const group = groups.get(groupId);
+  if (!group) {
+    throw new Error('Group not found');
+  }
+  const controller = group.clients.controller;
+  if (controller && controller.readyState === WebSocket.OPEN) {
+    controller.send(`LOCK ${groupId}`);
+  }
+
   const userIdentifier = isOwner ? `Owner ${identifier}` : `User ${identifier}`;
- 
+
   // Update group state
   await Group.updateOne(
     { id: groupId },
@@ -59,21 +69,11 @@ async function lock({ identifier, password, decoded }) {
 
   // Log door history
   await Door.create({
-    groupId,
+    groupId: groupId,
     state: 'Locked',
     user: userIdentifier,
     timestamp: new Date()
   });
-
-  // Notify controller
-  const group = groups.get(groupId);
-  if (!group) {
-    throw new Error('Group not found');
-  }
-  const controller = group.clients.controller;
-  if (controller && controller.readyState === WebSocket.OPEN) {
-    controller.send(`LOCK ${groupId}`);
-  }
 
   console.log(`User/Owner ${identifier} locked group: ${groupId}`);
   return {};

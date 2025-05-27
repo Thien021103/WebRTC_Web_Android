@@ -40,6 +40,16 @@ async function unlock({ identifier, password, decoded }) {
     throw new Error('Already unlocked');
   }
 
+  // Notify controller
+  const group = groups.get(groupId);
+  if (!group) {
+    throw new Error('Group not found');
+  }
+  const controller = group.clients.controller;
+  if (controller && controller.readyState === WebSocket.OPEN) {
+    controller.send(`UNLOCK ${groupId}`);
+  }
+
   const userIdentifier = isOwner ? `Owner ${identifier}` : `User ${identifier}`;
 
   // Update group state
@@ -58,21 +68,11 @@ async function unlock({ identifier, password, decoded }) {
 
   // Log door history
   await Door.create({
-    groupId,
+    groupId: groupId, 
     state: 'Unlocked',
     user: userIdentifier,
     timestamp: new Date()
   });
-
-  // Notify controller
-  const group = groups.get(groupId);
-  if (!group) {
-    throw new Error('Group not found');
-  }
-  const controller = group.clients.controller;
-  if (controller && controller.readyState === WebSocket.OPEN) {
-    controller.send(`UNLOCK ${groupId}`);
-  }
 
   console.log(`User/Owner ${identifier} unlocked group: ${groupId}`);
   return {};
