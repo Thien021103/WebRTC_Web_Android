@@ -103,7 +103,7 @@ fun VideoCallControls(
       ) {
         Icon(
           imageVector = Icons.Filled.LockOpen,
-          contentDescription = "Back",
+          contentDescription = "Unlock button",
           modifier = Modifier.padding(end = 8.dp)
         )
         Text(

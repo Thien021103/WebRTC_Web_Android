@@ -160,6 +160,8 @@ class MainActivity : ComponentActivity() {
             )
             Screen.Door -> DoorScreen(
               accessToken = accessToken,
+              identifier = identifier,
+              role = role,
               onHistoryClick = { currentScreen = Screen.DoorHistory },
               onBack = { currentScreen = Screen.Main }
             )

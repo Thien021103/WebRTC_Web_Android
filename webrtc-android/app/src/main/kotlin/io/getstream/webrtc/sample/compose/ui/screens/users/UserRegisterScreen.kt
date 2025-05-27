@@ -57,11 +57,20 @@ fun RegisterUserScreen(
 
   var userId by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
+  var confirmPassword by remember { mutableStateOf("") }
+
   var registerMessage by remember { mutableStateOf("") }
   var isLoading by remember { mutableStateOf(false) }
   var showPassword by remember { mutableStateOf(false) }
+  var showConfirmPassword by remember { mutableStateOf(false) }
 
   fun performRegisterUser() {
+    if (password != confirmPassword) {
+      CoroutineScope(Dispatchers.Main).launch {
+        registerMessage = "Passwords do not match"
+      }
+      return
+    }
     isLoading = true
     registerMessage = ""
     val client = OkHttpClient()
@@ -126,10 +135,7 @@ fun RegisterUserScreen(
     },
     content = { padding ->
       Column(
-        modifier = Modifier
-          .fillMaxWidth()
-          .padding(padding)
-          .padding(16.dp),
+        modifier = Modifier.fillMaxWidth().padding(padding).padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
       ) {
@@ -160,6 +166,29 @@ fun RegisterUserScreen(
                 Icon(
                   imageVector = if (showPassword) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
                   contentDescription = "Password hide/show"
+                )
+              }
+            )
+          },
+          modifier = Modifier.fillMaxWidth(),
+          enabled = !isLoading
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+          value = confirmPassword,
+          onValueChange = { confirmPassword = it },
+          label = {
+            if (password != confirmPassword) Text("Passwords do not match")
+            else Text("Confirm Password")
+          },
+          visualTransformation = if (showConfirmPassword) VisualTransformation.None else PasswordVisualTransformation(),
+          trailingIcon = {
+            IconButton(
+              onClick = { showConfirmPassword = !showConfirmPassword },
+              content = {
+                Icon(
+                  imageVector = if (showConfirmPassword) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                  contentDescription = "Confirm password hide/show"
                 )
               }
             )

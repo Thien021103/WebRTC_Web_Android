@@ -39,62 +39,90 @@ fun VideoItem(
     modifier = Modifier.fillMaxWidth().clickable { onVideoSelected() },
     elevation = 4.dp
   ) {
-    Row(
-      modifier = Modifier.padding(8.dp),
-      verticalAlignment = Alignment.CenterVertically
+    Column(
+      modifier = Modifier.padding(8.dp)
     ) {
-      // Load Cloudinary thumbnail with GlideImage
-      GlideImage(
-        imageModel = { video.thumbnailUrl },
-        modifier = Modifier.size(100.dp),
-        imageOptions = ImageOptions(contentScale = ContentScale.Crop, alignment = Alignment.Center),
-        loading = {
-          Box(
-            modifier = Modifier.size(100.dp).background(Color.Gray),
-            contentAlignment = Alignment.Center
-          ) {
-            CircularProgressIndicator()
-          }
-        },
-        failure = {
-          Box(
-            modifier = Modifier.size(100.dp).background(Color.Gray),
-            contentAlignment = Alignment.Center
-          ) {
-            Text("No Thumbnail", color = Color.White, fontSize = 12.sp)
-          }
-        },
-        success = { _, painter ->
-          Log.d("VideoItem", "Loaded thumbnail for ${video.displayName}")
-          Image(
-            painter = painter,
-            contentDescription = "Thumbnail for ${video.displayName}",
-            modifier = Modifier.size(100.dp),
-            contentScale = ContentScale.Crop
-          )
-        }
-      )
-      Spacer(modifier = Modifier.width(8.dp))
+      // Video name at the top
       Text(
         text = video.displayName,
         style = MaterialTheme.typography.subtitle1,
-        modifier = Modifier.weight(1f)
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(bottom = 8.dp)
       )
-      // Download button
-      IconButton(onClick = { onDownload() }) {
-        Icon(
-          imageVector = Icons.Filled.CloudDownload,
-          contentDescription = "Download ${video.displayName}",
-          tint = Color.Blue
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        // Thumbnail on the left
+        GlideImage(
+          imageModel = { video.thumbnailUrl },
+          modifier = Modifier.size(100.dp),
+          imageOptions = ImageOptions(
+            contentScale = ContentScale.Crop,
+            alignment = Alignment.Center
+          ),
+          loading = {
+            Box(
+              modifier = Modifier.size(100.dp).background(Color.Gray),
+              contentAlignment = Alignment.Center
+            ) {
+              CircularProgressIndicator()
+            }
+          },
+          failure = {
+            Box(
+              modifier = Modifier.size(100.dp).background(Color.Gray),
+              contentAlignment = Alignment.Center
+            ) {
+              Text("No Thumbnail", color = Color.White, fontSize = 12.sp)
+            }
+          },
+          success = { _, painter ->
+            Log.d("VideoItem", "Loaded thumbnail for ${video.displayName}")
+            Image(
+              painter = painter,
+              contentDescription = "Thumbnail for ${video.displayName}",
+              modifier = Modifier.size(100.dp),
+              contentScale = ContentScale.Crop
+            )
+          }
         )
-      }
-      // Delete button
-      IconButton(onClick = { showDeleteDialog = true }) {
-        Icon(
-          imageVector = Icons.Default.Delete,
-          contentDescription = "Delete ${video.displayName}",
-          tint = Color.Red
-        )
+        Spacer(modifier = Modifier.width(20.dp))
+        // Spacer to push buttons to the right
+        Spacer(modifier = Modifier.weight(1f))
+        // Column for buttons on the right
+        Column(
+          horizontalAlignment = Alignment.End,
+          modifier = Modifier.padding(8.dp)
+        ) {
+          TextButton(onClick = { onDownload() }) {
+            Icon(
+              imageVector = Icons.Filled.CloudDownload,
+              contentDescription = "Download ${video.displayName}",
+              tint = Color.Blue
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+              text = "Download",
+              color = MaterialTheme.colors.primary,
+              fontSize = 14.sp
+            )
+          }
+          TextButton(onClick = { showDeleteDialog = true }) {
+            Icon(
+              imageVector = Icons.Default.Delete,
+              contentDescription = "Delete ${video.displayName}",
+              tint = Color.Blue
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+              text = "Delete",
+              color = MaterialTheme.colors.error,
+              fontSize = 14.sp
+            )
+          }
+        }
       }
     }
   }

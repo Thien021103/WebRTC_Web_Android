@@ -147,9 +147,7 @@ fun VideoCallScreen(
       email = email,
       role = role,
       accessToken = accessToken,
-      modifier = Modifier
-        .fillMaxWidth()
-        .align(Alignment.BottomCenter),
+      modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter),
       callMediaState = callMediaState,
       onCallAction = {
         when (it) {
@@ -184,17 +182,13 @@ fun VideoCallScreen(
           if (uploadCompleted) {
             Text("Upload Complete!")
             Log.d("Upload Dialog", "Close dialog on success")
-            showUploadDialog = false
-            onCancelCall.invoke() // Proceed to parent screen
           } else if (uploadFailed) {
             Text("Upload Failed.")
             Log.d("Upload Dialog", "Close dialog on failed")
-            showUploadDialog = false
-            onCancelCall.invoke() // Proceed to parent screen
           } else {
             Row(verticalAlignment = Alignment.CenterVertically) {
               CircularProgressIndicator()
-              Spacer(modifier = Modifier.height(8.dp))
+              Spacer(modifier = Modifier.height(12.dp))
               Text("Progress: ${(uploadProgress * 100).toInt()}%")
             }
           }

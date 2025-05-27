@@ -38,8 +38,10 @@
   <string name="cancel">No</string>
 
   <string name="unlock_door">Unlock Door?</string>
+  <string name="lock_door">Lock Door?</string>
+
   <string name="unlock_message">Unlock Message?</string>
 
-  <string name="enter_password">Enter password to unlock the door</string>
+  <string name="enter_password">Enter password</string>
 
 </resources>

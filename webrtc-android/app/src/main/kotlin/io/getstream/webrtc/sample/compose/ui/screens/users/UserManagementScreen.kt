@@ -42,18 +42,13 @@ fun UserManagementScreen(
     },
     content = { padding ->
       Column(
-        modifier = Modifier
-          .fillMaxSize()
-          .padding(padding)
-          .padding(16.dp),
+        modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
       ) {
         Button(
           onClick = onRegisterUserClick,
-          modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp),
+          modifier = Modifier.fillMaxWidth().height(56.dp),
           shape = RoundedCornerShape(12.dp),
           elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
           colors = ButtonDefaults.buttonColors(
@@ -89,9 +84,7 @@ fun UserManagementScreen(
         Spacer(modifier = Modifier.height(24.dp))
         Button(
           onClick = onBack,
-          modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp),
+          modifier = Modifier.fillMaxWidth().height(56.dp),
           shape = RoundedCornerShape(12.dp),
           elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
           colors = ButtonDefaults.buttonColors(
