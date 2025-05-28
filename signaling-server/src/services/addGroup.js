@@ -20,6 +20,8 @@ const Owner = require('../schemas/owner');
       ownerEmail: ownerEmail,
       cameraId: cameraId,
       controllerId: controllerId,
+      cloudFolder: "",
+      
     });
     await dbGroup.save();
 
