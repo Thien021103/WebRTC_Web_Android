@@ -10,7 +10,8 @@ extern "C" {
 #ifndef DISABLE_PEER_SIGNALING
 
 typedef struct ServiceConfiguration {
-  char* id;
+  char* camera_id;
+  char* secret_key;
   const char* client_id;
   const char* ws_url;
   int ws_port;
@@ -21,6 +22,7 @@ typedef struct ServiceConfiguration {
   {                                                 \
     .ws_url = "thientranduc.id.vn",                 \
     .ws_port = 444,                                 \
+    .secret_key = "secret_key",                     \
     .client_id = "peer",                            \
     .pc = NULL                                      \
   }

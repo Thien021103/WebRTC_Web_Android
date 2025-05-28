@@ -15,24 +15,28 @@
 #define HOST_LEN 64
 #define CRED_LEN 128
 #define PEER_ID_SIZE 80
+#define TOKEN_SIZE 256
 
 typedef struct PeerSignaling {
 
     uint16_t packet_id;
-    char id[PEER_ID_SIZE];
-    
+    char camera_id[PEER_ID_SIZE];
+    char camera_token[TOKEN_SIZE];
     char ws_host[HOST_LEN];
     int  ws_port;
     char client_id[CRED_LEN];
+    char secret_key[CRED_LEN];
+    char connect_hmac_hex[41];
     PeerConnection* pc;
 
 } PeerSignaling;
 
 enum MsgType {
-    JANUS_MSS_ICE_CANDIDATE = 1,
-    JANUS_MSS_SDP_OFFER = 3,
-    JANUS_MSS_SDP_ANSWER = 4,
-    JANUS_MSS_REGISTER_WITH_SERVER = 6,
+    ICE_CANDIDATE = 1,
+    SDP_OFFER = 3,
+    SDP_ANSWER = 4,
+    REGISTER_WITH_SERVER = 6,
+    PONG = 7,
 };
 
 // Signaling information
@@ -58,6 +62,7 @@ static struct lws* web_socket = NULL;
 
 static int retry_delay = 1000000; // Start with 1s
 static int mainloop = 1;
+static int token_received = 0;
 
 // Embed the GTS Root R4 CA certificate as a null-terminated string
 const char *ca_pem = 
@@ -91,6 +96,8 @@ const char *ca_pem =
     "uYkQ4omYCTX5ohy+knMjdOmdH9c7SpqEWBDC86fiNex+O0XOMEZSa8DA\n"
     "-----END CERTIFICATE-----";
 
+const char* pong = "PONG";
+
 enum AppState {
     APP_STATE_UNKNOWN = 0,
     SERVER_CONNECTING = 1000,
@@ -114,19 +121,24 @@ static int lws_websocket_connection_send_text(struct lws* wsi_in, char* str, enu
     size_t n;
 
     switch (msgtype) {
-    case JANUS_MSS_SDP_OFFER:
+    case SDP_OFFER:
         n = sprintf((char*)p, "%s", str);
-        LOGI("Sent: %s\n", (char*)p);
+        LOGI("Sent: %s", (char*)p);
         lws_write(wsi_in, p, n, LWS_WRITE_TEXT);
         break;
-    case JANUS_MSS_REGISTER_WITH_SERVER:
+    case REGISTER_WITH_SERVER:
         n = sprintf((char*)p, "%s", str);
-        LOGI("Sent: %s\n", (char*)p);
+        LOGI("Sent: %s", (char*)p);
         lws_write(wsi_in, p, n, LWS_WRITE_TEXT);
         break;
-    case JANUS_MSS_SDP_ANSWER:
+    case SDP_ANSWER:
         break;
-    case JANUS_MSS_ICE_CANDIDATE:
+    case ICE_CANDIDATE:
+        break;
+    case PONG:
+        n = sprintf((char*)p, "%s", str);
+        LOGI("Sent: %s", (char*)p);
+        lws_write(wsi_in, p, n, LWS_WRITE_TEXT);
         break;
     default:
         break;
@@ -138,12 +150,23 @@ static int websocket_write_back(struct lws* wsi_in, char* str, int str_size_in) 
 
     PeerConnectionState state = peer_connection_get_state(g_ps.pc);
 
-    LOGD("Message received: \n%s\n", str);
+    LOGI("Message received: \n%s", str);
     if (str == NULL || wsi_in == NULL) {
         LOGW("Invalid arguments received");
         return -1;
     }
-    if (strncmp(str, "STATE ", 6) == 0) {
+    if (strncmp(str, "TOKEN ", 6) == 0) {
+        const char *value = str + 6; // Skip "TOKEN\n"
+        memset(g_ps.camera_token, 0, TOKEN_SIZE);
+        snprintf (g_ps.camera_token, TOKEN_SIZE, "%s", value);
+        token_received = 1;
+        if (signaling_state == Ready) {
+            LOGI("Ready to start signaling, making Offer");
+            peer_connection_create_offer(g_ps.pc);
+        }
+    } else if (strncmp(str, "PING", 4) == 0) {
+        lws_websocket_connection_send_text(web_socket, pong, PONG);
+    } else if (strncmp(str, "STATE ", 6) == 0) {
         const char *value = strchr(str, ' '); // Find the first space
         if (value) {
             value++; // Move past the space
@@ -159,12 +182,16 @@ static int websocket_write_back(struct lws* wsi_in, char* str, int str_size_in) 
                 LOGI("Offer sent...");
             } else if (strcmp(value, "Ready") == 0) {
                 signaling_state = Ready;
-                LOGI("Ready to start signaling, making Offer");
                 if (state == PEER_CONNECTION_CLOSED ||
                     state == PEER_CONNECTION_NEW    ||
                     state == PEER_CONNECTION_FAILED ||
                     state == PEER_CONNECTION_DISCONNECTED) {
-                    peer_connection_create_offer(g_ps.pc);
+                    if (!token_received) {
+                        return -1;
+                    } else {
+                        LOGI("Ready to start signaling, making Offer");
+                        peer_connection_create_offer(g_ps.pc);
+                    }
                 }
             } else if (strcmp(value, "Offline") == 0) {
                 signaling_state = Offline;
@@ -172,12 +199,14 @@ static int websocket_write_back(struct lws* wsi_in, char* str, int str_size_in) 
             }
         }
     } else if (strncmp(str, "ANSWER\n", 7) == 0) {
+        LOGI("Recv: %s\n", str);
         const char *value = str + 7; // Skip "ANSWER\n"
         if (state == PEER_CONNECTION_NEW) {
             peer_connection_set_remote_description(g_ps.pc, value);
         }
     } else if (strncmp(str, "ICE\n", 4) == 0) {
         const char *value = str + 4; // Skip "ICE\n"
+        LOGI("Recv: %s\n", str);
         if (state == PEER_CONNECTION_CHECKING) {
             char converted_candidate[1024];
             char *candidate = strstr(value, "candidate");
@@ -234,9 +263,9 @@ static int callback_janus(struct lws* wsi, enum lws_callback_reasons reason, voi
         app_state = SERVER_REGISTERED;
         char message[100];
 
-        snprintf(message, sizeof(message), "CONNECT camera %s", g_ps.id);
+        snprintf(message, sizeof(message), "CONNECT camera %s", g_ps.camera_id);
 
-        lws_websocket_connection_send_text(web_socket, message, JANUS_MSS_REGISTER_WITH_SERVER);
+        lws_websocket_connection_send_text(web_socket, message, REGISTER_WITH_SERVER);
         break;
     }
     case LWS_CALLBACK_CLOSED:
@@ -245,6 +274,8 @@ static int callback_janus(struct lws* wsi, enum lws_callback_reasons reason, voi
         LOGI("--- CLOSED ---");
 
         app_state = SERVER_CLOSED;
+        signaling_state = Offline;
+        token_received = 0;
         usleep(retry_delay);
 
         memset(&i, 0 , sizeof(i));
@@ -269,6 +300,8 @@ static int callback_janus(struct lws* wsi, enum lws_callback_reasons reason, voi
         LOGI("--- CLIENT CONNECTION ERROR ---");
 
         app_state = SERVER_CONNECTION_ERROR;
+        signaling_state = Offline;
+        token_received = 0;
         usleep(retry_delay);
         
         memset(&i, 0 , sizeof(i));
@@ -298,23 +331,15 @@ static int callback_janus(struct lws* wsi, enum lws_callback_reasons reason, voi
 static void peer_signaling_onicecandidate(char* description, void* userdata) {
     char offer[5000];
 
-    snprintf(offer, sizeof(offer), "OFFER camera %s\n%s", g_ps.id, description);
+    snprintf(offer, sizeof(offer), "OFFER camera %s\n%s", g_ps.camera_token, description);
 
     // Send the offer over WebSocket
-    lws_websocket_connection_send_text(web_socket, offer, JANUS_MSS_SDP_OFFER);
-}
-
-int peer_signaling_loop() {
-    connect_to_ws_server();
-    return 0;
-}
-
-void peer_signaling_leave_channel() {
-    disconnect_websocket();
+    lws_websocket_connection_send_text(web_socket, offer, SDP_OFFER);
 }
 
 void peer_signaling_set_config(ServiceConfiguration* service_config) {
 
+    unsigned char hmac[20];
     memset(&g_ps, 0, sizeof(g_ps));
     do {
         if (service_config->ws_url == NULL || strlen(service_config->ws_url) == 0) {
@@ -327,12 +352,21 @@ void peer_signaling_set_config(ServiceConfiguration* service_config) {
     } while (0);
     
     // ID
-    if (service_config->id != NULL && strlen(service_config->id) > 0) {
-        strncpy(g_ps.id, service_config->id, PEER_ID_SIZE);
+    if (service_config->camera_id != NULL && strlen(service_config->camera_id) > 0) {
+        strncpy(g_ps.camera_id, service_config->camera_id, PEER_ID_SIZE);
     }
 
     if (service_config->client_id != NULL && strlen(service_config->client_id) > 0) {
         strncpy(g_ps.client_id, service_config->client_id, CRED_LEN);
+    }
+
+    if (service_config->secret_key != NULL && strlen(service_config->secret_key) > 0) {
+        strncpy(g_ps.secret_key, service_config->secret_key, PEER_ID_SIZE);
+    }
+
+    utils_get_hmac_sha1(g_ps.camera_id, strlen(g_ps.camera_id), g_ps.secret_key, strlen(g_ps.secret_key), hmac);
+    for (int i = 0; i < 20; i++) {
+        sprintf(&g_ps.connect_hmac_hex[i*2], "%02x", hmac[i]);
     }
 
     g_ps.pc = service_config->pc;
@@ -351,6 +385,8 @@ void disconnect_websocket() {
 
 void connect_to_ws_server()
 {
+    signaling_state = Offline;
+    token_received = 0;
     // lws_set_log_level(LLL_ERR | LLL_WARN | LLL_NOTICE | LLL_INFO | LLL_DEBUG | LLL_PARSER | LLL_HEADER | LLL_EXT | LLL_CLIENT, NULL);
     struct lws_context_creation_info info;
     memset(&info, 0, sizeof(info));
@@ -389,4 +425,13 @@ void connect_to_ws_server()
         usleep(10000);
     }
     lws_context_destroy(lws_context);
+}
+
+int peer_signaling_loop() {
+    connect_to_ws_server();
+    return 0;
+}
+
+void peer_signaling_leave_channel() {
+    disconnect_websocket();
 }

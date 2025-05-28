@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
 
 
   ServiceConfiguration service_config = SERVICE_CONFIG_DEFAULT();
-  service_config.id = 123;
+  service_config.camera_id = 123;
 
   peer_init();
   g_pc = peer_connection_create(&config);
