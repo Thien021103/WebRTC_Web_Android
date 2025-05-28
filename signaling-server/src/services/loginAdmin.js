@@ -21,7 +21,7 @@ async function loginAdmin({ email, password }) {
 
   const accessToken = jwt.sign({ email: email, isAdmin: true }, SECRET_KEY, { expiresIn: '7d' });
   await Admin.updateOne(
-    { email, groupId }, 
+    { email }, 
     { $set: { accessToken: accessToken } }
   );
 
