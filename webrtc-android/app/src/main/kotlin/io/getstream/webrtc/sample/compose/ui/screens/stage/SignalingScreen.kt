@@ -58,7 +58,7 @@ import org.json.JSONObject
 @Composable
 fun SignallingScreen(
   role: String,
-  email: String,
+  identifier: String,
   accessToken: String,
   cloudFolder: String,
   onBack: () -> Unit
@@ -172,7 +172,7 @@ fun SignallingScreen(
             } else {
               VideoCallScreen (
                 role = role,
-                email = email,
+                identifier = identifier,
                 accessToken = accessToken,
                 cloudFolder = cloudFolder,
                 onCancelCall = {

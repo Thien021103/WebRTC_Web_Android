@@ -58,7 +58,7 @@ import org.json.JSONObject
 @Composable
 fun VideoCallControls(
   context: Context,
-  email: String,
+  identifier: String,
   role: String,
   accessToken: String,
   modifier: Modifier,
@@ -121,9 +121,9 @@ fun VideoCallControls(
 
     val body = JSONObject().apply {
       if(role == "Owner") {
-        put("email", email)
+        put("email", identifier)
       } else {
-        put("id", email)
+        put("id", identifier)
       }
       put("password", password)
     }.toString()

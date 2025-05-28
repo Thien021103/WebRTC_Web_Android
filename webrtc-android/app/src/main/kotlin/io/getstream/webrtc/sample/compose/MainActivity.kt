@@ -140,7 +140,7 @@ class MainActivity : ComponentActivity() {
             )
             Screen.Signalling -> SignallingScreen(
               role = role,
-              email = identifier,
+              identifier = identifier,
               accessToken = accessToken,
               cloudFolder = cloudFolder,
               onBack = { currentScreen = Screen.Main }

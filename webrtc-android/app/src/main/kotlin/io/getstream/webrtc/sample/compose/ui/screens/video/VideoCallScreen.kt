@@ -44,12 +44,13 @@ import java.time.format.DateTimeFormatter
 @RequiresApi(Build.VERSION_CODES.O)
 fun getOutputFile(
   context: Context,
+  identifier: String,
   cloudFolder: String
 ): File {
   // Format: |day-month-year|hour:min:sec|recorded.mp4
   val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH-mm-ss")
   val timestamp = LocalDateTime.now().format(formatter)
-  val fileName = "Record $timestamp.mp4" // e.g., |24-04-2025|17:48:42|recorded.mp4
+  val fileName = "Record $timestamp (Caller: $identifier).mp4" // e.g., |24-04-2025|17:48:42|recorded.mp4
   val baseDir = context.getExternalFilesDir(null)
   try {
     // Try Downloads directory first
@@ -68,14 +69,14 @@ fun getOutputFile(
 @Composable
 fun VideoCallScreen(
   role: String,
-  email: String,
+  identifier: String,
   accessToken: String,
   cloudFolder: String,
   onCancelCall: () -> Unit
 ) {
   val sessionManager = LocalWebRtcSessionManager.current
   val context = LocalContext.current
-  val outputFile = getOutputFile(cloudFolder = cloudFolder, context = context)
+  val outputFile = getOutputFile(cloudFolder = cloudFolder, context = context, identifier = identifier)
   val mediaMuxer = remember { MediaMuxer(outputFile.absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4) }
   val recordingManager = remember { RecordingManager(cloudFolder = cloudFolder, context = context, mediaMuxer = mediaMuxer, outputFile = outputFile) }
 
@@ -144,7 +145,7 @@ fun VideoCallScreen(
 
     VideoCallControls(
       context = context,
-      email = email,
+      identifier = identifier,
       role = role,
       accessToken = accessToken,
       modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter),
