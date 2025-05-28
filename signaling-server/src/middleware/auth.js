@@ -96,4 +96,22 @@ const wsControllerAuth = async (token, client) => {
   }
 };
 
-module.exports = { authMiddleware, wsUserAuth, wsCameraAuth, wsControllerAuth };
+function adminAuth(req, res, next) {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  if (!token) {
+    return res.status(401).json({ status: 'false', message: 'No token provided' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    if (!decoded.isAdmin || !decoded.email) {
+      return res.status(403).json({ status: 'false', message: 'Invalid token' });
+    }
+    req.user = decoded;
+    next();
+  } catch (error) {
+    res.status(401).json({ status: 'false', message: 'Invalid token' });
+  }
+}
+
+module.exports = { authMiddleware, wsUserAuth, wsCameraAuth, wsControllerAuth, adminAuth };
