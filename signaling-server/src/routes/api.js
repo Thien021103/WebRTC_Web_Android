@@ -16,6 +16,7 @@ const { handleGetDoor } = require('../controllers/door');
 const { handleSendOTP } = require('../controllers/otp');
 const { handleAddGroup } = require('../controllers/addGroup');
 const { handleAdminLogin } = require('../controllers/loginAdmin');
+const { handleGetGroups } = require('../controllers/getGroups');
 
 router.post('/login', handleLogin);
 router.post('/register', handleRegister);
@@ -35,8 +36,9 @@ router.get('/door-history', authMiddleware, handleGetDoorHistory);
 router.get('/get-videos', authMiddleware, handleGetVideos);
 router.delete('/delete-videos', authMiddleware, handleDeleteVideo);
 
-router.post('/addGroup', adminAuth, handleAddGroup);
-router.post('/loginAdmin', handleAdminLogin);
+router.get('/get-groups', adminAuth, handleGetGroups);
+router.post('/add-group', adminAuth, handleAddGroup);
+router.post('/login-admin', handleAdminLogin);
 
 
 module.exports = router;
