@@ -3,8 +3,8 @@ const { getGroups } = require('../services/getGroups');
 async function handleGetGroups(req, res) {
   try {
     const decoded = req.user; // From authMiddleware
-    const users = await getGroups(decoded);
-    res.json({ status: "success", users });
+    const groups = await getGroups(decoded);
+    res.json({ status: "success", groups });
   } catch (error) {
     console.error(`Error in handleGetUsers: ${error.message}`);
     res.status(error.message.includes('Unauthorized') ? 401 : 500).json({

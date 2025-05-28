@@ -11,7 +11,7 @@ async function getGroups(decoded) {
   ).lean();
 
   console.log(`Admin ${decoded.email} retrieved ${groups.length} groups`);
-  return users;
+  return groups;
 }
 
 module.exports = { getGroups };
