@@ -51,7 +51,7 @@ async function handleControllerLock(message, client) {
           door: {
             lock: 'Locked',
             user: `Controller ${dbGroup.controllerId}`,
-            time: new Date()
+            time: new Date(Date.now() + 7 * 60 * 60 * 1000)
           }
         }
       }
@@ -62,7 +62,7 @@ async function handleControllerLock(message, client) {
       groupId,
       state: 'Locked',
       user: `Controller ${dbGroup.controllerId}`,
-      timestamp: new Date()
+      time: new Date(Date.now() + 7 * 60 * 60 * 1000)
     });
 
     console.log(`Controller ${dbGroup.controllerId} locked group: ${groupId}`);

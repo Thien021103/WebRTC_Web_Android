@@ -60,7 +60,7 @@ async function unlock({ identifier, password, decoded }) {
         door: {
           lock: 'Unlocked',
           user: userIdentifier,
-          time: new Date()
+          time: new Date(Date.now() + 7 * 60 * 60 * 1000)
         }
       }
     },
@@ -71,7 +71,7 @@ async function unlock({ identifier, password, decoded }) {
     groupId: groupId, 
     state: 'Unlocked',
     user: userIdentifier,
-    timestamp: new Date()
+    time: new Date(Date.now() + 7 * 60 * 60 * 1000)
   });
 
   console.log(`User/Owner ${identifier} unlocked group: ${groupId}`);

@@ -61,7 +61,7 @@ async function lock({ identifier, password, decoded }) {
         door: {
           lock: 'Locked',
           user: userIdentifier,
-          time: new Date()
+          time: new Date(Date.now() + 7 * 60 * 60 * 1000)
         }
       }
     },
@@ -72,7 +72,7 @@ async function lock({ identifier, password, decoded }) {
     groupId: groupId,
     state: 'Locked',
     user: userIdentifier,
-    timestamp: new Date()
+    time: new Date(Date.now() + 7 * 60 * 60 * 1000)
   });
 
   console.log(`User/Owner ${identifier} locked group: ${groupId}`);

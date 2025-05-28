@@ -17,15 +17,15 @@ async function getDoorHistory(decoded, query) {
     if (isNaN(start.getTime())) {
       throw new Error('Invalid startDate');
     }
-    queryObj.timestamp = { $gte: start };
+    queryObj.time = { $gte: start };
   }
   if (endDate) {
     const end = new Date(endDate);
     if (isNaN(end.getTime())) {
       throw new Error('Invalid endDate');
     }
-    queryObj.timestamp = queryObj.timestamp || {};
-    queryObj.timestamp.$lte = end;
+    queryObj.time = queryObj.time || {};
+    queryObj.time.$lte = end;
   }
 
   // Pagination
@@ -35,8 +35,8 @@ async function getDoorHistory(decoded, query) {
 
   // Fetch door history
   const history = await Door.find(queryObj)
-    .select('state user timestamp -_id')
-    .sort({ timestamp: -1 }) // Newest first
+    .select('state user time -_id')
+    .sort({ time: -1 }) // Newest first
     .skip(skip)
     .limit(limitNum)
     .lean();

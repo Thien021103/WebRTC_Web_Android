@@ -4,7 +4,7 @@ const doorSchema = new mongoose.Schema({
   groupId: { type: String, required: true, index: true },
   state: { type: String, enum: ['Locked', 'Unlocked'], required: true },
   user: { type: String, default: null },
-  timestamp: { type: Date, required: true, default: Date.now }
+  time: { type: Date, required: true, default: () => new Date(Date.now() + 7 * 60 * 60 * 1000) }
 }, { timestamps: true });
 
 // Compound index for efficient querying by groupId and timestamp

@@ -8,7 +8,7 @@ async function getUsersInGroup(decoded) {
   const groupId = decoded.groupId;
   const users = await User.find(
     { groupId }, 
-    { _id: 0, id: 1, groupId: 1, createdAt: 1, updatedAt: 1 }
+    { _id: 0, id: 1, groupId: 1, createdAt: 1 }
   ).lean();
 
   console.log(`Owner ${decoded.email} retrieved ${users.length} users for group: ${groupId}`);
