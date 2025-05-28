@@ -25,15 +25,15 @@ async function addGroup({ ownerEmail }) {
     }
   }
 
-     // Create group
-     const dbGroup = new Group({
-      id: groupId,
-      ownerEmail: ownerEmail,
-      cameraId: cameraId,
-      controllerId: controllerId,
-      cloudFolder: '',
-    });
-    await dbGroup.save();
+  // Create group
+  const dbGroup = new Group({
+    id: groupId,
+    ownerEmail: ownerEmail,
+    cameraId: cameraId,
+    controllerId: controllerId,
+    cloudFolder: "",
+  });
+  await dbGroup.save();
 
   return dbGroup;
 }
