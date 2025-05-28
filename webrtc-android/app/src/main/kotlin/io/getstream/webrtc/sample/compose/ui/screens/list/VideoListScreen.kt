@@ -56,6 +56,7 @@ import java.net.URL
 
 @Composable
 fun VideoListScreen(
+  role: String,
   viewModel: VideoListViewModel,
   onBack: () -> Unit
 ) {
@@ -63,6 +64,8 @@ fun VideoListScreen(
   val context = LocalContext.current
   var selectedVideo by remember { mutableStateOf<Video?>(null) }
   var downloadVideo by remember { mutableStateOf<Video?>(null) }
+  var isLoading by remember { mutableStateOf(false) }
+
   val coroutineScope = rememberCoroutineScope()
 
   val cldVideoPlayer = remember {
@@ -121,10 +124,7 @@ fun VideoListScreen(
           textAlign = TextAlign.Center
         )
         Box(
-          modifier = Modifier
-            .fillMaxWidth()
-            .height(280.dp)
-            .background(Color.Black),
+          modifier = Modifier.fillMaxWidth().height(280.dp).background(Color.Black),
           contentAlignment = Alignment.Center
         ) {
           if (selectedVideo != null) {
@@ -158,7 +158,7 @@ fun VideoListScreen(
             )
           }
         }
-        if (videos.isEmpty()) {
+        if (videos.isEmpty() || isLoading) {
           CircularProgressIndicator(
             modifier = Modifier.size(50.dp).align(Alignment.CenterHorizontally),
             color = MaterialTheme.colors.onSecondary,
@@ -171,13 +171,22 @@ fun VideoListScreen(
         ) {
           items(videos) { video ->
             VideoItem(
+              role = role,
               video = video,
               onVideoSelected = { selectedVideo = video },
               onDownload = {
                 downloadVideo = video
                 viewModel.downloadVideo(video = video, launcher = downloadLauncher)
               },
-              onDelete = { viewModel.deleteVideo(video) }
+              onDelete = {
+                isLoading = true
+                viewModel.deleteVideo(
+                  video = video,
+                  onDone = {
+                    isLoading = false;
+                  }
+                )
+              }
             )
           }
         }

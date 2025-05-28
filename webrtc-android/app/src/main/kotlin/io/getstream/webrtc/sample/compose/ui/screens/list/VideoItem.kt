@@ -28,6 +28,7 @@ import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
 fun VideoItem(
+  role: String,
   video: Video,
   onVideoSelected: () -> Unit,
   onDownload: () -> Unit,
@@ -109,18 +110,20 @@ fun VideoItem(
               fontSize = 14.sp
             )
           }
-          TextButton(onClick = { showDeleteDialog = true }) {
-            Icon(
-              imageVector = Icons.Default.Delete,
-              contentDescription = "Delete ${video.displayName}",
-              tint = Color.Blue
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-              text = "Delete",
-              color = MaterialTheme.colors.error,
-              fontSize = 14.sp
-            )
+          if (role == "Owner") {
+            TextButton(onClick = { showDeleteDialog = true }) {
+              Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Delete ${video.displayName}",
+                tint = Color.Blue
+              )
+              Spacer(modifier = Modifier.width(8.dp))
+              Text(
+                text = "Delete",
+                color = MaterialTheme.colors.error,
+                fontSize = 14.sp
+              )
+            }
           }
         }
       }

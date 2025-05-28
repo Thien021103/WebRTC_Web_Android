@@ -135,6 +135,7 @@ class MainActivity : ComponentActivity() {
               }
             )
             Screen.Videos -> VideoListScreen(
+              role = role,
               viewModel = VideoListViewModel(token = accessToken),
               onBack = { currentScreen = Screen.Main }
             )

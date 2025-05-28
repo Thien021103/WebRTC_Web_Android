@@ -82,7 +82,9 @@ class VideoListViewModel(
       }
     }
   }
-  fun deleteVideo(video: Video) {
+  fun deleteVideo(
+    video: Video,
+    onDone: () -> Unit) {
     viewModelScope.launch {
       withContext(Dispatchers.IO) {
         try {
@@ -102,11 +104,14 @@ class VideoListViewModel(
           if (response.isSuccessful) {
             Log.d("VideoListViewModel", "Deleted ${video.id.substringAfterLast("/")}")
             fetchVideos()
+            onDone()
           } else {
             Log.e("VideoListViewModel", "Failed to delete ${video.displayName}: ${response.code}")
+            onDone()
           }
         } catch (e: Exception) {
           Log.e("VideoListViewModel", "Error deleting ${video.displayName}: ${e.message}")
+          onDone()
         }
       }
     }
