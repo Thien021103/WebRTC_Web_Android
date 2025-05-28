@@ -20,6 +20,7 @@
   <string name="webrtc_session">WebRTC Session</string>
 
   <string name="session_offline">Offline</string>
+  <string name="session_error">Error, group is busy</string>
   <string name="session_impossible">Wait for camera</string>
   <string name="session_ready">Starting …</string>
   <string name="session_creating">Join call</string>

@@ -58,6 +58,8 @@ class SignalingClient(
       when {
         text.startsWith(SignalingCommand.STATE.toString(), true) ->
           handleStateMessage(text)
+        text.startsWith(SignalingCommand.ERROR.toString(), true) ->
+          handleErrorMessage(text)
         text.startsWith(SignalingCommand.OFFER.toString(), true) ->
           handleSignalingCommand(SignalingCommand.OFFER, text)
         text.startsWith(SignalingCommand.ANSWER.toString(), true) ->
@@ -100,6 +102,12 @@ class SignalingClient(
     _sessionStateFlow.value = WebRTCSessionState.valueOf(state)
   }
 
+  private fun handleErrorMessage(message: String) {
+    val state = WebRTCSessionState.Error
+    logger.d { "[errorMessage] $message" }
+    _sessionStateFlow.value = state
+  }
+
   private fun handleSignalingCommand(command: SignalingCommand, text: String) {
     val value = getNextLineMessage(text)
     logger.d { "received signaling: $command $value" }
@@ -125,7 +133,8 @@ enum class WebRTCSessionState {
   Creating, // Creating session, offer has been sent
   Ready, // Both clients available and ready to initiate session
   Impossible, // We have less than two clients connected to the server
-  Offline // unable to connect signaling server
+  Offline, // unable to connect signaling server
+  Error
 }
 
 enum class SignalingCommand {
@@ -134,6 +143,7 @@ enum class SignalingCommand {
   ANSWER, // to send or receive answer
   ICE, // to send and receive ice candidates
   CONNECT, // to connect to server
+  ERROR,
   PING,
   PONG
 }
