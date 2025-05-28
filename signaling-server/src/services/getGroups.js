@@ -7,7 +7,7 @@ async function getGroups(decoded) {
 
   const groups = await Group.find(
     {}, 
-    { _id: 0, id: 1, createdAt: 1 }
+    { _id: 0, id: 1, createdAt: 1, cameraId: 1, controllerId: 1, ownerEmail: 1 }
   ).lean();
 
   console.log(`Admin ${decoded.email} retrieved ${groups.length} groups`);
