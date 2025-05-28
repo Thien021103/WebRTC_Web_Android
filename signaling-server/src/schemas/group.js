@@ -8,11 +8,9 @@ const groupSchema = new mongoose.Schema({
 
   cameraId: { type: String, unique: true, required: true },
   cameraToken: { type: String },
-  cameraSecret: { type: String },
 
   controllerId: { type: String, unique: true },
   controllerToken: { type: String },
-  controllerSecret: { type: String },
 
   state: { type: String, required: true, enum: ['Impossible', 'Ready'], default: 'Impossible' },
   
