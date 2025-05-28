@@ -61,7 +61,7 @@ async function handleControllerLock(message, client) {
     await Door.create({
       groupId,
       state: 'Locked',
-      user: `Controller ${dbGroup.controllerId}`,
+      user: `Controller`,
       time: new Date(Date.now() + 7 * 60 * 60 * 1000)
     });
 
