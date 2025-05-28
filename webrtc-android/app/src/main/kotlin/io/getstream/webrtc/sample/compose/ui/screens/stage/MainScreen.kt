@@ -20,6 +20,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.VideoLibrary
@@ -74,6 +75,25 @@ fun MainScreen(
         contentColor = MaterialTheme.colors.onPrimary
       )
     },
+    bottomBar = {
+      Button(
+        onClick = { askLogout = true },
+        modifier = Modifier.fillMaxWidth().padding(16.dp, 16.dp, 16.dp, 32.dp).height(56.dp),
+        shape = RoundedCornerShape(12.dp),
+        elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
+        colors = ButtonDefaults.buttonColors(
+          backgroundColor = MaterialTheme.colors.error,
+          contentColor = MaterialTheme.colors.onError
+        )
+      ) {
+        Icon(
+          imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+          contentDescription = "Logout",
+          modifier = Modifier.padding(end = 8.dp)
+        )
+        Text("Logout", fontSize = 20.sp)
+      }
+    },
     content = { padding ->
       Column(
         modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
@@ -81,7 +101,7 @@ fun MainScreen(
         horizontalAlignment = Alignment.CenterHorizontally
       ) {
         Text(
-          text = "You are logged in!",
+          text = "You are logged in as\n$role $identifier!",
           fontSize = 24.sp,
           color = MaterialTheme.colors.primary,
           textAlign = TextAlign.Center,
@@ -155,24 +175,6 @@ fun MainScreen(
             )
             Text("Manage Users", fontSize = 20.sp)
           }
-        }
-        Spacer(modifier = Modifier.height(35.dp))
-        Button(
-          onClick = { askLogout = true },
-          modifier = Modifier.fillMaxWidth().height(56.dp),
-          shape = RoundedCornerShape(12.dp),
-          elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
-          colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.colors.error,
-            contentColor = MaterialTheme.colors.onError
-          )
-        ) {
-          Icon(
-            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-            contentDescription = "Logout",
-            modifier = Modifier.padding(end = 8.dp)
-          )
-          Text("Logout", fontSize = 20.sp)
         }
       }
     }

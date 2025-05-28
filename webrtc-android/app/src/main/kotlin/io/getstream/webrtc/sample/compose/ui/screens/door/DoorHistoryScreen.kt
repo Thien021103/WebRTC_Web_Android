@@ -107,7 +107,7 @@ fun DoorHistoryScreen(
                 DoorHistoryEntry(
                   state = entryJson.getString("state"),
                   user = entryJson.optString("user", "No information"),
-                  timestamp = entryJson.getString("timestamp")
+                  timestamp = entryJson.getString("time")
                 )
               )
             }
@@ -144,6 +144,25 @@ fun DoorHistoryScreen(
         backgroundColor = MaterialTheme.colors.primary,
         contentColor = MaterialTheme.colors.onPrimary
       )
+    },
+    bottomBar = {
+      Button(
+        onClick = onBack,
+        modifier = Modifier.fillMaxWidth().padding(16.dp, 16.dp, 16.dp, 32.dp).height(56.dp),
+        shape = RoundedCornerShape(12.dp),
+        elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
+        colors = ButtonDefaults.buttonColors(
+          backgroundColor = MaterialTheme.colors.primary,
+          contentColor = MaterialTheme.colors.onPrimary
+        )
+      ) {
+        Icon(
+          imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+          contentDescription = "Back",
+          modifier = Modifier.padding(end = 8.dp)
+        )
+        Text(text = "Back", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+      }
     },
     content = { padding ->
       Column(
@@ -313,24 +332,6 @@ fun DoorHistoryScreen(
             color = MaterialTheme.colors.error,
             modifier = Modifier.padding(top = 8.dp)
           )
-        }
-        Spacer(modifier = Modifier.height(24.dp))
-        Button(
-          onClick = onBack,
-          modifier = Modifier.fillMaxWidth().height(56.dp),
-          shape = RoundedCornerShape(12.dp),
-          elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
-          colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.colors.error,
-            contentColor = MaterialTheme.colors.onError
-          )
-        ) {
-          Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = "Back",
-            modifier = Modifier.padding(end = 8.dp)
-          )
-          Text(text = "Back", fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
       }
     }

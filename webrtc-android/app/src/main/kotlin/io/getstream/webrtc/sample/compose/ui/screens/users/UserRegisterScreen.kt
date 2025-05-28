@@ -133,6 +133,25 @@ fun RegisterUserScreen(
         contentColor = MaterialTheme.colors.onPrimary
       )
     },
+    bottomBar = {
+      Button(
+        onClick = onBack,
+        modifier = Modifier.fillMaxWidth().padding(16.dp, 16.dp, 16.dp, 32.dp).height(56.dp),
+        shape = RoundedCornerShape(12.dp),
+        elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
+        colors = ButtonDefaults.buttonColors(
+          backgroundColor = MaterialTheme.colors.primary,
+          contentColor = MaterialTheme.colors.onPrimary
+        )
+      ) {
+        Icon(
+          imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+          contentDescription = "Back",
+          modifier = Modifier.padding(end = 8.dp)
+        )
+        Text(text = "Back", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+      }
+    },
     content = { padding ->
       Column(
         modifier = Modifier.fillMaxWidth().padding(padding).padding(16.dp),
@@ -228,28 +247,6 @@ fun RegisterUserScreen(
               fontWeight = FontWeight.Bold
             )
           }
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Button(
-          onClick = onBack,
-          modifier = Modifier.fillMaxWidth().height(56.dp),
-          shape = RoundedCornerShape(12.dp),
-          elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
-          colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.colors.primary,
-            contentColor = MaterialTheme.colors.onPrimary
-          )
-        ) {
-          Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = "Back",
-            modifier = Modifier.padding(end = 8.dp)
-          )
-          Text(
-            text = "Back",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
-          )
         }
       }
     }

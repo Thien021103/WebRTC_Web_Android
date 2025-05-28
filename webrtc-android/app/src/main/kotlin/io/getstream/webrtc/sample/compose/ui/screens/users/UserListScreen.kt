@@ -52,8 +52,7 @@ import java.util.Locale
 data class User(
   val id: String,
   val groupId: String,
-  val createdAt: String,
-  val updatedAt: String
+  val createdAt: String
 )
 
 @Composable
@@ -98,8 +97,7 @@ fun UserListScreen(
                 User(
                   id = userJson.getString("id"),
                   groupId = userJson.getString("groupId"),
-                  createdAt = userJson.getString("createdAt"),
-                  updatedAt = userJson.getString("updatedAt")
+                  createdAt = userJson.getString("createdAt")
                 )
               )
             }
@@ -197,6 +195,25 @@ fun UserListScreen(
         contentColor = MaterialTheme.colors.onPrimary
       )
     },
+    bottomBar = {
+      Button(
+        onClick = onBack,
+        modifier = Modifier.fillMaxWidth().padding(16.dp, 16.dp, 16.dp, 32.dp).height(56.dp),
+        shape = RoundedCornerShape(12.dp),
+        elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
+        colors = ButtonDefaults.buttonColors(
+          backgroundColor = MaterialTheme.colors.primary,
+          contentColor = MaterialTheme.colors.onPrimary
+        )
+      ) {
+        Icon(
+          imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+          contentDescription = "Back",
+          modifier = Modifier.padding(end = 8.dp)
+        )
+        Text(text = "Back", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+      }
+    },
     content = { padding ->
       Column(
         modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
@@ -237,20 +254,6 @@ fun UserListScreen(
                         }",
                         fontSize = 14.sp
                       )
-                      Text(
-                        text = "Updated: ${
-                          SimpleDateFormat(
-                            "MMM dd, yyyy HH:mm",
-                            Locale.getDefault()
-                          ).format(
-                            SimpleDateFormat(
-                              "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
-                              Locale.getDefault()
-                            ).parse(user.updatedAt) ?: user.updatedAt
-                          )
-                        }",
-                        fontSize = 14.sp
-                      )
                     }
                     TextButton(
                       onClick = {
@@ -272,24 +275,6 @@ fun UserListScreen(
             color = MaterialTheme.colors.error,
             modifier = Modifier.padding(top = 8.dp)
           )
-        }
-        Spacer(modifier = Modifier.height(24.dp))
-        Button(
-          onClick = onBack,
-          modifier = Modifier.fillMaxWidth().height(56.dp),
-          shape = RoundedCornerShape(12.dp),
-          elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
-          colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.colors.primary,
-            contentColor = MaterialTheme.colors.onPrimary
-          )
-        ) {
-          Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = "Back",
-            modifier = Modifier.padding(end = 8.dp)
-          )
-          Text(text = "Back", fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
       }
     }

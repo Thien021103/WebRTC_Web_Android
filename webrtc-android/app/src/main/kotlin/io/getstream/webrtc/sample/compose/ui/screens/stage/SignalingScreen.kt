@@ -93,7 +93,7 @@ fun SignallingScreen(
       ) {
         if (!startedSignalling) {
           Text(
-            text = "Ready to start signalling",
+            text = "Ready to start, press this to connect to signaling system",
             fontSize = 24.sp,
             color = MaterialTheme.colors.primary,
             textAlign = TextAlign.Center,
