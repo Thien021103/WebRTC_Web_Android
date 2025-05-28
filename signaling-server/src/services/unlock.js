@@ -47,7 +47,7 @@ async function unlock({ identifier, password, decoded }) {
   }
   const controller = group.clients.controller;
   if (controller && controller.readyState === WebSocket.OPEN) {
-    controller.send(`UNLOCK ${groupId}`);
+    controller.send(`UNLOCK ${dbGroup.controllerId}`);
   }
 
   const userIdentifier = isOwner ? `Owner ${identifier}` : `User ${identifier}`;

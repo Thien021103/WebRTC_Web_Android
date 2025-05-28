@@ -13,7 +13,7 @@
 #define SCREEN_HEIGHT 64
 #define OLED_RESET -1
 
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+// Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 WebSocketsClient webSocket;
 Servo doorServo;
 WiFiManager wifiManager;
@@ -30,20 +30,20 @@ void IRAM_ATTR handleButtonPress() {
   buttonPressed = true;
 }
 
-void updateDisplay(String status, String token = "") {
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(0, 0);
-  display.println("Door Lock Status");
-  display.println(WiFi.status() == WL_CONNECTED ? "WiFi: Connected" : "WiFi: Disconnected");
-  display.println(wsConnected ? "WebSocket: Connected" : "WebSocket: Disconnected");
-  display.println("Status: " + status);
-  if (token.length() > 0) {
-    display.println("Token: " + token.substring(0, min(token.length(), 20U)));
-  }
-  display.display();
-}
+// void updateDisplay(String status, String token = "") {
+//   display.clearDisplay();
+//   display.setTextSize(1);
+//   display.setTextColor(SSD1306_WHITE);
+//   display.setCursor(0, 0);
+//   display.println("Door Lock Status");
+//   display.println(WiFi.status() == WL_CONNECTED ? "WiFi: Connected" : "WiFi: Disconnected");
+//   display.println(wsConnected ? "WebSocket: Connected" : "WebSocket: Disconnected");
+//   display.println("Status: " + status);
+//   if (token.length() > 0) {
+//     display.println("Token: " + token.substring(0, min(token.length(), 20U)));
+//   }
+//   display.display();
+// }
 
 void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
   String message = String((char*)payload);
@@ -64,7 +64,7 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
       Serial.println("Received: " + message);
       if (message == "UNLOCK " + String(CONTROLLER_ID)) {
         Serial.println("Unlocking door...");
-        updateDisplay("Unlocking ...");
+        // updateDisplay("Unlocking ...");
         DOOR_STATE = "Unlocked";
         doorServo.write(90); // Unlock position
         delay(2000);        // Simulate unlock duration
@@ -83,7 +83,7 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
         int index = message.indexOf(' ');
         if (index != -1 && index + 1 < message.length()) {
           WEBRTC_STATE = message.substring(index + 1);
-          updateDisplay("State " + WEBRTC_STATE);
+          // updateDisplay("State " + WEBRTC_STATE);
         }
       }
       else if (message.startsWith("PING")) {
@@ -125,16 +125,16 @@ void setup() {
   String WEBRTC_STATE = "Impossible";
 
   // Initialize OLED
-  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
-    Serial.println("OLED failed");
-    for(;;);
-  }
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(0, 0);
-  display.println("Initializing...");
-  display.display();
+  // if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+  //   Serial.println("OLED failed");
+  //   for(;;);
+  // }
+  // display.clearDisplay();
+  // display.setTextSize(1);
+  // display.setTextColor(SSD1306_WHITE);
+  // display.setCursor(0, 0);
+  // display.println("Initializing...");
+  // display.display();
 
   wifiManager.setTimeout(180);
   webSocket.onEvent(webSocketEvent);
@@ -178,15 +178,15 @@ void loop() {
     // Retry Websocket connection
     if (!wsConnected) {
       Serial.println("Attempting WebSocket reconnection...");
-      updateDisplay("Connecting ...");
+      // updateDisplay("Connecting ...");
       webSocket.beginSSL("thientranduc.id.vn", 444, "/");
       if(wsConnected && CONTROLLER_TOKEN.length() > 0) {
         webSocket.sendTXT("NOTIFY controller " + CONTROLLER_TOKEN);
-        updateDisplay("Notifying");
+        // updateDisplay("Notifying");
       }
     } else if (CONTROLLER_TOKEN.length() > 0) {
       webSocket.sendTXT("NOTIFY controller " + CONTROLLER_TOKEN);
-      updateDisplay("Notifying");
+      // updateDisplay("Notifying");
     }
   }
 }
