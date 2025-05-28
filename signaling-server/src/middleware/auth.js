@@ -47,7 +47,7 @@ const wsUserAuth = async (token, client) => {
       console.error('Invalid access token');
       return false;
     }
-    client._groupId = decoded.groupId;
+    client._tmpGroupId = decoded.groupId;
     client._accessToken = token;
     return true;
   } catch (error) {
@@ -68,7 +68,7 @@ const wsCameraAuth = async (token, client) => {
       console.error(`Invalid camera token: ${token}`);
       return false;
     }
-    client._groupId = decoded.groupId;
+    client._tmpGroupId = decoded.groupId;
     return true;
   } catch (error) {
     console.error('WebSocket camera auth failed:', error.message);
@@ -88,7 +88,7 @@ const wsControllerAuth = async (token, client) => {
       console.error('Invalid or revoked controller token');
       return false;
     }
-    client._groupId = decoded.groupId;
+    client._tmpGroupId = decoded.groupId;
     return true;
   } catch (error) {
     console.error('WebSocket controller auth failed:', error.message);

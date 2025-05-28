@@ -31,7 +31,7 @@ async function handleControllerNotify(message, client) {
     client.close();
     return;
   }
-  const groupId = client._groupId;
+  const groupId = client._tmpGroupId;
 
   try {
     const dbGroup = await Group.findOne({ id: groupId });

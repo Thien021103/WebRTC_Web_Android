@@ -31,14 +31,14 @@ async function handleIce(message, client) {
       client.close();
       return;
     }
-    groupId = client._groupId;
+    groupId = client._tmpGroupId;
   } else {
     if (!(await wsUserAuth(token, client))) {
       console.error('Invalid user token');
       client.close();
       return;
     }
-    groupId = client._groupId;
+    groupId = client._tmpGroupId;
   }
   
   const group = groups.get(groupId);

@@ -35,7 +35,7 @@ async function handleOffer(message, client) {
     return;
   }
 
-  const groupId = client._groupId;
+  const groupId = client._tmpGroupId;
   const group = groups.get(groupId);
 
   if (!group || group.state !== 'Ready') {
