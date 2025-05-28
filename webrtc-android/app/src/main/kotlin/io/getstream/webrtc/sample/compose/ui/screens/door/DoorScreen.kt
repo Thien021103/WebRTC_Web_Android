@@ -48,6 +48,7 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.Loop
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.ui.res.stringResource
@@ -78,7 +79,7 @@ fun DoorScreen(
 
   var showDialog by remember { mutableStateOf(false) }
 
-  var isLoading by remember { mutableStateOf(true) }
+  var isLoading by remember { mutableStateOf(false) }
   var isUnlocking by remember { mutableStateOf(false) }
 
   var showPassword by remember { mutableStateOf(false) }
@@ -90,6 +91,7 @@ fun DoorScreen(
   val client = OkHttpClient.Builder().build()
 
   fun performGetDoorStatus() {
+    isLoading = true
     val url = "https://thientranduc.id.vn:444/api/door"
 
     CoroutineScope(Dispatchers.IO).launch {
@@ -315,6 +317,24 @@ fun DoorScreen(
             color = MaterialTheme.colors.error,
             modifier = Modifier.padding(top = 8.dp)
           )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+          onClick = { performGetDoorStatus() },
+          modifier = Modifier.fillMaxWidth().height(56.dp),
+          shape = RoundedCornerShape(12.dp),
+          elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
+          colors = ButtonDefaults.buttonColors(
+            backgroundColor = MaterialTheme.colors.primary,
+            contentColor = MaterialTheme.colors.onPrimary
+          )
+        ) {
+          Icon(
+            imageVector = Icons.Filled.Loop,
+            contentDescription = "Reload Door History",
+            modifier = Modifier.padding(end = 8.dp)
+          )
+          Text("Reload Door History", fontSize = 20.sp)
         }
         Spacer(modifier = Modifier.height(24.dp))
         Button(
