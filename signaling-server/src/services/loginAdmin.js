@@ -9,7 +9,7 @@ async function loginAdmin({ email, password }) {
     throw new Error('Missing required fields');
   }
 
-  const admin = await Admin.findOne({ email: email, password: password });
+  const admin = await Admin.findOne({ email: email });
   if (!admin) {
     throw new Error('Invalid info');
   }
