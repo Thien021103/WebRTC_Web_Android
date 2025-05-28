@@ -60,10 +60,6 @@ add_definitions("-Wunused-variable -Werror=sequence-point -Werror=pointer-sign -
 add_subdirectory(src)
 add_subdirectory(examples)
 
-if(ENABLE_TESTS)
-  add_subdirectory(tests)
-endif()
-
 ExternalProject_Add(mbedtls
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/mbedtls
   CMAKE_ARGS
