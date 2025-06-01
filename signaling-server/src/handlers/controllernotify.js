@@ -2,7 +2,7 @@ const Group = require('../schemas/group');
 const User = require('../schemas/user');
 const Owner = require('../schemas/owner');
 
-const { sendFCMNotification } = require('../fcm/fcm');
+const { sendFCMNotification } = require('../utils/fcm');
 const { wsControllerAuth } = require('../middleware/auth');
 
 async function handleControllerNotify(message, client) {

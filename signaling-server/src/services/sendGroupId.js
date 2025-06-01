@@ -1,9 +1,9 @@
 const Group = require('../schemas/group');
 const Owner = require('../schemas/owner');
 
-const { createAndSendOTP } = require("../utils/otp");
+const { mailGroupId } = require("../utils/newOwner");
 
-async function getOTP(email, groupId) {
+async function sendGroupId(email, groupId) {
 
   if (!email || !groupId) {
     throw new Error('Missing required fields');
@@ -14,11 +14,11 @@ async function getOTP(email, groupId) {
     throw new Error('Invalid groupId or email not authorized');
   }
 
-  const existingOwner = await Owner.findOne({ groupId });
+  const existingOwner = await Owner.findOne({ groupId: groupId });
   if (existingOwner) {
     throw new Error('Unauthorized');
   }
-  await createAndSendOTP(email);
+  await mailGroupId(email, groupId);
 }
 
-module.exports = { getOTP };
+module.exports = { sendGroupId };

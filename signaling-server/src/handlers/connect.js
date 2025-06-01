@@ -3,7 +3,7 @@ const Owner = require('../schemas/owner');
 const User = require('../schemas/user');
 const Group = require('../schemas/group');
 const { groups, notifyStateUpdate } = require('../groups/groups');
-const { sendFCMNotification } = require('../fcm/fcm');
+const { sendFCMNotification } = require('../utils/fcm');
 const { wsUserAuth } = require('../middleware/auth');
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key';

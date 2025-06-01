@@ -5,7 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 const Group = require('../schemas/group');
 const Owner = require('../schemas/owner');
 
-const { verifyOTP } = require('../otp/otp');
+const { verifyOTP } = require('../utils/otp');
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key';
 
