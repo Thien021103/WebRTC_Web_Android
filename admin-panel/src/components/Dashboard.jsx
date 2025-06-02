@@ -18,17 +18,21 @@ import {
 import {
   Menu as MenuIcon,
   Group as GroupIcon,
-  Timeline as TimelineIcon,
+  People as PeopleIcon,
   Logout as LogoutIcon,
 } from '@mui/icons-material';
+
 import AddGroupForm from './AddGroupForm';
 import GroupList from './GroupList';
+import OwnerList from './OwnerList';
 
 function Dashboard() {
   const [groups, setGroups] = useState([]);
+  const [owners, setOwners] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [view, setView] = useState('groups');
   const navigate = useNavigate();
 
   const fetchGroups = async () => {
@@ -47,8 +51,25 @@ function Dashboard() {
     }
   };
 
+  const fetchOwners = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`https://thientranduc.id.vn:444/api/get-owners`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setOwners(response.data.owners || []);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchGroups();
+    fetchOwners();
   }, []);
 
   const handleDrawerToggle = () => {
@@ -62,15 +83,23 @@ function Dashboard() {
 
   const drawer = (
     <List>
-      <ListItem button selected>
+      <ListItem
+        onClick={() => setView('groups')}
+        selected={view === 'groups'}
+        sx={{ bgcolor: view === 'groups' ? 'rgba(255, 255, 255, 0.1)' : 'transparent' }}
+      >
         <ListItemIcon><GroupIcon sx={{ color: '#ffffff' }} /></ListItemIcon>
         <ListItemText primary="Groups" />
       </ListItem>
-      <ListItem button disabled>
-        <ListItemIcon><TimelineIcon sx={{ color: '#ffffff' }} /></ListItemIcon>
-        <ListItemText primary="WebSocket Stats" />
+      <ListItem
+        onClick={() => setView('owners')}
+        selected={view === 'owners'}
+        sx={{ bgcolor: view === 'owners' ? 'rgba(255, 255, 255, 0.1)' : 'transparent' }}
+      >
+        <ListItemIcon><PeopleIcon sx={{ color: '#ffffff' }} /></ListItemIcon>
+        <ListItemText primary="Owners" />
       </ListItem>
-      <ListItem button onClick={handleLogout}>
+      <ListItem onClick={handleLogout}>
         <ListItemIcon><LogoutIcon sx={{ color: '#ffffff' }} /></ListItemIcon>
         <ListItemText primary="Logout" />
       </ListItem>
@@ -92,12 +121,12 @@ function Dashboard() {
           <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
             Admin Panel
           </Typography>
-          <IconButton color="inherit">
+          {/* <IconButton color="inherit">
             <img src="https://via.placeholder.com/40" alt="Profile" style={{ borderRadius: '50%' }} />
-          </IconButton>
+          </IconButton> */}
         </Toolbar>
       </AppBar>
-      <Box sx={{ width: { sm: 240 }, flexShrink: { sm: 0 } }}>
+      <Box component="nav" sx={{ width: { sm: 240 }, flexShrink: { sm: 0 } }}>
         <Drawer
           variant="temporary"
           open={mobileOpen}
@@ -108,7 +137,7 @@ function Dashboard() {
             '& .MuiDrawer-paper': { width: 240, mt: 8 },
           }}
         >
-          { drawer }
+          {drawer}
         </Drawer>
         <Drawer
           variant="permanent"
@@ -141,10 +170,17 @@ function Dashboard() {
                 },
               }}
             >
-              Group Management
+              {view === 'groups' ? 'Group Management' : 'Owner Management'}
             </Typography>
-            <AddGroupForm onGroupAdded={fetchGroups} />
-            <GroupList groups={groups} loading={loading} error={error} />
+            {view === 'groups' && (
+              <>
+                <AddGroupForm onGroupAdded={fetchGroups} />
+                <GroupList groups={groups} loading={loading} error={error} />
+              </>
+            )}
+            {view === 'owners' && (
+              <OwnerList owners={owners} loading={loading} error={error} />
+            )}
           </Paper>
         </Fade>
       </Box>
