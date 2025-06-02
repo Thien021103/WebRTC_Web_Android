@@ -2,12 +2,12 @@ const { logoutUser, logoutOwner } = require('../services/logout');
 
 async function handleLogout(req, res) {
   try {
-    const { id, email, groupId } = req.body;
+    const { email, groupId } = req.body;
 
     if (email && groupId) {
       await logoutOwner({ email, groupId });
-    } else if (id) {
-      await logoutUser({ id });
+    } else if (email && !groupId) {
+      await logoutUser({ email });
     } else {
       throw new Error('Missing required fields');
     }

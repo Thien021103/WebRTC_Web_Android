@@ -3,7 +3,8 @@ const router = express.Router();
 
 const { authMiddleware, adminAuth } = require('../middleware/auth');
 
-const { handleLogin } = require('../controllers/login');
+const { handleLoginUser } = require('../controllers/loginUser');
+const { handleLoginOwner } = require('../controllers/loginOwner');
 const { handleRegister } = require('../controllers/register');
 const { handleLogout } = require('../controllers/logout');
 const { handleLock } = require('../controllers/lock');
@@ -20,7 +21,9 @@ const { handleGetGroups } = require('../controllers/getGroups');
 const { handleSendGroupId } = require('../controllers/sendGroupId');
 const { handleGetOwners } = require('../controllers/getOwners');
 
-router.post('/login', handleLogin);
+router.post('/login-user', handleLoginUser);
+router.post('/login-owner', handleLoginOwner);
+
 router.post('/register', handleRegister);
 router.post('/logout', authMiddleware, handleLogout);
 

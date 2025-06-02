@@ -1,7 +1,7 @@
 const Door = require('../schemas/door');
 
 async function getDoorHistory(decoded, query) {
-  const { groupId, isOwner, email, id } = decoded;
+  const { groupId, isOwner, email } = decoded;
   const { state, startDate, endDate, limit = 50, page = 1 } = query;
 
   // Build query
@@ -41,7 +41,7 @@ async function getDoorHistory(decoded, query) {
     .limit(limitNum)
     .lean();
 
-  console.log(`${isOwner ? 'Owner' : 'User'} ${isOwner ? email : id} retrieved ${history.length} door history entries for group: ${groupId}`);
+  console.log(`${isOwner ? 'Owner' : 'User'} ${email} retrieved ${history.length} door history entries for group: ${groupId}`);
   return history;
 }
 

@@ -16,19 +16,19 @@ async function logoutOwner({ email, groupId }) {
   return {};
 }
 
-async function logoutUser({ id }) {
-  if ( !id ) {
+async function logoutUser({ email }) {
+  if ( !email ) {
     throw new Error('Missing required fields');
   }
   
-  const user = await User.findOne({ id });
+  const user = await User.findOne({ email });
   if (!user) {
     throw new Error('Invalid info');
   }
 
-  await User.updateOne({ id }, { $unset: { accessToken: '' } });
+  await User.updateOne({ email }, { $unset: { accessToken: '' } });
 
-  console.log(`User logged out: ${id}`);
+  console.log(`User logged out: ${email}`);
   return {};
 }
 

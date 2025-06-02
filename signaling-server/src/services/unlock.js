@@ -20,7 +20,7 @@ async function unlock({ identifier, password, decoded }) {
   if (isOwner) {
     entity = await Owner.findOne({ email: identifier, groupId: groupId });
   } else {
-    entity = await User.findOne({ id: identifier, groupId: groupId });
+    entity = await User.findOne({ email: identifier, groupId: groupId });
   }
   if (!entity) {
     throw new Error('Invalid info');

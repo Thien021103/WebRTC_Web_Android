@@ -1,14 +1,12 @@
-const { loginUser, loginOwner } = require('../services/login');
+const { loginUser } = require('../services/login');
 
-async function handleLogin(req, res) {
+async function handleLoginUser(req, res) {
   try {
-    const { email, id, password, groupId, fcmToken } = req.body;
+    const { email, password, fcmToken } = req.body;
     let result;
     
-    if (email && groupId && fcmToken) {
-      result = await loginOwner({ email, password, groupId, fcmToken });
-    } else if (id && fcmToken) {
-      result = await loginUser({ id, password, fcmToken });
+    if (email && fcmToken) {
+      result = await loginUser({ email, password, fcmToken });
     } else {
       throw new Error('Missing required fields');
     }
@@ -23,7 +21,7 @@ async function handleLogin(req, res) {
       cloudSec: process.env.CLOUDINARY_API_SECRET
     });
   } catch (error) {
-    console.error(`Error in handleLogin: ${error.message}`);
+    console.error(`Error in handleLoginUser: ${error.message}`);
     if (error.message === 'Missing required fields' || error.message === 'Invalid info') {
       res.status(400).json({
         status: "false",
@@ -43,4 +41,4 @@ async function handleLogin(req, res) {
   }
 }
 
-module.exports = { handleLogin };
+module.exports = { handleLoginUser };

@@ -4,11 +4,12 @@ const { v4: uuidv4 } = require('uuid');
 
 const Owner = require('../schemas/owner');
 const User = require('../schemas/user');
+const { mailNewUser } = require('../utils/newUser');
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key';
 
-async function registerUser({ userName, password, ownerToken }) {
-  if (!userName || !password || !ownerToken) {
+async function registerUser({ userName, email, password, ownerToken }) {
+  if (!userName || !password || !ownerToken || !email) {
     throw new Error('Missing required fields');
   }
 
@@ -29,32 +30,27 @@ async function registerUser({ userName, password, ownerToken }) {
     throw new Error('Unauthorized');
   }
   
-  const existingUser = await User.findOne({ name: userName, groupId: decoded.groupId });
+  const existingUser = await User.findOne({ email: email });
   if (existingUser) {
     throw new Error('Username already registered');
   }
 
-  let userId;
-  let isUnique = false;
-  while (!isUnique) {
-    userId = uuidv4();
-    // Check uniqueness
-    const existingUser = await User.findOne({ id: userId });
-    if (!existingUser) {
-      isUnique = true;
-    }
+  const existingUserName = await User.findOne({ name: userName, groupId: decoded.groupId });
+  if (existingUserName) {
+    throw new Error('Username already registered');
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
   const user = new User({
-    id: userId,
+    email: email,
     name: userName,
     password: hashedPassword,
     groupId: decoded.groupId,
   });
   await user.save();
 
-  console.log(`User registered: ${userId}, group: ${decoded.groupId}`);
+  await mailNewUser(email, userName, decoded.email);
+  console.log(`User registered: ${email}, group: ${decoded.groupId}`);
 }
 
 module.exports = { registerUser };

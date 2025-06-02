@@ -19,14 +19,14 @@ const authMiddleware = async (req, res, next) => {
     if (decoded.isOwner) {
       entity = await Owner.findOne({ email: decoded.email, groupId: decoded.groupId, accessToken: token });
     } else {
-      entity = await User.findOne({ id: decoded.id, groupId: decoded.groupId, accessToken: token });
+      entity = await User.findOne({ email: decoded.email, groupId: decoded.groupId, accessToken: token });
     }
 
     if (!entity) {
       return res.status(401).json({ status: "false", message: 'Invalid token' });
     }
 
-    req.user = decoded; // { email | id, groupId, isOwner }
+    req.user = decoded; // { email, groupId, isOwner }
     next();
   } catch (error) {
     console.log(error.message);
@@ -41,7 +41,7 @@ const wsUserAuth = async (token, client) => {
     if (decoded.isOwner) {
       entity = await Owner.findOne({ email: decoded.email, groupId: decoded.groupId, accessToken: token });
     } else {
-      entity = await User.findOne({ id: decoded.id, groupId: decoded.groupId, accessToken: token });
+      entity = await User.findOne({ email: decoded.email, groupId: decoded.groupId, accessToken: token });
     }
     if (!entity) {
       console.error('Invalid access token');

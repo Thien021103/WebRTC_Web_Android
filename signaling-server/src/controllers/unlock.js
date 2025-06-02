@@ -2,13 +2,11 @@ const { unlock } = require('../services/unlock');
 
 async function handleUnlock(req, res) {
   try {
-    const { email, id, password } = req.body;
+    const { email, password } = req.body;
     const decoded = req.user; // Bearer token
 
     if (email) {
       await unlock({ identifier: email, password: password, decoded: decoded });
-    } else if (id) {
-      await unlock({ identifier: id, password: password, decoded: decoded });
     } else {
       throw new Error('Missing required fields');
     }

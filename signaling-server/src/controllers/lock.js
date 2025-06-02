@@ -2,13 +2,11 @@ const { lock } = require('../services/lock');
 
 async function handleLock(req, res) {
   try {
-    const { email, id, password } = req.body;
+    const { email, password } = req.body;
     const decoded = req.user; // Bearer token
 
     if (email) {
       await lock({ identifier: email, password: password, decoded: decoded });
-    } else if (id) {
-      await lock({ identifier: id, password: password, decoded: decoded });
     } else {
       throw new Error('Missing required fields');
     }

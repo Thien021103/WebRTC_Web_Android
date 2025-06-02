@@ -15,8 +15,8 @@ async function handleRegister(req, res) {
         cloudKey: process.env.CLOUDINARY_API_KEY,
         cloudSec: process.env.CLOUDINARY_API_SECRET
       });
-    } else if ( userName && ownerToken ) {
-      await registerUser({ userName, password, ownerToken });
+    } else if ( email, userName && ownerToken ) {
+      await registerUser({ userName, email, password, ownerToken });
       res.status(201).json({ 
         status: "success",
         message: "User registered" 
