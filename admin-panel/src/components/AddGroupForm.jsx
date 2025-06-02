@@ -32,7 +32,7 @@ function AddGroupForm({ onGroupAdded }) {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/add-group`, {
+      const response = await axios.post('https://thientranduc.id.vn:444/api/add-group', {
         ownerEmail,
       }, {
         headers: { Authorization: `Bearer ${token}` },

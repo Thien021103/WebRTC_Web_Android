@@ -44,26 +44,25 @@ function Login() {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
+          width: '100%',
           minHeight: '100vh',
           bgcolor: '#f5f7fa',
-          p: 2,
+          p: { xs: 2, sm: 3 },
+          boxSizing: 'border-box',
+          ml: 60
         }}
       >
         <Paper
           elevation={6}
           sx={{
-            p: 4,
+            p: { xs: 3, sm: 4 },
             maxWidth: 400,
             width: '100%',
             borderRadius: 2,
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
           }}
         >
           <Box sx={{ textAlign: 'center', mb: 3 }}>
-            <img
-              src="https://via.placeholder.com/100"
-              alt="Logo"
-              style={{ width: 60, marginBottom: 16 }}
-            />
             <Typography variant="h5" sx={{ fontWeight: 600, color: '#1976d2' }}>
               Admin Login
             </Typography>

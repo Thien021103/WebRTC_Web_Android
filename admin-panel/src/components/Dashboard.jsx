@@ -35,7 +35,7 @@ function Dashboard() {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/get-groups`, {
+      const response = await axios.get(`https://thientranduc.id.vn:444/api/get-groups`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setGroups(response.data.groups || []);
