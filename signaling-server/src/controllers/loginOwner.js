@@ -2,11 +2,11 @@ const { loginOwner } = require('../services/login');
 
 async function handleLoginOwner(req, res) {
   try {
-    const { email, password, groupId, fcmToken } = req.body;
+    const { email, password, groupName, fcmToken } = req.body;
     let result;
-    
-    if (email && groupId && fcmToken) {
-      result = await loginOwner({ email, password, groupId, fcmToken });
+
+    if (email && groupName && fcmToken) {
+      result = await loginOwner({ email, password, groupName, fcmToken });
     } else {
       throw new Error('Missing required fields');
     }
@@ -27,7 +27,7 @@ async function handleLoginOwner(req, res) {
         status: "false",
         message: error.message
       });
-    } else if (error.message === 'Invalid password' || error.message === 'Invalid groupId or email not authorized') {
+    } else if (error.message === 'Invalid password' || error.message === 'Invalid groupName or email not authorized') {
       res.status(401).json({
         status: "false",
         message: error.message

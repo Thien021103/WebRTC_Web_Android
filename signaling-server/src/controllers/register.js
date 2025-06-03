@@ -3,10 +3,10 @@ const { registerOwner } = require('../services/registerOwner');
 
 async function handleRegister(req, res) {
   try {
-    const { userName, email, password, groupId, otp, fcmToken, ownerToken } = req.body;
+    const { userName, email, password, groupId, groupName, otp, fcmToken, ownerToken } = req.body;
 
-    if ( email && groupId && otp && fcmToken ) {
-      const { accessToken, cloudFolder } = await registerOwner({ email, password, groupId, otp, fcmToken });
+    if ( email && groupId && groupName && otp && fcmToken ) {
+      const { accessToken, cloudFolder } = await registerOwner({ email, password, groupId, groupName, otp, fcmToken });
       res.status(201).json({ 
         status: "success", 
         message: accessToken,
@@ -15,7 +15,7 @@ async function handleRegister(req, res) {
         cloudKey: process.env.CLOUDINARY_API_KEY,
         cloudSec: process.env.CLOUDINARY_API_SECRET
       });
-    } else if ( email, userName && ownerToken ) {
+    } else if ( email && userName && ownerToken ) {
       await registerUser({ userName, email, password, ownerToken });
       res.status(201).json({ 
         status: "success",

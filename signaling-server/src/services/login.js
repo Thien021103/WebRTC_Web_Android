@@ -6,18 +6,18 @@ const Group = require('../schemas/group');
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key';
 
-async function loginOwner({ email, password, groupId, fcmToken }) {
-  if (!email || !password || !groupId || !fcmToken) {
+async function loginOwner({ email, password, groupName, fcmToken }) {
+  if (!email || !password || !groupName || !fcmToken) {
     throw new Error('Missing required fields');
   }
 
-  const dbGroup = await Group.findOne({ id: groupId, ownerEmail: email });
+  const dbGroup = await Group.findOne({ name: groupName, ownerEmail: email });
   if (!dbGroup) {
-    throw new Error('Invalid groupId or email not authorized');
+    throw new Error('Invalid groupName or email not authorized');
   }
   const cloudFolder = dbGroup.cloudFolder;
 
-  const owner = await Owner.findOne({ email: email, groupId: groupId });
+  const owner = await Owner.findOne({ email: email, groupId: dbGroup.id });
   if (!owner) {
     throw new Error('Invalid info');
   }
@@ -27,13 +27,13 @@ async function loginOwner({ email, password, groupId, fcmToken }) {
     throw new Error('Invalid password');
   }
 
-  const accessToken = jwt.sign({ email: email, groupId: groupId, isOwner: true }, SECRET_KEY, { expiresIn: '7d' });
+  const accessToken = jwt.sign({ email: email, groupId: dbGroup.id, isOwner: true }, SECRET_KEY, { expiresIn: '7d' });
   await Owner.updateOne(
-    { email, groupId }, 
+    { email: email, groupId: dbGroup.id }, 
     { $set: { fcmToken: fcmToken, accessToken: accessToken } }
   );
 
-  console.log(`Owner logged in: ${email}, group: ${groupId}`);
+  console.log(`Owner logged in: ${email}, group: ${groupName}`);
   return { accessToken, cloudFolder };
 }
 

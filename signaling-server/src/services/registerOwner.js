@@ -9,8 +9,8 @@ const { verifyOTP } = require('../utils/otp');
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key';
 
-async function registerOwner({ email, password, groupId, otp, fcmToken }) {
-  if (!email || !password || !groupId || !fcmToken || !otp) {
+async function registerOwner({ email, password, groupId, groupName, otp, fcmToken }) {
+  if (!email || !password || !groupId || !groupName || !fcmToken || !otp) {
     throw new Error('Missing required fields');
   }
 
@@ -21,6 +21,11 @@ async function registerOwner({ email, password, groupId, otp, fcmToken }) {
   const dbGroup = await Group.findOne({ id: groupId, ownerEmail: email });
   if (!dbGroup) {
     throw new Error('Invalid groupId or email not authorized');
+  }
+
+  const existingGroup = await Group.findOne({ name: groupName, ownerEmail: email });
+  if (existingGroup) {
+    throw new Error('Group name already registered');
   }
 
   const existingOwner = await Owner.findOne({ groupId });
@@ -41,9 +46,18 @@ async function registerOwner({ email, password, groupId, otp, fcmToken }) {
   });
   await dbOwner.save();
 
-  await Group.updateOne({ id: groupId }, { $set: { cloudFolder: cloudFolder } });
+  await Group.updateOne(
+    { id: groupId }, 
+    { 
+      $set: 
+        { 
+          cloudFolder: cloudFolder,
+          name: groupName
+        }
+    }
+  );
 
-  console.log(`Owner registered: ${email}, group: ${groupId}, accessToken: ${accessToken}`);
+  console.log(`Owner registered: ${email}, group: ${groupName}`);
   return { accessToken, cloudFolder };
 }
 

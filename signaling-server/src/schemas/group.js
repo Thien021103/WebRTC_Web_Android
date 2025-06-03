@@ -3,7 +3,9 @@ const mongoose = require('mongoose');
 const groupSchema = new mongoose.Schema({
 
   id: { type: String, required: true, unique: true },
-
+  
+  name: { type: String },
+  
   ownerEmail: { type: String, required: true },
 
   cameraId: { type: String, unique: true, required: true },
