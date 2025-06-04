@@ -13,7 +13,7 @@ async function logoutOwner({ email, groupName }) {
 
   const owner = await Owner.findOne({ email: email, groupId: dbGroup.id });
   if (!owner) {
-    throw new Error('Invalid info');
+    throw new Error(`Invalid info ${email}, group: ${groupName}`);
   }
   await Owner.updateOne(
     { email: email, groupId: dbGroup.id }, 
