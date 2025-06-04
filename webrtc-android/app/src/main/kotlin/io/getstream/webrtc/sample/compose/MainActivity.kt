@@ -76,7 +76,7 @@ class MainActivity : ComponentActivity() {
           }
           var currentScreen: Screen by remember { mutableStateOf(Screen.RoleSelection) }
           var identifier by remember { mutableStateOf("") }
-          var groupId by remember { mutableStateOf("") }
+          var groupName by remember { mutableStateOf("") }
           var accessToken by remember { mutableStateOf("") }
           var role by remember { mutableStateOf("") }
           var cloudFolder by remember { mutableStateOf("") }
@@ -91,9 +91,9 @@ class MainActivity : ComponentActivity() {
             Screen.Login -> LoginScreen(
               fcmToken = fcmToken,
               role = role,
-              onSuccess = { emailOrId, id, token, folder, config ->
-                identifier = emailOrId
-                groupId = id
+              onSuccess = { email, group, token, folder, config ->
+                identifier = email
+                groupName = group
                 accessToken = token
                 cloudFolder = folder
                 currentScreen = Screen.Main
@@ -104,9 +104,9 @@ class MainActivity : ComponentActivity() {
             )
             Screen.Register -> RegisterScreen(
               fcmToken = fcmToken,
-              onSuccess = { email, id, token, folder, config ->
+              onSuccess = { email, group, token, folder, config ->
                 identifier = email
-                groupId = id
+                groupName = group
                 accessToken = token
                 cloudFolder = folder
                 currentScreen = Screen.Main
@@ -119,7 +119,7 @@ class MainActivity : ComponentActivity() {
             Screen.Main -> MainScreen(
               role = role,
               identifier = identifier,
-              id = groupId,
+              groupName = groupName,
               token = accessToken,
               onVideosClick = { currentScreen = Screen.Videos },
               onSignallingClick = { currentScreen = Screen.Signalling },
@@ -127,7 +127,7 @@ class MainActivity : ComponentActivity() {
               onUserManagementClick = { currentScreen = Screen.UserManagement },
               onLogout = {
                 identifier = ""
-                groupId = ""
+                groupName = ""
                 accessToken = ""
                 role = ""
                 currentScreen = Screen.RoleSelection

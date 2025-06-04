@@ -149,14 +149,10 @@ fun DoorScreen(
       "https://thientranduc.id.vn:444/api/lock"
     }
     isUnlocking = true
-    unlockMessage = "Unlocking ..."
+    unlockMessage = "Working ..."
 
     val body = JSONObject().apply {
-      if(role == "Owner") {
-        put("email", identifier)
-      } else {
-        put("id", identifier)
-      }
+      put("email", identifier)
       put("password", password)
     }.toString()
     CoroutineScope(Dispatchers.IO).launch {

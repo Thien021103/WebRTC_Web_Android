@@ -50,7 +50,8 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 data class User(
-  val id: String,
+  val email: String,
+  val name: String,
   val groupId: String,
   val createdAt: String
 )
@@ -65,7 +66,7 @@ fun UserListScreen(
   var isLoading by remember { mutableStateOf(true) }
   var errorMessage by remember { mutableStateOf("") }
   var showDeleteDialog by remember { mutableStateOf(false) }
-  var deleteId by remember { mutableStateOf("") }
+  var deleteEmail by remember { mutableStateOf("") }
 
   // Fetch users function
   fun fetchUsers() {
@@ -95,7 +96,8 @@ fun UserListScreen(
               val userJson = usersArray.getJSONObject(i)
               userList.add(
                 User(
-                  id = userJson.getString("id"),
+                  email = userJson.getString("email"),
+                  name = userJson.getString("name"),
                   groupId = userJson.getString("groupId"),
                   createdAt = userJson.getString("createdAt")
                 )
@@ -127,14 +129,14 @@ fun UserListScreen(
   }
 
   fun performDeleteUser(
-    userId: String,
+    email: String,
   ) {
     errorMessage = ""
     val client = OkHttpClient()
     val deleteUrl = "https://thientranduc.id.vn:444/api/delete-users"
 
     val body = JSONObject().apply {
-      put("id", userId)
+      put("email", email)
     }.toString()
 
     CoroutineScope(Dispatchers.IO).launch {
@@ -157,25 +159,25 @@ fun UserListScreen(
             CoroutineScope(Dispatchers.Main).launch {
               isLoading = true
               errorMessage = "User deleted successfully"
-              deleteId = ""
+              deleteEmail = ""
               fetchUsers() // Refresh list
             }
           } else {
             CoroutineScope(Dispatchers.Main).launch {
               errorMessage = json.optString("message", "Failed to delete user")
-              deleteId = ""
+              deleteEmail = ""
             }
           }
         } else {
           CoroutineScope(Dispatchers.Main).launch {
             errorMessage = json.optString("message", "Server error")
-            deleteId = ""
+            deleteEmail = ""
           }
         }
       } catch (e: Exception) {
         CoroutineScope(Dispatchers.Main).launch {
           errorMessage = "Network error: ${e.message}"
-          deleteId = ""
+          deleteEmail = ""
         }
       }
     }
@@ -232,37 +234,30 @@ fun UserListScreen(
                 shape = RoundedCornerShape(8.dp)
               ) {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                  Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                  ) {
-                    Column {
-                      Text(text = "User ID: ${user.id}", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                      Text(text = "Group ID: ${user.groupId}", fontSize = 16.sp)
-                      Text(
-                        text = "Created: ${
-                          SimpleDateFormat(
-                            "MMM dd, yyyy HH:mm",
-                            Locale.getDefault()
-                          ).format(
-                            SimpleDateFormat(
-                              "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
-                              Locale.getDefault()
-                            ).parse(user.createdAt) ?: user.createdAt
-                          )
-                        }",
-                        fontSize = 14.sp
+                  Text(text = "User name: ${user.name}", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                  Text(text = "User email: ${user.email}", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                  Text(text = "Group ID: ${user.groupId}", fontSize = 14.sp)
+                  Text(
+                    text = "Created: ${
+                      SimpleDateFormat(
+                        "MMM dd, yyyy HH:mm",
+                        Locale.getDefault()
+                      ).format(
+                        SimpleDateFormat(
+                          "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                          Locale.getDefault()
+                        ).parse(user.createdAt) ?: user.createdAt
                       )
+                    }",
+                    fontSize = 14.sp
+                  )
+                  TextButton(
+                    onClick = {
+                      deleteEmail = user.email
+                      showDeleteDialog = true
                     }
-                    TextButton(
-                      onClick = {
-                        deleteId = user.id
-                        showDeleteDialog = true
-                      }
-                    ) {
-                      Text(text = "Delete", color = MaterialTheme.colors.error, fontSize = 14.sp)
-                    }
+                  ) {
+                    Text(text = "Delete", color = MaterialTheme.colors.error, fontSize = 14.sp)
                   }
                 }
               }
@@ -291,14 +286,14 @@ fun UserListScreen(
     AlertDialog(
       onDismissRequest = {
         showDeleteDialog = false
-        deleteId = ""
+        deleteEmail = ""
       },
       title = { Text("Confirm Delete") },
       text = { Text("Are you sure you want to delete this user?") },
       confirmButton = {
         TextButton(
           onClick = {
-            performDeleteUser(deleteId)
+            performDeleteUser(deleteEmail)
             showDeleteDialog = false
           }
         ) {
@@ -309,7 +304,7 @@ fun UserListScreen(
         TextButton(
           onClick = {
             showDeleteDialog = false
-            deleteId = ""
+            deleteEmail = ""
           }
         ) {
           Text("Cancel")

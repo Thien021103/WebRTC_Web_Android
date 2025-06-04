@@ -59,11 +59,12 @@ fun LoginScreen(
   onRegister: () -> Unit,
   onBack: () -> Unit
 ) {
-  val loginUrl = "https://thientranduc.id.vn:444/api/login"
+  val loginUserUrl = "https://thientranduc.id.vn:444/api/login-user"
+  val loginOwnerUrl = "https://thientranduc.id.vn:444/api/login-owner"
 
-  var emailOrId by remember { mutableStateOf("") }
+  var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
-  var groupId by remember { mutableStateOf("") }
+  var groupName by remember { mutableStateOf("") }
   var errorMessage by remember { mutableStateOf("") }
   var isLoading by remember { mutableStateOf(false) }
   var showPassword by remember { mutableStateOf(false) }
@@ -75,19 +76,20 @@ fun LoginScreen(
     isLoading = true
     errorMessage = ""
     val body = JSONObject().apply {
-      if (role == "Owner") {
-        put("email", emailOrId)
-      } else {
-        put("id", emailOrId)
-      }
+      put("email", email)
       put("password", password)
-      put("groupId", groupId)
+      if (role == "Owner") {
+        put("groupName", groupName)
+      }
       put("fcmToken", fcmToken)
     }.toString()
     CoroutineScope(Dispatchers.IO).launch {
       try {
         val request = Request.Builder()
-          .url(loginUrl)
+          .url(
+            if (role == "Owner") { loginOwnerUrl }
+            else { loginUserUrl }
+          )
           .post(body.toRequestBody("application/json".toMediaType()))
           .build()
         Log.d("Login Request", body)
@@ -109,7 +111,7 @@ fun LoginScreen(
               "api_secret" to json.optString("cloudSec", "")
             )
             CoroutineScope(Dispatchers.Main).launch {
-              onSuccess(emailOrId, groupId, accessToken, cloudFolder, cloudinaryConfig)
+              onSuccess(email, groupName, accessToken, cloudFolder, cloudinaryConfig)
               isLoading = false
             }
           } else {
@@ -148,14 +150,12 @@ fun LoginScreen(
         )
 
         OutlinedTextField(
-          value = emailOrId,
-          onValueChange = { emailOrId = it },
-          label = { Text(if (role == "Owner") "Email" else "User ID") },
+          value = email,
+          onValueChange = { email = it },
+          label = { Text("Email") },
           modifier = Modifier.fillMaxWidth(),
           enabled = !isLoading,
-          keyboardOptions = KeyboardOptions(
-            keyboardType = if (role == "Owner") KeyboardType.Email else KeyboardType.Text
-          )
+          keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
@@ -180,9 +180,9 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(8.dp))
         if (role == "Owner") {
           OutlinedTextField(
-            value = groupId,
-            onValueChange = { groupId = it },
-            label = { Text("Group ID") },
+            value = groupName,
+            onValueChange = { groupName = it },
+            label = { Text("Group name") },
             modifier = Modifier.fillMaxWidth(),
             enabled = !isLoading
           )
@@ -208,9 +208,9 @@ fun LoginScreen(
             backgroundColor = MaterialTheme.colors.secondary,
             contentColor = MaterialTheme.colors.onSecondary
           ),
-          enabled = emailOrId.isNotBlank()
+          enabled = email.isNotBlank()
             && password.isNotBlank()
-            && (if (role == "Owner") groupId.isNotBlank() else true)
+            && (if (role == "Owner") groupName  .isNotBlank() else true)
             && fcmToken.isNotBlank() && !isLoading
         ) {
           if (isLoading) {

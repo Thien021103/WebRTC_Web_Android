@@ -67,6 +67,7 @@ fun RegisterScreen(
   var password by remember { mutableStateOf("") }
   var confirmPassword by remember { mutableStateOf("") }
   var groupId by remember { mutableStateOf("") }
+  var groupName by remember { mutableStateOf("") }
   var otp by remember { mutableStateOf("") }
 
   var errorMessage by remember { mutableStateOf("") }
@@ -142,6 +143,7 @@ fun RegisterScreen(
       put("email", email)
       put("password", password)
       put("groupId", groupId)
+      put("groupName", groupName)
       put("fcmToken", fcmToken)
       put("otp", otp)
     }.toString()
@@ -170,18 +172,20 @@ fun RegisterScreen(
               "api_secret" to json.optString("cloudSec", "")
             )
             CoroutineScope(Dispatchers.Main).launch {
-              onSuccess(email, groupId, accessToken, cloudFolder, cloudinaryConfig)
+              onSuccess(email, groupName, accessToken, cloudFolder, cloudinaryConfig)
               isLoading = false
             }
           } else {
             CoroutineScope(Dispatchers.Main).launch {
               errorMessage = json.optString("message", "Registration failed")
+              isOtpRequested = false
               isLoading = false
             }
           }
         } else {
           CoroutineScope(Dispatchers.Main).launch {
             errorMessage = json.optString("message", "Registration failed")
+            isOtpRequested = false
             isLoading = false
           }
         }
@@ -265,6 +269,14 @@ fun RegisterScreen(
           modifier = Modifier.fillMaxWidth(),
           enabled = !isLoading
         )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+          value = groupName,
+          onValueChange = { groupName = it },
+          label = { Text("Group name") },
+          modifier = Modifier.fillMaxWidth(),
+          enabled = !isLoading
+        )
         Spacer(modifier = Modifier.height(16.dp))
 
         if (isOtpRequested) {
@@ -331,7 +343,10 @@ fun RegisterScreen(
               backgroundColor = MaterialTheme.colors.secondary,
               contentColor = MaterialTheme.colors.onSecondary
             ),
-            enabled = email.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank() && groupId.isNotBlank() && fcmToken.isNotBlank() && otp.isNotBlank() && !isLoading
+            enabled = email.isNotBlank() && password.isNotBlank()
+              && confirmPassword.isNotBlank() && groupId.isNotBlank()
+              && fcmToken.isNotBlank() && otp.isNotBlank()
+              && groupName.isNotBlank() && !isLoading
           ) {
             if (isLoading) {
               CircularProgressIndicator(

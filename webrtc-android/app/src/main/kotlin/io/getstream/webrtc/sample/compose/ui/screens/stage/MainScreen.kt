@@ -52,7 +52,7 @@ import org.json.JSONObject
 fun MainScreen(
   role: String,
   identifier: String,
-  id: String,
+  groupName: String,
   token: String,
   onVideosClick: () -> Unit,
   onSignallingClick: () -> Unit,
@@ -101,7 +101,7 @@ fun MainScreen(
         horizontalAlignment = Alignment.CenterHorizontally
       ) {
         Text(
-          text = "You are logged in as\n$role $identifier!",
+          text = "You are logged in as\n$role $identifier!\n Group: $groupName",
           fontSize = 24.sp,
           color = MaterialTheme.colors.primary,
           textAlign = TextAlign.Center,
@@ -154,7 +154,7 @@ fun MainScreen(
             contentDescription = "Door History",
             modifier = Modifier.padding(end = 8.dp)
           )
-          Text("Door Management", fontSize = 20.sp)
+          Text("Manage Door", fontSize = 20.sp)
         }
         if (role == "Owner") {
           Spacer(modifier = Modifier.height(16.dp))
@@ -198,7 +198,7 @@ fun MainScreen(
       confirmButton = {
         Button(
           onClick = {
-            performLogOut(role = role, identifier = identifier, groupId = id, accessToken = token)
+            performLogOut(role = role, identifier = identifier, groupName = groupName, accessToken = token)
             onLogout()
             askLogout = false
           },
@@ -237,7 +237,7 @@ fun MainScreen(
 fun performLogOut (
   role: String,
   identifier: String,
-  groupId: String,
+  groupName: String,
   accessToken: String
 ) {
   val client = OkHttpClient()
@@ -247,10 +247,10 @@ fun performLogOut (
   val body = JSONObject().apply {
     if (role == "Owner") {
       put("email", identifier)
+      put("groupName", groupName)
     } else {
-      put("id", identifier)
+      put("email", identifier)
     }
-    put("groupId", groupId)
   }.toString()
   CoroutineScope(Dispatchers.IO).launch {
     try {
