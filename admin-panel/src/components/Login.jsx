@@ -44,12 +44,15 @@ function Login() {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          width: '100%',
-          minHeight: '100vh',
-          bgcolor: '#f5f7fa',
+          width: '100vw',
+          height: '100vh',
+          bgcolor: 'background.default',
           p: { xs: 2, sm: 3 },
+          m: 0,
+          position: 'fixed',
+          top: 0,
+          left: 0,
           boxSizing: 'border-box',
-          ml: 60
         }}
       >
         <Paper
