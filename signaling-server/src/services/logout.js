@@ -1,18 +1,28 @@
 const User = require('../schemas/user');
-const Owner = require('../schemas/owner')
+const Owner = require('../schemas/owner');
+const Group = require('../schemas/group');
 
-async function logoutOwner({ email, groupId }) {
-  if ( !email || !groupId ) {
+async function logoutOwner({ email, groupName }) {
+  if ( !email || !groupName ) {
     throw new Error('Missing required fields');
   }
+  const dbGroup = await Group.findOne({ name: groupName, ownerEmail: email });
+  if (!dbGroup) {
+    throw new Error('Invalid groupName or email not authorized');
+  }
 
-  const owner = await Owner.findOne({ email, groupId });
+  const owner = await Owner.findOne({ email: email, groupId: dbGroup.id });
   if (!owner) {
     throw new Error('Invalid info');
   }
-  await Owner.updateOne({ email, groupId }, { $unset: { accessToken: '' } });
+  await Owner.updateOne(
+    { email: email, groupId: dbGroup.id }, 
+    { $unset: 
+      { accessToken: '' } 
+    }
+  );
 
-  console.log(`Owner logged out: ${email}, group: ${groupId}`);
+  console.log(`Owner logged out: ${email}, group: ${groupName}`);
   return {};
 }
 
