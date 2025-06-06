@@ -1,44 +1,32 @@
 package io.getstream.webrtc.sample.compose.ui.screens.stage
 
 import android.util.Log
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.VideoLibrary
-import androidx.compose.material.icons.filled.Group
-import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
-import io.getstream.webrtc.sample.compose.R
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -60,14 +48,15 @@ fun MainScreen(
   onUserManagementClick: () -> Unit,
   onLogout: () -> Unit
 ) {
-  var askLogout by remember { mutableStateOf(false) }
+  val navController = rememberNavController()
+  var currentRoute by remember { mutableStateOf("main") }
 
   Scaffold(
     topBar = {
       TopAppBar(
         title = {
           Text(
-            text = "Welcome!",
+            text = if (currentRoute == "main") "Welcome!" else "Profile",
             fontSize = 20.sp
           )
         },
@@ -76,162 +65,71 @@ fun MainScreen(
       )
     },
     bottomBar = {
-      Button(
-        onClick = { askLogout = true },
-        modifier = Modifier.fillMaxWidth().padding(16.dp, 16.dp, 16.dp, 32.dp).height(56.dp),
-        shape = RoundedCornerShape(12.dp),
-        elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
-        colors = ButtonDefaults.buttonColors(
-          backgroundColor = MaterialTheme.colors.error,
-          contentColor = MaterialTheme.colors.onError
-        )
+      BottomNavigation(
+        backgroundColor = MaterialTheme.colors.surface,
+        contentColor = MaterialTheme.colors.onSurface
       ) {
-        Icon(
-          imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-          contentDescription = "Logout",
-          modifier = Modifier.padding(end = 8.dp)
+        BottomNavigationItem(
+          icon = { Icon(Icons.Filled.Home, contentDescription = "Main") },
+          label = { Text("Main") },
+          selected = currentRoute == "main",
+          selectedContentColor = MaterialTheme.colors.primary,
+          unselectedContentColor = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+          onClick = {
+            if (currentRoute != "main") {
+              navController.navigate("main")
+              currentRoute = "main"
+            }
+          }
         )
-        Text("Logout", fontSize = 20.sp)
+        BottomNavigationItem(
+          icon = { Icon(Icons.Filled.Person, contentDescription = "Profile") },
+          label = { Text("Profile") },
+          selected = currentRoute == "profile",
+          selectedContentColor = MaterialTheme.colors.primary,
+          unselectedContentColor = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+          onClick = {
+            if (currentRoute != "profile") {
+              navController.navigate("profile")
+              currentRoute = "profile"
+            }
+          }
+        )
       }
     },
     content = { padding ->
-      Column(
-        modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+      NavHost(
+        navController = navController,
+        startDestination = "main",
+        modifier = Modifier.fillMaxSize().padding(padding) // Light gray background; use Color.White for white
       ) {
-        Text(
-          text = "You are logged in as\n$role $identifier!\n Group: $groupName",
-          fontSize = 24.sp,
-          color = MaterialTheme.colors.primary,
-          textAlign = TextAlign.Center,
-          modifier = Modifier.padding(bottom = 32.dp)
-        )
-        Button(
-          onClick = onSignallingClick,
-          modifier = Modifier.fillMaxWidth().height(56.dp),
-          shape = RoundedCornerShape(12.dp),
-          elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
-          colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.colors.secondary,
-            contentColor = MaterialTheme.colors.onSecondary
+        composable("main") {
+          OptionScreen(
+            role = role,
+            identifier = identifier,
+            onVideosClick = onVideosClick,
+            onSignallingClick = onSignallingClick,
+            onDoorClick = onDoorClick,
+            onUserManagementClick = onUserManagementClick
           )
-        ) {
-          Icon(
-            imageVector = Icons.Filled.PlayArrow,
-            contentDescription = "Start Signalling",
-            modifier = Modifier.padding(end = 8.dp)
-          )
-          Text("Start Signalling", fontSize = 20.sp)
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-          onClick = onVideosClick,
-          modifier = Modifier.fillMaxWidth().height(56.dp),
-          shape = RoundedCornerShape(12.dp),
-          elevation = ButtonDefaults.elevation(defaultElevation = 4.dp)
-        ) {
-          Icon(
-            imageVector = Icons.Filled.VideoLibrary,
-            contentDescription = "View Videos",
-            modifier = Modifier.padding(end = 8.dp)
+        composable("profile") {
+          UserDetailScreen(
+            role = role,
+            identifier = identifier,
+            groupName = groupName,
+            onChangePassword = {
+              performLogOut(role, identifier, groupName, token)
+            },
+            onLogout = {
+              performLogOut(role, identifier, groupName, token)
+              onLogout()
+            }
           )
-          Text("View Videos", fontSize = 20.sp)
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-          onClick = onDoorClick,
-          modifier = Modifier.fillMaxWidth().height(56.dp),
-          shape = RoundedCornerShape(12.dp),
-          elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
-          colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.colors.primary,
-            contentColor = MaterialTheme.colors.onPrimary
-          )
-        ) {
-          Icon(
-            imageVector = Icons.Filled.History,
-            contentDescription = "Door History",
-            modifier = Modifier.padding(end = 8.dp)
-          )
-          Text("Manage Door", fontSize = 20.sp)
-        }
-        if (role == "Owner") {
-          Spacer(modifier = Modifier.height(16.dp))
-          Button(
-            onClick = onUserManagementClick,
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(12.dp),
-            elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
-            colors = ButtonDefaults.buttonColors(
-              backgroundColor = MaterialTheme.colors.primary,
-              contentColor = MaterialTheme.colors.onPrimary
-            )
-          ) {
-            Icon(
-              imageVector = Icons.Filled.Group,
-              contentDescription = "Manage Users",
-              modifier = Modifier.padding(end = 8.dp)
-            )
-            Text("Manage Users", fontSize = 20.sp)
-          }
         }
       }
     }
   )
-  if (askLogout) {
-    AlertDialog(
-      onDismissRequest = { askLogout = false },
-      title = {
-        Text(
-          text = stringResource(R.string.confirm_logout),
-          fontSize = 20.sp,
-          fontWeight = FontWeight.Bold
-        )
-      },
-      text = {
-        Text(
-          text = stringResource(R.string.logout_message),
-          fontSize = 16.sp
-        )
-      },
-      confirmButton = {
-        Button(
-          onClick = {
-            performLogOut(role = role, identifier = identifier, groupName = groupName, accessToken = token)
-            onLogout()
-            askLogout = false
-          },
-          shape = RoundedCornerShape(8.dp),
-          modifier = Modifier.height(50.dp),
-          colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.colors.error,
-            contentColor = MaterialTheme.colors.onError
-          )
-        ) {
-          Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(vertical = 8.dp)
-          ) {
-            Text(
-              text = stringResource(R.string.confirm),
-              fontSize = 14.sp,
-              fontWeight = FontWeight.Bold
-            )
-          }
-        }
-      },
-      dismissButton = {
-        TextButton(onClick = { askLogout = false }) {
-          Text(stringResource(R.string.cancel), fontSize = 14.sp)
-        }
-      },
-      shape = RoundedCornerShape(12.dp),
-      modifier = Modifier.height(170.dp),
-      backgroundColor = MaterialTheme.colors.surface
-    )
-  }
 }
 
 fun performLogOut (

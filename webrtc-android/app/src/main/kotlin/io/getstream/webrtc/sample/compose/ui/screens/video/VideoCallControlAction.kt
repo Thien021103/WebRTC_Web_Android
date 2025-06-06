@@ -1,12 +1,11 @@
 package io.getstream.webrtc.sample.compose.ui.screens.video
 
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import io.getstream.webrtc.sample.compose.R
-import io.getstream.webrtc.sample.compose.ui.theme.Disabled
-import io.getstream.webrtc.sample.compose.ui.theme.Primary
 
 sealed class CallAction {
   data class ToggleMicroPhone(
@@ -54,7 +53,7 @@ fun buildDefaultCallControlActions(
     VideoCallControlAction(
       icon = microphoneIcon,
       iconTint = Color.White,
-      background = Primary,
+      background = MaterialTheme.colors.secondary,
       callAction = CallAction.ToggleMicroPhone(callMediaState.isMicrophoneEnabled)
     ),
 //    VideoCallControlAction(
@@ -72,7 +71,7 @@ fun buildDefaultCallControlActions(
     VideoCallControlAction(
       icon = painterResource(id = R.drawable.ic_call_end),
       iconTint = Color.White,
-      background = Disabled,
+      background = MaterialTheme.colors.error,
       callAction = CallAction.LeaveCall
     )
   )

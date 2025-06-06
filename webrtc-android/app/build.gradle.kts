@@ -67,6 +67,7 @@ dependencies {
   implementation(libs.androidx.compose.foundation.layout)
   implementation(libs.androidx.compose.ui.tooling.preview)
   implementation(libs.androidx.compose.constraintlayout)
+  implementation(libs.androidx.navigation.compose)
 
   // image loading
   implementation(libs.landscapist.glide)

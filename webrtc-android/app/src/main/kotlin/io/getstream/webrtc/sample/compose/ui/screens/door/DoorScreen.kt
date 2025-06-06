@@ -288,8 +288,8 @@ fun DoorScreen(
             shape = RoundedCornerShape(12.dp),
             elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
             colors = ButtonDefaults.buttonColors(
-              backgroundColor = MaterialTheme.colors.primary,
-              contentColor = MaterialTheme.colors.onPrimary
+              backgroundColor = MaterialTheme.colors.secondary,
+              contentColor = MaterialTheme.colors.onSecondary
             )
           ) {
             Icon(
@@ -314,8 +314,8 @@ fun DoorScreen(
             shape = RoundedCornerShape(12.dp),
             elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
             colors = ButtonDefaults.buttonColors(
-              backgroundColor = MaterialTheme.colors.secondary,
-              contentColor = MaterialTheme.colors.onSecondary
+              backgroundColor = MaterialTheme.colors.primaryVariant,
+              contentColor = MaterialTheme.colors.onPrimary
             )
           ) {
             Icon(
@@ -340,8 +340,8 @@ fun DoorScreen(
           shape = RoundedCornerShape(12.dp),
           elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
           colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.colors.primary,
-            contentColor = MaterialTheme.colors.onPrimary
+            backgroundColor = MaterialTheme.colors.secondaryVariant,
+            contentColor = MaterialTheme.colors.onSecondary
           )
         ) {
           Icon(
