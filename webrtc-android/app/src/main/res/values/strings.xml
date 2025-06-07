@@ -15,7 +15,7 @@
      limitations under the License.
 -->
 <resources>
-  <string name="app_name">Webrtc-Sample</string>
+  <string name="app_name">EasyDoorBell</string>
 
   <string name="webrtc_session">WebRTC Session</string>
 
@@ -44,5 +44,9 @@
   <string name="unlock_message">Unlock Message?</string>
 
   <string name="enter_password">Enter password</string>
+
+  <string name="enter_new_password">Enter password</string>
+  <string name="enter_old_password">Enter password</string>
+
 
 </resources>

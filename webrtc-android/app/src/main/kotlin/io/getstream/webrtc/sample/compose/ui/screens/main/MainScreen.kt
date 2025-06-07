@@ -1,19 +1,16 @@
-package io.getstream.webrtc.sample.compose.ui.screens.stage
+package io.getstream.webrtc.sample.compose.ui.screens.main
 
-import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
@@ -22,19 +19,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
-import org.json.JSONObject
 
 @Composable
 fun MainScreen(
@@ -83,6 +71,19 @@ fun MainScreen(
           }
         )
         BottomNavigationItem(
+          icon = { Icon(Icons.Filled.Group, contentDescription = "Group") },
+          label = { Text("Group") },
+          selected = currentRoute == "group",
+          selectedContentColor = MaterialTheme.colors.primary,
+          unselectedContentColor = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+          onClick = {
+            if (currentRoute != "group") {
+              navController.navigate("group")
+              currentRoute = "group"
+            }
+          }
+        )
+        BottomNavigationItem(
           icon = { Icon(Icons.Filled.Person, contentDescription = "Profile") },
           label = { Text("Profile") },
           selected = currentRoute == "profile",
@@ -101,7 +102,7 @@ fun MainScreen(
       NavHost(
         navController = navController,
         startDestination = "main",
-        modifier = Modifier.fillMaxSize().padding(padding) // Light gray background; use Color.White for white
+        modifier = Modifier.fillMaxSize().padding(padding)
       ) {
         composable("main") {
           OptionScreen(
@@ -118,51 +119,16 @@ fun MainScreen(
             role = role,
             identifier = identifier,
             groupName = groupName,
-            onChangePassword = {
-              performLogOut(role, identifier, groupName, token)
-            },
-            onLogout = {
-              performLogOut(role, identifier, groupName, token)
-              onLogout()
-            }
+            accessToken = token,
+            onLogout = { onLogout() }
+          )
+        }
+        composable("group") {
+          GroupDetailScreen(
+            accessToken = token,
           )
         }
       }
     }
   )
-}
-
-fun performLogOut (
-  role: String,
-  identifier: String,
-  groupName: String,
-  accessToken: String
-) {
-  val client = OkHttpClient()
-
-  val logOutUrl = "https://thientranduc.id.vn:444/api/logout"
-
-  val body = JSONObject().apply {
-    if (role == "Owner") {
-      put("email", identifier)
-      put("groupName", groupName)
-    } else {
-      put("email", identifier)
-    }
-  }.toString()
-  CoroutineScope(Dispatchers.IO).launch {
-    try {
-      val request = Request.Builder()
-        .url(logOutUrl) // Replace with your server URL
-        .addHeader("Authorization", "Bearer $accessToken")
-        .post(body.toRequestBody("application/json".toMediaType()))
-        .build()
-
-      // Response body will be: { "success": true, "accessToken": "xyz" }
-      val response = client.newCall(request).execute()
-      Log.d("Logout", "Server response: ${response.body?.string()}")
-    } catch (e: Exception) {
-      Log.d("Logout error", "Server error: ${e.message}")
-    }
-  }
 }

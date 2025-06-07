@@ -39,6 +39,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
 import android.util.Log
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -241,12 +242,12 @@ fun DoorScreen(
         horizontalAlignment = Alignment.CenterHorizontally
       ) {
         if (isLoading) {
-          CircularProgressIndicator()
-          Text(
-            text = "Fetching door status...",
-            fontSize = 16.sp,
-            modifier = Modifier.padding(top = 8.dp)
-          )
+          Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+          ) {
+            CircularProgressIndicator()
+          }
         } else if (door != null) {
           Card(
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
@@ -328,7 +329,7 @@ fun DoorScreen(
         } else if (errorMessage.isNotEmpty()) {
           Text(
             text = errorMessage,
-            fontSize = 16.sp,
+            fontSize = 20.sp,
             color = MaterialTheme.colors.error,
             modifier = Modifier.padding(top = 8.dp)
           )

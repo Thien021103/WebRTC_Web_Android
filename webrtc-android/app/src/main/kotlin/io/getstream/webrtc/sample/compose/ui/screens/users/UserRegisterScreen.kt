@@ -107,6 +107,7 @@ fun RegisterUserScreen(
               isLoading = false
               userName = ""
               password = ""
+              confirmPassword = ""
             }
           } else {
             CoroutineScope(Dispatchers.Main).launch {
@@ -238,7 +239,7 @@ fun RegisterUserScreen(
             backgroundColor = MaterialTheme.colors.secondary,
             contentColor = MaterialTheme.colors.onSecondary
           ),
-          enabled = userName.isNotBlank() && password.isNotBlank() && !isLoading
+          enabled = userName.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank() && !isLoading
         ) {
           if (isLoading) {
             CircularProgressIndicator()

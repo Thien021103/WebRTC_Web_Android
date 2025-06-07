@@ -1,4 +1,4 @@
-package io.getstream.webrtc.sample.compose.ui.screens.stage
+package io.getstream.webrtc.sample.compose.ui.screens.main
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
