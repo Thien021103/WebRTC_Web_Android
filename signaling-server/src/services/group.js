@@ -12,10 +12,16 @@ async function getGroup(decoded) {
   }
 
   const group = groups.get(groupId);
-  if(!group) {
-    throw new Error('Group not connected');
-  }
   console.log(`User ${decoded.email} retrieved group info: ${groupId}`);
+
+  if(!group) {
+    return {
+      name: dbGroup.name,
+      state: "Impossible",
+      camera: "Disconnected",
+      controller: "Disconnected",
+    }
+  }
   return {
     name: dbGroup.name,
     state: group.state,
