@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const Group = require('../schemas/group');
 const Owner = require('../schemas/owner');
 const User = require('../schemas/user');
