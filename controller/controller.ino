@@ -8,7 +8,7 @@
 
 #define BUTTON_PIN 12
 #define SERVO_PIN 14
-#define CONTROLLER_ID "con1"
+#define CONTROLLER_ID "230b813a-207c-4e21-98cc-06005b6ac2c4"
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 #define OLED_RESET -1
