@@ -30,7 +30,7 @@ function OwnerList({ owners, loading, error }) {
     setButtonStates((prev) => ({ ...prev, [index]: { loading: true, error: null } }));
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/delete-owner`, {
+      await axios.delete(`https://thientranduc.id.vn:444/api/delete-owner`, {
         email,
         groupId,
       }, {
