@@ -32,7 +32,7 @@ async function registerUser({ userName, email, password, ownerToken }) {
   
   const existingUser = await User.findOne({ email: email });
   if (existingUser) {
-    throw new Error('Username already registered');
+    throw new Error('Email already registered');
   }
 
   const existingUserName = await User.findOne({ name: userName, groupId: decoded.groupId });
