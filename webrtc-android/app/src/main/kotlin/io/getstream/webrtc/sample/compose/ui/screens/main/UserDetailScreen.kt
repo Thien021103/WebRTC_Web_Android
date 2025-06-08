@@ -191,7 +191,7 @@ fun UserDetailScreen(
           modifier = Modifier.padding(bottom = 8.dp)
         )
         Text(
-          text = "Identifier: $identifier",
+          text = "Email: $identifier",
           fontSize = 18.sp,
           modifier = Modifier.padding(bottom = 8.dp)
         )

@@ -44,7 +44,10 @@ fun MainScreen(
       TopAppBar(
         title = {
           Text(
-            text = if (currentRoute == "main") "Welcome!" else "Profile",
+            text =
+              if (currentRoute == "main") {"Welcome!"}
+              else if (currentRoute == "group") {"Your Group"}
+              else {"Profile"},
             fontSize = 20.sp
           )
         },

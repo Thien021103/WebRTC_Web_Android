@@ -16,6 +16,7 @@ import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
@@ -36,10 +37,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.internal.wait
 import org.json.JSONObject
 
 data class GroupDetails(
   val name: String,
+  val owner: String,
   val state: String,
   val camera: String,
   val controller: String
@@ -81,6 +84,7 @@ fun GroupDetailScreen(
             val groupJson = json.getJSONObject("group")
             val groupDetails = GroupDetails(
               name = groupJson.optString("name", "N/A"),
+              owner = groupJson.optString("owner", "N/A"),
               state = groupJson.optString("state", "Impossible"),
               camera = groupJson.optString("camera", "Disconnected"),
               controller = groupJson.optString("controller", "Disconnected")
@@ -128,6 +132,7 @@ fun GroupDetailScreen(
         CircularProgressIndicator()
       }
     } else if (group != null) {
+      // Main Group Details Card
       Card(
         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         elevation = 4.dp,
@@ -155,20 +160,79 @@ fun GroupDetailScreen(
             modifier = Modifier.padding(bottom = 8.dp)
           )
           Text(
-            text = "Camera: ${group!!.camera}",
-            fontSize = 18.sp,
-            modifier = Modifier.padding(bottom = 8.dp)
-          )
-          Text(
-            text = "Controller: ${group!!.controller}",
+            text = "Owner's Email: ${group!!.owner}",
             fontSize = 18.sp
           )
+        }
+      }
+      Spacer(modifier = Modifier.height(8.dp))
+      // Camera Status Card
+      Card(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        elevation = 4.dp,
+        shape = RoundedCornerShape(8.dp)
+      ) {
+        Column(
+          modifier = Modifier.fillMaxWidth().padding(16.dp),
+          horizontalAlignment = Alignment.Start
+        ) {
+          Text(
+            text = "Camera Status",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colors.primary,
+            modifier = Modifier.padding(bottom = 8.dp)
+          )
+          Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = if (group!!.camera == "Connected") MaterialTheme.colors.primaryVariant else MaterialTheme.colors.error,
+            modifier = Modifier.padding(top = 4.dp)
+          ) {
+            Text(
+              text = group!!.camera,
+              fontSize = 16.sp,
+              color = MaterialTheme.colors.surface,
+              modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+            )
+          }
+        }
+      }
+      Spacer(modifier = Modifier.height(8.dp))
+      // Controller Status Card
+      Card(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        elevation = 4.dp,
+        shape = RoundedCornerShape(8.dp)
+      ) {
+        Column(
+          modifier = Modifier.fillMaxWidth().padding(16.dp),
+          horizontalAlignment = Alignment.Start
+        ) {
+          Text(
+            text = "Controller Status",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colors.primary,
+            modifier = Modifier.padding(bottom = 8.dp)
+          )
+          Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = if (group!!.controller == "Connected") MaterialTheme.colors.primaryVariant else MaterialTheme.colors.error,
+            modifier = Modifier.padding(top = 4.dp)
+          ) {
+            Text(
+              text = group!!.controller,
+              fontSize = 16.sp,
+              color = MaterialTheme.colors.surface,
+              modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+            )
+          }
         }
       }
       if (errorMessage.isNotEmpty()) {
         Text(
           text = errorMessage,
-          fontSize = 20.sp,
+          fontSize = 16.sp,
           color = MaterialTheme.colors.error,
           modifier = Modifier.padding(top = 8.dp)
         )
@@ -180,7 +244,7 @@ fun GroupDetailScreen(
         shape = RoundedCornerShape(12.dp),
         elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
         colors = ButtonDefaults.buttonColors(
-          backgroundColor = MaterialTheme.colors.secondaryVariant,
+          backgroundColor = MaterialTheme.colors.secondary,
           contentColor = MaterialTheme.colors.onSecondary
         )
       ) {
@@ -193,12 +257,29 @@ fun GroupDetailScreen(
       }
       Spacer(modifier = Modifier.height(16.dp))
     } else if (errorMessage.isNotEmpty()) {
-      Text(
-        text = errorMessage,
-        fontSize = 16.sp,
-        color = MaterialTheme.colors.error,
-        modifier = Modifier.padding(top = 8.dp)
-      )
+      Card(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        elevation = 4.dp,
+        shape = RoundedCornerShape(8.dp)
+      ) {
+        Column(
+          modifier = Modifier.fillMaxWidth().padding(16.dp),
+          horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+          Text(
+            text = "Error",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colors.error,
+            modifier = Modifier.padding(bottom = 8.dp)
+          )
+          Text(
+            text = errorMessage,
+            fontSize = 16.sp,
+            color = MaterialTheme.colors.error
+          )
+        }
+      }
       Spacer(modifier = Modifier.weight(1f))
       Button(
         onClick = { fetchTrigger++ },
