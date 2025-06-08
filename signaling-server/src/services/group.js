@@ -17,6 +17,7 @@ async function getGroup(decoded) {
   if(!group) {
     return {
       name: dbGroup.name,
+      owner: dbGroup.ownerEmail,
       state: "Impossible",
       camera: "Disconnected",
       controller: "Disconnected",
@@ -25,6 +26,7 @@ async function getGroup(decoded) {
   return {
     name: dbGroup.name,
     state: group.state,
+    owner: dbGroup.ownerEmail,
     camera: (group.clients.camera?.readyState === WebSocket.OPEN)
       ? "Connected" : "Disconnected",
     controller: (group.clients.controller?.readyState === WebSocket.OPEN)
