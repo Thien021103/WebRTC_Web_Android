@@ -179,7 +179,7 @@ function Dashboard() {
               </>
             )}
             {view === 'owners' && (
-              <OwnerList owners={owners} loading={loading} error={error} />
+              <OwnerList owners={owners} loading={loading} error={error} onRefetch={fetchOwners} />
             )}
           </Paper>
         </Fade>
