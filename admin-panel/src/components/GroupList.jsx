@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -8,25 +9,34 @@ import {
   Paper,
   Typography,
   Button,
+  CircularProgress,
 } from '@mui/material';
 import axios from 'axios';
 
 function GroupList({ groups, loading, error }) {
+  const [buttonStates, setButtonStates] = useState({});
+
   if (loading) return <Typography variant="body1" align="center" sx={{ py: 2 }}>Loading groups...</Typography>;
   if (error) return <Typography variant="body1" color="error" align="center" sx={{ py: 2 }}>Error: {error}</Typography>;
   if (!Array.isArray(groups) || groups.length === 0) return <Typography variant="body1" align="center" sx={{ py: 2 }}>No groups found.</Typography>;
 
-  const handleSendGroupId = async (email, groupId) => {
+  const handleSendGroupId = async (email, id, index) => {
+    setButtonStates((prev) => ({ ...prev, [index]: { loading: true, error: null } }));
     try {
       const token = localStorage.getItem('token');
       await axios.post(`https://thientranduc.id.vn:444/api/send-group-id`, {
         email,
-        groupId,
+        groupId: id,
       }, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      setButtonStates((prev) => ({ ...prev, [index]: { loading: false, error: null } }));
     } catch (err) {
-      console.error('Failed to send group ID:', err.response?.data?.message || err.message);
+      const errorMsg = err.response?.data?.message || 'Failed to send group ID';
+      setButtonStates((prev) => ({ ...prev, [index]: { loading: false, error: errorMsg } }));
+      setTimeout(() => {
+        setButtonStates((prev) => ({ ...prev, [index]: { loading: false, error: null } }));
+      }, 3000);
     }
   };
 
@@ -56,10 +66,17 @@ function GroupList({ groups, loading, error }) {
                   variant="contained"
                   color="primary"
                   size="small"
-                  onClick={() => handleSendGroupId(group.ownerEmail, group.id)}
+                  onClick={() => handleSendGroupId(group.ownerEmail, group.id, index)}
+                  disabled={buttonStates[index]?.loading}
+                  startIcon={buttonStates[index]?.loading && <CircularProgress size={16} color="inherit" />}
                 >
                   Mail Group ID to Owner
                 </Button>
+                {buttonStates[index]?.error && (
+                  <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
+                    {buttonStates[index].error}
+                  </Typography>
+                )}
               </TableCell>
             </TableRow>
           ))}
