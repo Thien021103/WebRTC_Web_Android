@@ -49,7 +49,7 @@ router.get('/get-videos', authMiddleware, handleGetVideos);
 router.delete('/delete-videos', authMiddleware, handleDeleteVideo);
 
 router.get('/get-owners', adminAuth, handleGetOwners);
-router.post('/deleteOwner', adminAuth, handleDeleteOwner);
+router.delete('/delete-owner', adminAuth, handleDeleteOwner);
 
 router.get('/get-groups', adminAuth, handleGetGroups);
 router.post('/add-group', adminAuth, handleAddGroup);
