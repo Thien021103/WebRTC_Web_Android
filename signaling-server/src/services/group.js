@@ -25,9 +25,9 @@ async function getGroup(decoded) {
   return {
     name: dbGroup.name,
     state: group.state,
-    camera: (group.clients.camera.readyState === WebSocket.OPEN)
+    camera: (group.clients.camera?.readyState === WebSocket.OPEN)
       ? "Connected" : "Disconnected",
-    controller: (group.clients.controller.readyState === WebSocket.OPEN)
+    controller: (group.clients.controller?.readyState === WebSocket.OPEN)
       ? "Connected" : "Disconnected",
   }
 }
