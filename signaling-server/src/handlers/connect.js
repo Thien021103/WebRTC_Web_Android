@@ -101,7 +101,7 @@ async function handleConnect(message, client) {
 
     // Update group state
     const { camera, user, controller } = group.clients;
-    const newState = camera && user && controller ? 'Ready' : 'Impossible';
+    const newState = camera && user /*&& controller*/ ? 'Ready' : 'Impossible';
     group.state = newState;
 
     await Group.updateOne({ id: groupId }, { $set: { state: newState } });
