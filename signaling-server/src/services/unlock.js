@@ -46,7 +46,9 @@ async function unlock({ identifier, password, decoded }) {
     throw new Error('Group not found');
   }
   const controller = group.clients.controller;
-  if (controller && controller.readyState === WebSocket.OPEN) {
+  if (!controller) {
+    throw new Error('Controller not connected');
+  } else if (controller.readyState === WebSocket.OPEN) {
     controller.send(`UNLOCK ${dbGroup.controllerId}`);
   }
 
