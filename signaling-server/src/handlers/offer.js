@@ -29,6 +29,7 @@ async function handleOffer(message, client) {
   }
 
   // Validate camera token
+  console.log(`Validating camera token: ${token}`);
   if (!(await wsCameraAuth(token, client))) {
     console.error('Invalid camera token');
     client.close();
