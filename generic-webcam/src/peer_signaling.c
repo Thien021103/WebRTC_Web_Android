@@ -15,7 +15,7 @@
 #define HOST_LEN 64
 #define CRED_LEN 128
 #define PEER_ID_SIZE 80
-#define TOKEN_SIZE 256
+#define TOKEN_SIZE 512
 
 typedef struct PeerSignaling {
 
@@ -334,7 +334,7 @@ static void peer_signaling_onicecandidate(char* description, void* userdata) {
     snprintf(offer, sizeof(offer), "OFFER camera %s\n%s", g_ps.camera_token, description);
 
     // Send the offer over WebSocket
-    lws_websocket_connection_send_text(web_socket, offer, SDP_OFFER);
+    lws_write(web_socket, (unsigned char*)offer, strlen(offer), LWS_WRITE_TEXT);
 }
 
 void peer_signaling_set_config(ServiceConfiguration* service_config) {

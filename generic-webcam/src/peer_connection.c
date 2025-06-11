@@ -433,7 +433,7 @@ int peer_connection_loop(PeerConnection* pc) {
 
     case PEER_CONNECTION_CHECKING:
       // LOGD("Checking...");
-      usleep(5000);
+      usleep(500);
       if (agent_select_candidate_pair(&pc->agent) < 0) {
         break;
       } 

@@ -175,12 +175,12 @@ static void* peer_connection_task(void* data) {
 // }
 
 int main(int argc, char* argv[]) {
-  char camera_id[50];
-  char ssid[100];
-  char pass[100];
-  memset(camera_id, 0, 50);
-  memset(ssid, 0, 100);
-  memset(pass, 0, 100);
+  char camera_id[48];
+  char ssid[128];
+  char pass[128];
+  memset(camera_id, 0, 48);
+  memset(ssid, 0, 128);
+  memset(pass, 0, 128);
 
   pthread_t peer_singaling_thread;
   pthread_t peer_connection_thread;
@@ -228,9 +228,9 @@ int main(int argc, char* argv[]) {
   peer_connection_ondatachannel(g_pc, onmessage, onopen, onclose);
 
   printf("argc = %d\nargv[1] = %s\nargv[2] = %s\nargv[3] = %s", argc, argv[1], argv[2], argv[3]);
-  snprintf(camera_id, 50, "%s", argv[1]);
-  snprintf(ssid, 100, "%s", argv[2]);
-  snprintf(pass, 100, "%s", argv[3]);
+  snprintf(camera_id, 48, "%s", argv[1]);
+  snprintf(ssid, 128, "%s", argv[2]);
+  snprintf(pass, 128, "%s", argv[3]);
 
   service_config.camera_id = camera_id;
   service_config.client_id = argv[1];
