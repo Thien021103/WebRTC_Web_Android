@@ -36,7 +36,7 @@ async function getNotifications(decoded, query) {
 
   // Fetch notifications
   const notifications = await Notification.find(queryObj)
-    .select('groupId time -_id')
+    .select('time -_id')
     .sort({ time: -1 })
     .skip(skip)
     .limit(limitNum)
