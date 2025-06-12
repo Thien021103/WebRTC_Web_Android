@@ -1,16 +1,9 @@
-const { getNotifications } = require('../services/notification');
+const { getNotifications } = require('../services/notificationService');
 
 async function handleGetNotifications(req, res) {
   try {
-    const { groupId, startDate, endDate, limit, page } = req.query;
     const decoded = req.user; // From authMiddleware
-
-    // Ensure user/owner belongs to the requested group
-    if (groupId !== decoded.groupId) {
-      throw new Error('Not authorized for this group');
-    }
-
-    const notifications = await getNotifications({ groupId, startDate, endDate, limit, page });
+    const notifications = await getNotifications(decoded, req.query);
     res.json({ status: 'success', notifications });
   } catch (error) {
     console.error(`Error in handleGetNotifications: ${error.message}`);
