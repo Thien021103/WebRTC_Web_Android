@@ -12,6 +12,7 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -47,6 +48,7 @@ fun MainScreen(
             text =
               if (currentRoute == "main") {"Welcome!"}
               else if (currentRoute == "group") {"Your Group"}
+              else if (currentRoute == "notifications") {"Notifications history"}
               else {"Profile"},
             fontSize = 20.sp
           )
@@ -99,6 +101,19 @@ fun MainScreen(
             }
           }
         )
+        BottomNavigationItem(
+          icon = { Icon(Icons.Filled.Notifications, contentDescription = "Notifications") },
+          label = { Text("Notifications") },
+          selected = currentRoute == "notifications",
+          selectedContentColor = MaterialTheme.colors.primary,
+          unselectedContentColor = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+          onClick = {
+            if (currentRoute != "notifications") {
+              navController.navigate("notifications")
+              currentRoute = "notifications"
+            }
+          }
+        )
       }
     },
     content = { padding ->
@@ -128,6 +143,11 @@ fun MainScreen(
         }
         composable("group") {
           GroupDetailScreen(
+            accessToken = token,
+          )
+        }
+        composable("notifications") {
+          NotificationScreen (
             accessToken = token,
           )
         }

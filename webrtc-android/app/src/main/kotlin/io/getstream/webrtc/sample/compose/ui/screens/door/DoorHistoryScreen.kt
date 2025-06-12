@@ -308,9 +308,9 @@ fun DoorHistoryScreen(
                     fontSize = 16.sp
                   )
                   Text(
-                    text = "Timestamp: ${
+                    text = "Time: ${
                       SimpleDateFormat(
-                        "MMM dd, yyyy HH:mm",
+                        "HH:mm, dd MMM, yyyy ",
                         Locale.getDefault()
                       ).format(
                         SimpleDateFormat(
