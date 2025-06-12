@@ -1,5 +1,6 @@
 const Owner = require('../schemas/owner');
 const Group = require('../schemas/group');
+const User = require('../schemas/user');
 
 async function deleteOwner({ email, groupId }) {
   if (!email || !groupId) {
@@ -11,6 +12,9 @@ async function deleteOwner({ email, groupId }) {
   if (!group) {
     throw new Error('Group not found');
   }
+
+  // Delete all users in the group
+  await User.deleteMany({ groupId });
 
   // Find and delete owner
   const owner = await Owner.findOneAndDelete({ email, groupId });

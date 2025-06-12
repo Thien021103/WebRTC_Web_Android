@@ -21,6 +21,7 @@ const { handleGetGroups } = require('../controllers/getGroups');
 const { handleSendGroupId } = require('../controllers/sendGroupId');
 const { handleGetOwners } = require('../controllers/getOwners');
 const { handleGetGroup } = require('../controllers/group');
+const { handleGetNotifications } = require('../controllers/notification');
 const { handleChangePassword } = require('../controllers/changePassword');
 const { handleDeleteOwner } = require('../controllers/deleteOwner');
 
@@ -44,6 +45,8 @@ router.get('/door', authMiddleware, handleGetDoor);
 router.get('/door-history', authMiddleware, handleGetDoorHistory);
 
 router.get('/group', authMiddleware, handleGetGroup);
+
+router.get('/notifications', authMiddleware, handleGetNotifications);
 
 router.get('/get-videos', authMiddleware, handleGetVideos);
 router.delete('/delete-videos', authMiddleware, handleDeleteVideo);

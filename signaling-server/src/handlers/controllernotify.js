@@ -1,6 +1,7 @@
 const Group = require('../schemas/group');
 const User = require('../schemas/user');
 const Owner = require('../schemas/owner');
+const Notification = require('../schemas/notification');
 
 const { sendFCMNotification } = require('../utils/fcm');
 const { wsControllerAuth } = require('../middleware/auth');
@@ -52,6 +53,15 @@ async function handleControllerNotify(message, client) {
       console.log(`No FCM tokens found for group ${groupId}`);
     }
 
+    // Save notification if no recent one exists (within 60 seconds)
+    const recentNotification = await Notification.findOne({
+      groupId,
+      time: { $gte: new Date(Date.now() + 7 * 60 * 60 * 1000 - 60 * 1000) }, // Vietnam time - 60s
+    });
+    if (!recentNotification) {
+      await Notification.create({ groupId });
+      console.log(`Notification saved for group ${groupId}`);
+    }
   } catch (error) {
     console.error(`Error in handleControllerNotify: ${error.message}`);
     client.close();
