@@ -24,6 +24,7 @@ const { handleGetGroup } = require('../controllers/group');
 const { handleGetNotifications } = require('../controllers/notification');
 const { handleChangePassword } = require('../controllers/changePassword');
 const { handleDeleteOwner } = require('../controllers/deleteOwner');
+const { handleLight } = require('../controllers/light');
 
 router.post('/login-user', handleLoginUser);
 router.post('/login-owner', handleLoginOwner);
@@ -34,6 +35,8 @@ router.post('/logout', authMiddleware, handleLogout);
 router.post('/change-password', authMiddleware, handleChangePassword);
 
 router.post('/otp', handleSendOTP);
+
+router.get('/light', authMiddleware, handleLight);
 
 router.post('/lock', authMiddleware, handleLock);
 router.post('/unlock', authMiddleware, handleUnlock);
