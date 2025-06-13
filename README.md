@@ -7,23 +7,14 @@
   - `npm install`
   - `npm start`
 
-# III. Chạy web client:
-- Trên 1 máy trong mạng LAN, vào thư mục `/client` 
-- Vào file `/client/client.js`, sửa địa chỉ IP trong dòng lệnh dưới đây về địa chỉ IP của máy chạy signaling server:
-```
-const websocket = new WebSocket('ws://127.0.0.1:8000/');
-```
-- Chạy: `python -m http.server --bind 127.0.0.1 8080`
-- Vào `http://127.0.0.1:8080/` trên browser
-
-# IV. Chạy chương trình Android:
+# III. Chạy chương trình Android:
 - Vào Android Studio, mở thư mục `/webrtc-android`
 - Cài đặt và chạy chương trình trên điện thoại. 
 - Nhập địa chỉ IP của máy đang chạy signaling server vào trong TextField hiện ra
 - Bấm vào `Start Signaling`
-- Bấm vào `Ready to start session`
+- Bấm vào `Join Call`
 
-# V. Build:
+# IV. Build:
 - Go to `generic-webcam/third_party/libwebsockets/lib/core/context.c`
   - Change:
   ```
@@ -67,3 +58,8 @@ const websocket = new WebSocket('ws://127.0.0.1:8000/');
   ```
   mbedtls_xor
   ```
+
+# V. Dependencies
+* [libpeer](https://github.com/sepfy/libpeer)
+* [libwebsockets] (https://github.com/warmcat/libwebsockets)
+* [webrtc-android] (https://github.com/GetStream/webrtc-android)
