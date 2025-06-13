@@ -22,10 +22,10 @@ WebRTC implementation written in C. The library aims to integrate IoT/Embedded d
 ### Getting Started with Generic Example
 ```bash
 $ sudo apt -y install git cmake
-$ git clone --recursive https://github.com/Thien021103/LibPeer2Way
-$ cd LibPeer2Way
+$ git clone --recursive https://github.com/sepfy/libpeer
+$ cd libpeer
 $ cmake -S . -B build && cmake --build build
 $ wget http://www.live555.com/liveMedia/public/264/test.264 # Download test video file
 $ wget https://mauvecloud.net/sounds/alaw08m.wav # Download test audio file
-$ ./generic/sample/sample
+$ ./examples/generic/sample
 ```

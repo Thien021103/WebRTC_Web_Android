@@ -15,6 +15,9 @@ typedef struct ServiceConfiguration {
   const char* client_id;
   const char* ws_url;
   int ws_port;
+
+  void (*on_light_switch)(int close);
+
   PeerConnection* pc;
 } ServiceConfiguration;
 

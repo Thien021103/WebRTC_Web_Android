@@ -34,6 +34,8 @@ const char SPK_PIPELINE[] = "appsrc name=spk-src format=time ! audio/x-alaw ! al
 //const char SPK_PIPELINE[] = "appsrc name=spk-src format=time ! alawdec ! audio/x-raw,format=S16LE,rate=8000,channels=1 ! alsasink sync=false device=plughw:seeed2micvoicec,0";
 
 int g_interrupted = 0;
+int light_switch = 0;
+
 PeerConnection* g_pc = NULL;
 PeerConnectionState g_state;
 
@@ -55,6 +57,28 @@ typedef struct Media {
 Media g_media;
 
 // static uint64_t get_timestamp();
+
+static void onlightswitch(int close) {
+  // Implement the logic to toggle the light
+  // char type[5];
+  // memset(&type, 0, sizeof(type));
+  if(close) {
+    light_switch = 0;
+    printf("Light OFF\n");
+    // pps_dua_write(g_cam_ctx.cam, PPS_DUA_NODE_WHITE_LIGHT_ENABLE, (char *)&type, sizeof(type));
+  } else {
+    light_switch = !light_switch;
+    if(light_switch) {
+      printf("Light ON\n");
+      // snprintf(type, sizeof(type), "%d", 1);
+      // pps_dua_write(g_cam_ctx.cam, PPS_DUA_NODE_WHITE_LIGHT_ENABLE, (char *)&type, sizeof(type));
+    } else {
+      printf("Light OFF\n");
+      // snprintf(type, sizeof(type), "%d", 0);
+      // pps_dua_write(g_cam_ctx.cam, PPS_DUA_NODE_WHITE_LIGHT_ENABLE, (char *)&type, sizeof(type));
+    }
+  }
+}
 
 static void onconnectionstatechange(PeerConnectionState state, void* data) {
     printf("state is changed: %s\n", peer_connection_state_to_string(state));
@@ -235,6 +259,7 @@ int main(int argc, char* argv[]) {
   service_config.camera_id = camera_id;
   service_config.client_id = argv[1];
   service_config.pc = g_pc;
+  service_config.on_light_switch = onlightswitch;
 
   peer_signaling_set_config(&service_config);
 

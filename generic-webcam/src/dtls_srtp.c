@@ -103,6 +103,8 @@ int dtls_srtp_init(DtlsSrtp* dtls_srtp, DtlsSrtpRole role, void* user_data) {
   dtls_srtp->role = role;
   dtls_srtp->state = DTLS_SRTP_STATE_INIT;
   dtls_srtp->user_data = user_data;
+  // dtls_srtp->udp_send = dtls_srtp_udp_send;
+  // dtls_srtp->udp_recv = dtls_srtp_udp_recv;
 
   mbedtls_ssl_config_init(&dtls_srtp->conf);
   mbedtls_ssl_init(&dtls_srtp->ssl);

@@ -27,6 +27,9 @@ typedef struct PeerSignaling {
     char client_id[CRED_LEN];
     char secret_key[CRED_LEN];
     char connect_hmac_hex[41];
+
+    void (*on_light_switch)(int close);
+
     PeerConnection* pc;
 
 } PeerSignaling;
@@ -47,12 +50,7 @@ enum SignalingState {
   Impossible = 100, // We have less than two clients connected to the server
   Offline = 010,    // unable to connect signaling server
 };
-enum SignalingCommand {
-  STATE = 200, // Command for WebRTCSessionState
-  OFFER = 202, // to send or receive offer
-  ANSWER = 220, // to send or receive answer
-  ICE = 222,// to send and receive ice candidates
-};
+ 
 static enum SignalingState signaling_state = Impossible;
 
 static PeerSignaling g_ps;
@@ -96,7 +94,7 @@ const char *ca_pem =
     "uYkQ4omYCTX5ohy+knMjdOmdH9c7SpqEWBDC86fiNex+O0XOMEZSa8DA\n"
     "-----END CERTIFICATE-----";
 
-const char* pong = "PONG";
+char* pong = "PONG";
 
 enum AppState {
     APP_STATE_UNKNOWN = 0,
@@ -166,6 +164,10 @@ static int websocket_write_back(struct lws* wsi_in, char* str, int str_size_in) 
         }
     } else if (strncmp(str, "PING", 4) == 0) {
         lws_websocket_connection_send_text(web_socket, pong, PONG);
+    } else if (strncmp(str, "LIGHT", 5) == 0) {
+        LOGI("LIGHT switch command received");
+        // Handle light command
+        g_ps.on_light_switch(0);
     } else if (strncmp(str, "STATE ", 6) == 0) {
         const char *value = strchr(str, ' '); // Find the first space
         if (value) {
@@ -173,6 +175,7 @@ static int websocket_write_back(struct lws* wsi_in, char* str, int str_size_in) 
             if (strcmp(value, "Impossible") == 0) {
                 signaling_state = Impossible;
                 peer_connection_close(g_ps.pc); // Close old connection when client out 
+                g_ps.on_light_switch(1); // Turn off light
                 LOGI("Waiting for a client to signal...");
             } else if (strcmp(value, "Active") == 0) {
                 signaling_state = Active;
@@ -362,6 +365,10 @@ void peer_signaling_set_config(ServiceConfiguration* service_config) {
 
     if (service_config->secret_key != NULL && strlen(service_config->secret_key) > 0) {
         strncpy(g_ps.secret_key, service_config->secret_key, PEER_ID_SIZE);
+    }
+
+    if (service_config->on_light_switch != NULL) {
+        g_ps.on_light_switch = service_config->on_light_switch;
     }
 
     utils_get_hmac_sha1(g_ps.camera_id, strlen(g_ps.camera_id), g_ps.secret_key, strlen(g_ps.secret_key), hmac);
