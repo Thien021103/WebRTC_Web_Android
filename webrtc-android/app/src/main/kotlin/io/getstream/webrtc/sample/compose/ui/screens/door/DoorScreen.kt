@@ -164,9 +164,9 @@ fun DoorScreen(
           .post(body.toRequestBody("application/json".toMediaType()))
           .build()
         val response = client.newCall(request).execute()
+        val responseBody = response.body?.string()
+        val json = JSONObject(responseBody ?: "{}")
         if (response.isSuccessful) {
-          val responseBody = response.body?.string()
-          val json = JSONObject(responseBody ?: "{}")
           val status = json.optString("status")
           unlockMessage = json.optString("message")
           if (status == "success") {
@@ -187,7 +187,7 @@ fun DoorScreen(
           CoroutineScope(Dispatchers.Main).launch {
             isUnlocking = false
             showDialog = false
-            unlockMessage = "Server error: ${response.body?.string()}"
+            unlockMessage = "Server error: ${json.optString("message", "Unknown error")}"
             errorMessage = unlockMessage
           }
         }

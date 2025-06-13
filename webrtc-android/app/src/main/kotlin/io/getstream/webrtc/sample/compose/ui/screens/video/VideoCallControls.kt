@@ -28,6 +28,7 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -39,6 +40,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -71,46 +74,46 @@ fun VideoCallControls(
   var showPassword by remember { mutableStateOf(false) }
   var password by remember { mutableStateOf("") }
   var unlockMessage by remember { mutableStateOf("") }
+  var isLightOn by remember { mutableStateOf(false) }
+  var isTogglingLight by remember { mutableStateOf(false) }
+
   val client = OkHttpClient.Builder().build()
 
-  LazyRow(
-    modifier = modifier.padding(bottom = 12.dp),
-    verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.SpaceEvenly
-  ) {
-    items(actions) { action ->
-      Box(
-        modifier = Modifier.size(56.dp).clip(CircleShape).background(action.background)
-      ) {
-        Icon(
-          modifier = Modifier.padding(10.dp).align(Alignment.Center).clickable { onCallAction(action.callAction) },
-          tint = action.iconTint,
-          painter = action.icon,
-          contentDescription = null
-        )
-      }
-    }
-    item {
-      Button(
-        onClick = { showUnlockDialog = true },
-        modifier = Modifier.fillMaxWidth().height(56.dp),
-        shape = RoundedCornerShape(12.dp),
-        elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
-        colors = ButtonDefaults.buttonColors(
-          backgroundColor = MaterialTheme.colors.primary,
-          contentColor = MaterialTheme.colors.onPrimary
-        )
-      ) {
-        Icon(
-          imageVector = Icons.Filled.LockOpen,
-          contentDescription = "Unlock button",
-          modifier = Modifier.padding(end = 8.dp)
-        )
-        Text(
-          text = "Unlock door",
-          fontSize = 18.sp,
-          fontWeight = FontWeight.Bold
-        )
+  fun performToggleLight() {
+    isLightOn = !isLightOn
+    isTogglingLight = true
+
+    CoroutineScope(Dispatchers.IO).launch {
+      try {
+        val request = Request.Builder()
+          .url("https://thientranduc.id.vn:444/api/light")
+          .addHeader("Authorization", "Bearer $accessToken")
+          .get()
+          .build()
+        val response = client.newCall(request).execute()
+        val responseBody = response.body?.string()
+        val json = JSONObject(responseBody ?: "{}")
+        val status = json.optString("status")
+        if (response.isSuccessful) {
+          if (status == "success") {
+            CoroutineScope(Dispatchers.Main).launch {
+              isTogglingLight = false
+            }
+          }
+          else {
+            CoroutineScope(Dispatchers.Main).launch {
+              isTogglingLight = false
+            }
+          }
+        } else {
+          CoroutineScope(Dispatchers.Main).launch {
+            isTogglingLight = false
+          }
+        }
+      } catch (e: Exception) {
+        CoroutineScope(Dispatchers.Main).launch {
+          isTogglingLight = false
+        }
       }
     }
   }
@@ -131,24 +134,93 @@ fun VideoCallControls(
           .post(body.toRequestBody("application/json".toMediaType()))
           .build()
         val response = client.newCall(request).execute()
+        val responseBody = response.body?.string()
+        val json = JSONObject(responseBody ?: "{}")
+        val status = json.optString("status")
         if (response.isSuccessful) {
-          val responseBody = response.body?.string()
-          val json = JSONObject(responseBody ?: "{}")
-          val status = json.optString("status")
-          unlockMessage = json.optString("message")
           if (status == "success") {
             password = ""
             isUnlocking = false
+            unlockMessage = "Door ${json.optString("message", "Handled")}"
           } else {
             isUnlocking = false
+            unlockMessage = json.optString("message", "Error handling door")
           }
         } else {
           isUnlocking = false
-          unlockMessage = "Server error: ${response.body?.string()}"
+          unlockMessage = "Server error: ${json.optString("message")}"
         }
       } catch (e: Exception) {
         isUnlocking = false
         unlockMessage = "Network error: ${e.message}"
+      }
+    }
+  }
+
+  LazyRow(
+    modifier = modifier.padding(bottom = 12.dp),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.SpaceEvenly
+  ) {
+    items(actions) { action ->
+      Box(
+        modifier = Modifier.size(56.dp).clip(CircleShape).background(action.background)
+      ) {
+        Icon(
+          modifier = Modifier.padding(10.dp).align(Alignment.Center).clickable { onCallAction(action.callAction) },
+          tint = action.iconTint,
+          painter = action.icon,
+          contentDescription = null
+        )
+      }
+      Spacer(modifier = Modifier.width(8.dp))
+    }
+    item {
+      Box(
+        modifier = Modifier
+          .size(56.dp)
+          .clip(CircleShape)
+          .background(MaterialTheme.colors.surface.copy(alpha = 0.8f))
+          .then(
+            if (isLightOn) Modifier.shadow(
+              elevation = 1.dp,
+              shape = CircleShape,
+              ambientColor = Color.Yellow,
+              spotColor = Color.Yellow
+            ) else Modifier
+          )
+          .clickable(enabled = !isTogglingLight) { performToggleLight() }
+      ) {
+        Icon(
+          imageVector = Icons.Filled.Lightbulb,
+          contentDescription = "Light switch",
+          tint = if (isLightOn) Color.Yellow else MaterialTheme.colors.onSurface,
+          modifier = Modifier.padding(10.dp).align(Alignment.Center)
+        )
+      }
+      Spacer(modifier = Modifier.width(8.dp))
+    }
+    item {
+      Button(
+        onClick = { showUnlockDialog = true },
+        modifier = Modifier.fillMaxWidth().height(56.dp),
+        shape = RoundedCornerShape(12.dp),
+        elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
+        colors = ButtonDefaults.buttonColors(
+          backgroundColor = MaterialTheme.colors.primary,
+          contentColor = MaterialTheme.colors.onPrimary
+        )
+      ) {
+        Icon(
+          imageVector = Icons.Filled.LockOpen,
+          contentDescription = "Unlock button",
+          modifier = Modifier.padding(end = 8.dp)
+        )
+        Text(
+          text = "Unlock door",
+          fontSize = 16.sp,
+          fontWeight = FontWeight.Bold
+        )
       }
     }
   }
@@ -201,9 +273,7 @@ fun VideoCallControls(
       },
       confirmButton = {
         Button(
-          onClick = {
-            performUnlock()
-          },
+          onClick = { performUnlock() },
           shape = RoundedCornerShape(8.dp),
           colors = ButtonDefaults.buttonColors(
             backgroundColor = MaterialTheme.colors.secondary,
