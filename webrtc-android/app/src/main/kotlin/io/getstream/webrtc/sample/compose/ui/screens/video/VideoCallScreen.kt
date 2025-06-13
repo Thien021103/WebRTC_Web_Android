@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
@@ -203,6 +204,17 @@ fun VideoCallScreen(
             onCancelCall.invoke() // Proceed to parent screen
           }) {
             Text("OK")
+          }
+        }
+      },
+      dismissButton = {
+        if (!uploadCompleted && !uploadFailed) {
+          TextButton(onClick = {
+            Log.d("Upload Dialog", "Close upload")
+            showUploadDialog = false
+            onCancelCall.invoke() // Proceed to parent screen
+          }) {
+            Text("Close", color = MaterialTheme.colors.error)
           }
         }
       }

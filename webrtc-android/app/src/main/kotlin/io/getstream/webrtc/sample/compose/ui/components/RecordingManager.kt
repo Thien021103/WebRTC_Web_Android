@@ -323,6 +323,12 @@ class RecordingManager (
       return
     }
 
+    if (file.length() == 0L) {
+      onUploadUpdate(null, 0f, true)
+      Log.e("RecordingManager", "Cannot upload: File ${file.name} is empty (0 bytes)")
+      return
+    }
+
     val publicId = "${file.nameWithoutExtension}}"
     Log.d("Recording Manager", "Uploading file $cloudFolder/${file.nameWithoutExtension}" )
     MediaManager.get().upload(file.absolutePath)
