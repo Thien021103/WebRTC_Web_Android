@@ -66,46 +66,40 @@ class RecordingManager (
           val audioFormat =
             MediaFormat.createAudioFormat("audio/mp4a-latm", sampleRate, channels).apply {
               setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC)
-              setInteger(MediaFormat.KEY_BIT_RATE, 32_000) // 128 kbps
+              setInteger(MediaFormat.KEY_BIT_RATE, 128_000) // 128 kbps
             }
           audioMediaCodec = MediaCodec.createEncoderByType("audio/mp4a-latm").apply {
             configure(audioFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
             start()
           }
-          Log.d("AudioCodec", "Audio codec started, bitsPerSample:$bitsPerSample, timestamp: $timestamp, $bitsPerSample, $sampleRate, $frames")
+          Log.d("AudioCodec", "Audio codec started, bitsPerSample:$bitsPerSample, timestamp: $timestamp, channel: $channels, sample rate: $sampleRate, frames: $frames")
         }
         currentTimestampUs = 0L
         isAudioRecording = true
       } else {
-        val paddedBuffer = ByteArray(2048)
-        // Copy audio data into buffer
+        // Copy only the actual data, no padding
         val dataSize = audioData.remaining()
-//        if (bufferOffset + dataSize <= audioBuffer.size) {
-        audioData.get(paddedBuffer, bufferOffset, dataSize)
+        val audioBytes = ByteArray(dataSize)
+        audioData.get(audioBytes)
+        System.arraycopy(audioBytes, 0, audioBuffer, bufferOffset, dataSize)
         bufferOffset += dataSize
-        for (i in dataSize until 2048) {
-          paddedBuffer[i] = 0
-        }
-//        }
-
-        // Queue when buffer has 2048 bytes (1024 samples)
-//        Log.d("AudioRecordingManager", "bufferOffset: $bufferOffset")
-//        if (bufferOffset >= 1900) {
+        // Process full 960-byte packets
+        while (bufferOffset >= 960) {
           try {
-            val normalizedTimestampUs = currentTimestampUs // Already in µs
-//            Log.d("AudioRecordingManager", "timestamp: $normalizedTimestampUs")
-            recordAudioData(ByteBuffer.wrap(paddedBuffer, 0, 2048), normalizedTimestampUs)
-            currentTimestampUs += (bufferOffset * 1_000_000L / 48000)
-            bufferOffset = 0 // Reset buffer
+            Log.d("AudioRecording", "Processing data size: 960, timestamp: $currentTimestampUs")
+            recordAudioData(ByteBuffer.wrap(audioBuffer, 0, 960), currentTimestampUs)
+            currentTimestampUs += 10_000L // 10 ms for 480 samples
+
+            // Shift remaining data
+            val remaining = bufferOffset - 960
+            if (remaining > 0) {
+              System.arraycopy(audioBuffer, 960, audioBuffer, 0, remaining)
+            }
+            bufferOffset = remaining
           } catch (e: Exception) {
             Log.e("AudioRecordingManager", "Error recording audio data", e)
           }
-//        } else {
-//          val normalizedTimestampUs = currentTimestampUs + (bufferOffset * 3 * 1_000_000L / 48000) // Already in µs
-//          val paddedBuffer = ByteArray(2048)
-////          System.arraycopy(audioBuffer, 0, paddedBuffer, 0, 160)
-//          recordAudioData(ByteBuffer.wrap(paddedBuffer, 0, bufferOffset), normalizedTimestampUs)
-//        }
+        }
       }
     }
   }
@@ -320,12 +314,6 @@ class RecordingManager (
     if (config["cloud_name"].isNullOrEmpty()) {
       onUploadUpdate(null, 0f, true)
       Log.e("RecordingManager", "Cannot upload: MediaManager not initialized")
-      return
-    }
-
-    if (file.length() == 0L) {
-      onUploadUpdate(null, 0f, true)
-      Log.e("RecordingManager", "Cannot upload: File ${file.name} is empty (0 bytes)")
       return
     }
 

@@ -231,7 +231,7 @@ class MainActivity : ComponentActivity() {
                   accessToken = ""
                   role = ""
                   currentScreen = Screen.RoleSelection
-                  (this.applicationContext as WebRTCApp).clearConfig()
+//                  (this.applicationContext as WebRTCApp).clearConfig() // Clearing this make MediaManager lost its config
                 }
               )
 

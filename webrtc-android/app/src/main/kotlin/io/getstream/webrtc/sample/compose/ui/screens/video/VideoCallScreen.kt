@@ -115,12 +115,12 @@ fun VideoCallScreen(
           .onSizeChanged { parentSize = it }
       )
     }
-/*    if(remoteAudioTrack != null) {
-      AudioRecorder(
-        audioTrack = remoteAudioTrack,
-        recordingManager = recordingManager
-      )
-    }*/
+//    if(remoteAudioTrack != null) {
+//      AudioRecorder(
+//        audioTrack = remoteAudioTrack,
+//        recordingManager = recordingManager
+//      )
+//    }
 
 // Enhanced logging for local video condition
 //    if (localVideoTrack != null) {
@@ -161,6 +161,7 @@ fun VideoCallScreen(
           CallAction.LeaveCall -> {
             Log.d("Upload Dialog", "Show Upload dialog")
             showUploadDialog = true
+            sessionManager.disconnect()
             recordingManager.stopRecording (
               onUploadUpdate = { url, progress, isComplete ->
                 uploadProgress = progress
@@ -168,7 +169,6 @@ fun VideoCallScreen(
                 uploadFailed = isComplete && url == null
               }
             )
-            sessionManager.disconnect()
           }
         }
       }

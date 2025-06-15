@@ -225,6 +225,9 @@ class WebRtcSessionManagerImpl(
     remoteVideoTrackFlow.replayCache.forEach { videoTrack ->
       videoTrack.dispose()
     }
+    remoteAudioTrackFlow.replayCache.forEach { audioTrack ->
+      audioTrack.dispose()
+    }
 //    localVideoTrackFlow.replayCache.forEach { videoTrack ->
 //      videoTrack.dispose()
 //    }
