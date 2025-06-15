@@ -36,11 +36,13 @@ const getVideos = async (groupId) => {
         public_id: video.public_id,
         name: video.public_id.split('/').pop(),
         secure_url: video.secure_url,
-      }));
+        created_at: video.created_at,
+      }))
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // Newest first
     console.log(`getVideos: Found ${videos.length} videos`);
     return videos;
   } catch (error) {
-    console.error(`getVideos: Error: ${error.error.message}`);
+    console.error(`getVideos: Error: ${error.error?.message || error.message}`);
     throw new Error('Failed to fetch videos');
   }
 };
