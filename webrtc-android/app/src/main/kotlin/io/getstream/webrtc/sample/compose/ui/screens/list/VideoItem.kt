@@ -14,14 +14,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.Surface
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
@@ -97,32 +100,55 @@ fun VideoItem(
           horizontalAlignment = Alignment.End,
           modifier = Modifier.padding(8.dp)
         ) {
-          TextButton(onClick = { onDownload() }) {
-            Icon(
-              imageVector = Icons.Filled.CloudDownload,
-              contentDescription = "Download ${video.displayName}",
-              tint = Color.Blue
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-              text = "Download",
-              color = MaterialTheme.colors.primary,
-              fontSize = 14.sp
-            )
-          }
-          if (role == "Owner") {
-            TextButton(onClick = { showDeleteDialog = true }) {
+          // Download button
+          Surface(
+            shape = RoundedCornerShape(18.dp),
+            color = MaterialTheme.colors.primaryVariant,
+            modifier = Modifier.clickable { onDownload() }
+          ) {
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+            ) {
               Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = "Delete ${video.displayName}",
-                tint = Color.Blue
+                imageVector = Icons.Filled.CloudDownload,
+                contentDescription = "Download ${video.displayName}",
+                tint = Color.White,
+                modifier = Modifier.size(18.dp)
               )
               Spacer(modifier = Modifier.width(8.dp))
               Text(
-                text = "Delete",
-                color = MaterialTheme.colors.error,
-                fontSize = 14.sp
+                text = "Download",
+                color = Color.White,
+                fontSize = 16.sp
               )
+            }
+          }
+          if (role == "Owner") {
+            Spacer(modifier = Modifier.height(16.dp))
+            // Delete button
+            Surface(
+              shape = RoundedCornerShape(18.dp),
+              color = MaterialTheme.colors.error,
+              modifier = Modifier.clickable { showDeleteDialog = true }
+            ) {
+              Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+              ) {
+                Icon(
+                  imageVector = Icons.Default.Delete,
+                  contentDescription = "Delete ${video.displayName}",
+                  tint = Color.White,
+                  modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                  text = "Delete",
+                  color = Color.White,
+                  fontSize = 16.sp
+                )
+              }
             }
           }
         }

@@ -12,6 +12,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Group
@@ -44,12 +45,26 @@ fun OptionScreen(
     horizontalAlignment = Alignment.CenterHorizontally
   ) {
     Text(
-      text = "You are logged in as\n$role $identifier!",
-      fontSize = 24.sp,
+      text = "You are logged in as $role",
+      fontSize = 20.sp,
       color = MaterialTheme.colors.primary,
       textAlign = TextAlign.Center,
-      modifier = Modifier.padding(bottom = 32.dp)
+      modifier = Modifier.padding(bottom = 16.dp)
     )
+    Surface(
+      shape = RoundedCornerShape(20.dp),
+      color = MaterialTheme.colors.secondaryVariant,
+      modifier = Modifier.padding(bottom = 32.dp)
+    ) {
+      Text(
+        text = identifier,
+        fontSize = 20.sp,
+        color = MaterialTheme.colors.surface,
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+      )
+    }
+    Spacer(modifier = Modifier.height(16.dp))
+
     Button(
       onClick = onSignallingClick,
       modifier = Modifier.fillMaxWidth().height(56.dp),

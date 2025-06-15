@@ -113,22 +113,27 @@ fun VideoListScreen(
       )
     },
     bottomBar = {
-      Button(
-        onClick = onBack,
-        modifier = Modifier.fillMaxWidth().padding(16.dp, 16.dp, 16.dp, 32.dp).height(56.dp),
-        shape = RoundedCornerShape(12.dp),
-        elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
-        colors = ButtonDefaults.buttonColors(
-          backgroundColor = MaterialTheme.colors.primary,
-          contentColor = MaterialTheme.colors.onPrimary
-        )
+      Box(
+        modifier = Modifier.height(60.dp).fillMaxWidth(),
+        contentAlignment = Alignment.Center
       ) {
-        Icon(
-          imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-          contentDescription = "Back",
-          modifier = Modifier.padding(end = 8.dp)
-        )
-        Text(text = "Back", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Button(
+          onClick = onBack,
+          modifier = Modifier.fillMaxWidth().padding(16.dp, 0.dp, 16.dp, 16.dp).height(56.dp),
+          shape = RoundedCornerShape(12.dp),
+          elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
+          colors = ButtonDefaults.buttonColors(
+            backgroundColor = MaterialTheme.colors.primary,
+            contentColor = MaterialTheme.colors.onPrimary
+          )
+        ) {
+          Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = "Back",
+            modifier = Modifier.padding(end = 8.dp)
+          )
+          Text(text = "Back", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        }
       }
     },
     content = { padding ->
@@ -139,11 +144,11 @@ fun VideoListScreen(
         Text(
           text = selectedVideo?.displayName ?: "Select a video to play",
           color = Color.Black,
-          fontSize = 24.sp,
+          fontSize = 16.sp,
           textAlign = TextAlign.Center
         )
         Box(
-          modifier = Modifier.fillMaxWidth().height(280.dp).background(Color.Black),
+          modifier = Modifier.fillMaxWidth().height(250.dp).background(Color.Black),
           contentAlignment = Alignment.Center
         ) {
           if (selectedVideo != null) {
