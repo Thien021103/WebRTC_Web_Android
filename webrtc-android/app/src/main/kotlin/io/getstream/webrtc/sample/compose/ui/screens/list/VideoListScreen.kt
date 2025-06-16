@@ -1,6 +1,7 @@
 package io.getstream.webrtc.sample.compose.ui.screens.list
 
 import android.app.Activity
+import android.content.res.Configuration
 import android.util.Log
 import android.view.ViewGroup
 import android.widget.Toast
@@ -10,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -36,10 +38,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -62,9 +66,11 @@ fun VideoListScreen(
 ) {
   val videos by viewModel.videos.collectAsState()
   val context = LocalContext.current
-  var selectedVideo by remember { mutableStateOf<Video?>(null) }
+  var selectedVideoId by rememberSaveable { mutableStateOf<String?>(null) }
   var downloadVideo by remember { mutableStateOf<Video?>(null) }
   var isLoading by remember { mutableStateOf(false) }
+
+  val selectedVideo = videos.find { it.id == selectedVideoId }
 
   val coroutineScope = rememberCoroutineScope()
 
@@ -137,81 +143,168 @@ fun VideoListScreen(
       }
     },
     content = { padding ->
-      Column(
-        modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-      ) {
-        Text(
-          text = selectedVideo?.displayName ?: "Select a video to play",
-          color = Color.Black,
-          fontSize = 16.sp,
-          textAlign = TextAlign.Center
-        )
-        Box(
-          modifier = Modifier.fillMaxWidth().height(250.dp).background(Color.Black),
-          contentAlignment = Alignment.Center
+      // Use Row in landscape for better layout
+      val configuration = LocalConfiguration.current
+      if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        Row(
+          modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
+          horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-          if (selectedVideo != null) {
-            AndroidView(
-              factory = { ctx ->
-                PlayerView(ctx).apply {
-                  player = cldVideoPlayer.player
-                  useController = true
-                  layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
+          // Video player
+          LazyColumn(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+          ) {
+            item {
+              Text(
+                text = selectedVideo?.displayName ?: "Select a video to play",
+                color = Color.Black,
+                fontSize = 16.sp,
+                textAlign = TextAlign.Center
+              )
+            }
+            item {
+              Box(
+                modifier = Modifier.fillMaxWidth().height(200.dp).background(Color.Black),
+                contentAlignment = Alignment.Center
+              ) {
+                if (selectedVideo != null) {
+                  AndroidView(
+                    factory = { ctx ->
+                      PlayerView(ctx).apply {
+                        player = cldVideoPlayer.player
+                        useController = true
+                        layoutParams = ViewGroup.LayoutParams(
+                          ViewGroup.LayoutParams.MATCH_PARENT,
+                          ViewGroup.LayoutParams.MATCH_PARENT
+                        )
+                      }
+                    },
+                    update = {
+                      cldVideoPlayer.player?.apply {
+                        setMediaItem(MediaItem.fromUri(selectedVideo!!.url))
+                        prepare()
+                        play()
+                      }
+                    },
+                    modifier = Modifier.fillMaxSize()
                   )
-                  Log.d("VideoListScreen", "PlayerView created")
+                } else {
+                  Text(
+                    text = "Select a video to play",
+                    color = Color.White,
+                    fontSize = 16.sp
+                  )
                 }
-              },
-              update = {
-                cldVideoPlayer.player?.apply {
-                  setMediaItem(MediaItem.fromUri(selectedVideo!!.url))
-                  prepare()
-                  play()
+              }
+            }
+          }
+          // Video list
+          LazyColumn(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+          ) {
+            items(videos) { video ->
+              VideoItem(
+                role = role,
+                video = video,
+                onVideoSelected = { selectedVideoId = video.id },
+                onDownload = {
+                  downloadVideo = video
+                  viewModel.downloadVideo(video = video, launcher = downloadLauncher)
+                },
+                onDelete = {
+                  isLoading = true
+                  viewModel.deleteVideo(
+                    video = video,
+                    onDone = { isLoading = false }
+                  )
                 }
-                Log.d("VideoListScreen", "Playing video: ${selectedVideo!!.id}")
-              },
-              modifier = Modifier.fillMaxSize()
-            )
-          } else {
-            Text(
-              text = "Select a video to play",
-              color = Color.White,
-              fontSize = 16.sp
+              )
+            }
+          }
+          if (videos.isEmpty() || isLoading) {
+            CircularProgressIndicator(
+              modifier = Modifier.size(50.dp).align(Alignment.CenterVertically),
+              color = MaterialTheme.colors.onSecondary,
+              strokeWidth = 2.dp
             )
           }
         }
-        if (videos.isEmpty() || isLoading) {
-          CircularProgressIndicator(
-            modifier = Modifier.size(50.dp).align(Alignment.CenterHorizontally),
-            color = MaterialTheme.colors.onSecondary,
-            strokeWidth = 2.dp
-          )
-        }
-        LazyColumn(
-          modifier = Modifier.weight(1f),
-          verticalArrangement = Arrangement.spacedBy(8.dp)
+      } else {
+        // Original portrait layout
+        Column(
+          modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
+          verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-          items(videos) { video ->
-            VideoItem(
-              role = role,
-              video = video,
-              onVideoSelected = { selectedVideo = video },
-              onDownload = {
-                downloadVideo = video
-                viewModel.downloadVideo(video = video, launcher = downloadLauncher)
-              },
-              onDelete = {
-                isLoading = true
-                viewModel.deleteVideo(
-                  video = video,
-                  onDone = {
-                    isLoading = false;
+          Text(
+            text = selectedVideo?.displayName ?: "Select a video to play",
+            color = Color.Black,
+            fontSize = 16.sp,
+            textAlign = TextAlign.Center
+          )
+          Box(
+            modifier = Modifier.fillMaxWidth().height(250.dp).background(Color.Black),
+            contentAlignment = Alignment.Center
+          ) {
+            if (selectedVideo != null) {
+              AndroidView(
+                factory = { ctx ->
+                  PlayerView(ctx).apply {
+                    player = cldVideoPlayer.player
+                    useController = true
+                    layoutParams = ViewGroup.LayoutParams(
+                      ViewGroup.LayoutParams.MATCH_PARENT,
+                      ViewGroup.LayoutParams.MATCH_PARENT
+                    )
                   }
-                )
-              }
+                },
+                update = {
+                  cldVideoPlayer.player?.apply {
+                    setMediaItem(MediaItem.fromUri(selectedVideo!!.url))
+                    prepare()
+                    play()
+                  }
+                },
+                modifier = Modifier.fillMaxSize()
+              )
+            } else {
+              Text(
+                text = "Select a video to play",
+                color = Color.White,
+                fontSize = 16.sp
+              )
+            }
+          }
+          if (videos.isEmpty() || isLoading) {
+            CircularProgressIndicator(
+              modifier = Modifier.size(50.dp).align(Alignment.CenterHorizontally),
+              color = MaterialTheme.colors.onSecondary,
+              strokeWidth = 2.dp
             )
+          }
+          LazyColumn(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+          ) {
+            items(videos) { video ->
+              VideoItem(
+                role = role,
+                video = video,
+                onVideoSelected = { selectedVideoId = video.id },
+                onDownload = {
+                  downloadVideo = video
+                  viewModel.downloadVideo(video = video, launcher = downloadLauncher)
+                },
+                onDelete = {
+                  isLoading = true
+                  viewModel.deleteVideo(
+                    video = video,
+                    onDone = { isLoading = false }
+                  )
+                }
+              )
+            }
           }
         }
       }

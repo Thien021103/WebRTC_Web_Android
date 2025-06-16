@@ -279,7 +279,11 @@ fun DoorHistoryScreen(
 
         // History list
         if (isLoading) {
-          CircularProgressIndicator()
+          CircularProgressIndicator(
+            modifier = Modifier.size(24.dp),
+            color = MaterialTheme.colors.secondary,
+            strokeWidth = 2.dp
+          )
           Text(
             text = "Fetching history...",
             fontSize = 16.sp,

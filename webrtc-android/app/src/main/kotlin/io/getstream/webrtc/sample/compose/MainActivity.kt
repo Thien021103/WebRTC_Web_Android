@@ -1,6 +1,7 @@
 package io.getstream.webrtc.sample.compose
 
 import android.Manifest
+import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -23,12 +24,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import io.getstream.webrtc.sample.compose.ui.screens.users.RegisterUserScreen
 import io.getstream.webrtc.sample.compose.ui.screens.users.UserManagementScreen
 import com.google.firebase.messaging.FirebaseMessaging
@@ -45,42 +50,88 @@ import io.getstream.webrtc.sample.compose.ui.screens.users.UserListScreen
 import io.getstream.webrtc.sample.compose.ui.theme.WebrtcSampleComposeTheme
 import kotlinx.coroutines.tasks.await
 
-sealed class Screen {
-  object Login : Screen()
-  object Register : Screen()
-  object Main : Screen()
-  object Videos : Screen()
-  object Signalling : Screen()
-  object RoleSelection : Screen()
-  object RegisterUser : Screen()
-  object UserManagement : Screen()
-  object UserList : Screen()
-  object Door : Screen()
-  object DoorHistory : Screen()
-}
+//sealed class Screen {
+//  object Login : Screen()
+//  object Register : Screen()
+//  object Main : Screen()
+//  object Videos : Screen()
+//  object Signalling : Screen()
+//  object RoleSelection : Screen()
+//  object RegisterUser : Screen()
+//  object UserManagement : Screen()
+//  object UserList : Screen()
+//  object Door : Screen()
+//  object DoorHistory : Screen()
+//}
+
+// Helper functions to serialize/deserialize Screen
+//private fun screenToString(screen: Screen): String = screen.javaClass.simpleName
+//private fun stringToScreen(name: String): Screen = when (name) {
+//  "Login" -> Screen.Login
+//  "Register" -> Screen.Register
+//  "Main" -> Screen.Main
+//  "Videos" -> Screen.Videos
+//  "Signalling" -> Screen.Signalling
+//  "RoleSelection" -> Screen.RoleSelection
+//  "RegisterUser" -> Screen.RegisterUser
+//  "UserManagement" -> Screen.UserManagement
+//  "UserList" -> Screen.UserList
+//  "Door" -> Screen.Door
+//  "DoorHistory" -> Screen.DoorHistory
+//  else -> Screen.RoleSelection // Fallback
+//}
 
 class MainActivity : ComponentActivity() {
   @RequiresApi(Build.VERSION_CODES.R)
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    // Define permissions based on API level
-    val requiredPermissions = mutableListOf(
-      Manifest.permission.CAMERA,
-      Manifest.permission.RECORD_AUDIO,
-//      Manifest.permission.MANAGE_EXTERNAL_STORAGE
-    ).apply {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        add(Manifest.permission.POST_NOTIFICATIONS)
-      }
-    }.toTypedArray()
-
     setContent {
       WebrtcSampleComposeTheme {
         var showSettingsDialog by remember { mutableStateOf(false) }
         var permissionsGranted by remember { mutableStateOf(false) }
 
-        // Register permission request launcher
+        // Save and restore state
+        val viewModel: MainViewModel = viewModel()
+        var currentScreen by rememberSaveable {
+          mutableStateOf(viewModel.savedStateHandle.get<String>("currentScreen") ?: "RoleSelection")
+        }
+        var identifier by rememberSaveable {
+          mutableStateOf(viewModel.savedStateHandle.get<String>("identifier") ?: "")
+        }
+        var groupName by rememberSaveable {
+          mutableStateOf(viewModel.savedStateHandle.get<String>("groupName") ?: "")
+        }
+        var accessToken by rememberSaveable {
+          mutableStateOf(viewModel.savedStateHandle.get<String>("accessToken") ?: "")
+        }
+        var role by rememberSaveable {
+          mutableStateOf(viewModel.savedStateHandle.get<String>("role") ?: "")
+        }
+        var cloudFolder by rememberSaveable {
+          mutableStateOf(viewModel.savedStateHandle.get<String>("cloudFolder") ?: "")
+        }
+
+        // Update saved state
+        LaunchedEffect(currentScreen, identifier, groupName, accessToken, role, cloudFolder) {
+          viewModel.savedStateHandle["currentScreen"] = currentScreen
+          viewModel.savedStateHandle["identifier"] = identifier
+          viewModel.savedStateHandle["groupName"] = groupName
+          viewModel.savedStateHandle["accessToken"] = accessToken
+          viewModel.savedStateHandle["role"] = role
+          viewModel.savedStateHandle["cloudFolder"] = cloudFolder
+        }
+
+        // Permissions
+        val requiredPermissions = mutableListOf(
+          Manifest.permission.CAMERA,
+          Manifest.permission.RECORD_AUDIO
+        ).apply {
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            add(Manifest.permission.POST_NOTIFICATIONS)
+          }
+        }.toTypedArray()
+
         val permissionLauncher = rememberLauncherForActivityResult(
           contract = ActivityResultContracts.RequestMultiplePermissions()
         ) { permissions ->
@@ -118,7 +169,26 @@ class MainActivity : ComponentActivity() {
           permissionLauncher.launch(requiredPermissions)
         }
 
-        // Show settings dialog
+        // Manage orientation based on screen
+        LaunchedEffect(currentScreen) {
+          requestedOrientation = when (currentScreen) {
+//            Screen.Videos -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
+            "Videos" -> ActivityInfo.SCREEN_ORIENTATION_SENSOR
+            else -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+          }
+        }
+
+        // FCM Token
+        var fcmToken by remember { mutableStateOf("") }
+        LaunchedEffect(Unit) {
+          try {
+            fcmToken = FirebaseMessaging.getInstance().token.await()
+            Log.d("FCM Token", fcmToken)
+          } catch (e: Exception) {
+            Log.e("MainActivity", "Failed to get FCM token: $e")
+          }
+        }
+
         if (showSettingsDialog) {
           AlertDialog(
             onDismissRequest = { /* Non-dismissable */ },
@@ -162,31 +232,15 @@ class MainActivity : ComponentActivity() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colors.background
           ) {
-            var fcmToken by remember { mutableStateOf("") }
-            LaunchedEffect(Unit) {
-              try {
-                fcmToken = FirebaseMessaging.getInstance().token.await()
-                Log.d("FCM Token", fcmToken)
-              } catch (e: Exception) {
-                println("Failed to get FCM token: $e")
-              }
-            }
-            var currentScreen: Screen by remember { mutableStateOf(Screen.RoleSelection) }
-            var identifier by remember { mutableStateOf("") }
-            var groupName by remember { mutableStateOf("") }
-            var accessToken by remember { mutableStateOf("") }
-            var role by remember { mutableStateOf("") }
-            var cloudFolder by remember { mutableStateOf("") }
-
             when (currentScreen) {
-              Screen.RoleSelection -> RoleSelectionScreen(
+              "RoleSelection" -> RoleSelectionScreen(
                 onRoleSelected = { selectedRole ->
                   role = selectedRole
-                  currentScreen = Screen.Login
+                  currentScreen = "Login"
                 }
               )
 
-              Screen.Login -> LoginScreen(
+              "Login" -> LoginScreen(
                 fcmToken = fcmToken,
                 role = role,
                 onSuccess = { email, group, token, folder, config ->
@@ -194,88 +248,88 @@ class MainActivity : ComponentActivity() {
                   groupName = group
                   accessToken = token
                   cloudFolder = folder
-                  currentScreen = Screen.Main
+                  currentScreen = "Main"
                   (this.applicationContext as WebRTCApp).initializeMediaManager(config)
                 },
-                onRegister = { currentScreen = Screen.Register },
-                onBack = { currentScreen = Screen.RoleSelection }
+                onRegister = { currentScreen = "Register" },
+                onBack = { currentScreen = "RoleSelection" }
               )
 
-              Screen.Register -> RegisterScreen(
+              "Register" -> RegisterScreen(
                 fcmToken = fcmToken,
                 onSuccess = { email, group, token, folder, config ->
                   identifier = email
                   groupName = group
                   accessToken = token
                   cloudFolder = folder
-                  currentScreen = Screen.Main
+                  currentScreen = "Main"
                   role = "Owner"
                   (this.applicationContext as WebRTCApp).initializeMediaManager(config)
                 },
-                onLogin = { currentScreen = Screen.Login },
-                onBack = { currentScreen = Screen.RoleSelection }
+                onLogin = { currentScreen = "Login" },
+                onBack = { currentScreen = "RoleSelection" }
               )
 
-              Screen.Main -> MainScreen(
+              "Main" -> MainScreen(
                 role = role,
                 identifier = identifier,
                 groupName = groupName,
                 token = accessToken,
-                onVideosClick = { currentScreen = Screen.Videos },
-                onSignallingClick = { currentScreen = Screen.Signalling },
-                onDoorClick = { currentScreen = Screen.Door },
-                onUserManagementClick = { currentScreen = Screen.UserManagement },
+                onVideosClick = { currentScreen = "Videos" },
+                onSignallingClick = { currentScreen = "Signalling" },
+                onDoorClick = { currentScreen = "Door" },
+                onUserManagementClick = { currentScreen = "UserManagement" },
                 onLogout = {
                   identifier = ""
                   groupName = ""
                   accessToken = ""
                   role = ""
-                  currentScreen = Screen.RoleSelection
+                  currentScreen = "RoleSelection"
 //                  (this.applicationContext as WebRTCApp).clearConfig() // Clearing this make MediaManager lost its config
                 }
               )
 
-              Screen.Videos -> VideoListScreen(
+              "Videos" -> VideoListScreen(
                 role = role,
-                viewModel = VideoListViewModel(token = accessToken),
-                onBack = { currentScreen = Screen.Main }
+                viewModel = viewModel(factory = VideoListViewModel.Factory(accessToken)),
+                onBack = { currentScreen = "Main" }
               )
 
-              Screen.Signalling -> SignallingScreen(
+              "Signalling" -> SignallingScreen(
                 role = role,
                 identifier = identifier,
                 accessToken = accessToken,
                 cloudFolder = cloudFolder,
-                onBack = { currentScreen = Screen.Main }
+                onBack = { currentScreen = "Main" }
               )
 
-              Screen.UserManagement -> UserManagementScreen(
-                onRegisterUserClick = { currentScreen = Screen.RegisterUser },
-                onUserListClick = { currentScreen = Screen.UserList },
-                onBack = { currentScreen = Screen.Main }
+              "UserManagement" -> UserManagementScreen(
+                onRegisterUserClick = { currentScreen = "RegisterUser" },
+                onUserListClick = { currentScreen = "UserList" },
+                onBack = { currentScreen = "Main" }
               )
 
-              Screen.RegisterUser -> RegisterUserScreen(
+              "RegisterUser" -> RegisterUserScreen(
                 accessToken = accessToken,
-                onBack = { currentScreen = Screen.UserManagement }
+                onBack = { currentScreen = "UserManagement" }
               )
 
-              Screen.UserList -> UserListScreen(
+              "UserList" -> UserListScreen(
                 accessToken = accessToken,
-                onBack = { currentScreen = Screen.UserManagement }
+                onBack = { currentScreen = "UserManagement" }
               )
 
-              Screen.Door -> DoorScreen(
+              "Door" -> DoorScreen(
                 accessToken = accessToken,
                 identifier = identifier,
                 role = role,
-                onHistoryClick = { currentScreen = Screen.DoorHistory },
-                onBack = { currentScreen = Screen.Main }
+                onHistoryClick = { currentScreen = "DoorHistory" },
+                onBack = { currentScreen = "Main" }
               )
 
-              Screen.DoorHistory -> DoorHistoryScreen(
+              "DoorHistory" -> DoorHistoryScreen(
                 accessToken = accessToken,
-                onBack = { currentScreen = Screen.Door }
+                onBack = { currentScreen = "Door" }
               )
             }
           }
@@ -291,4 +345,9 @@ class MainActivity : ComponentActivity() {
       }
     }
   }
+}
+
+// ViewModel to hold saved state
+class MainViewModel : ViewModel() {
+  val savedStateHandle = SavedStateHandle()
 }

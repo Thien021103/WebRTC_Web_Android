@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -125,5 +126,13 @@ class VideoListViewModel(
         putExtra(Intent.EXTRA_TITLE, video.displayName)
       }
     )
+  }
+  companion object {
+    fun Factory(token: String): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+      @Suppress("UNCHECKED_CAST")
+      override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return VideoListViewModel(token) as T
+      }
+    }
   }
 }
