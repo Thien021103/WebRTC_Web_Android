@@ -1,16 +1,14 @@
 # I. Clone từ link Github:
 *https://github.com/Thien021103/WebRTC_Web_Android.git*
 
-# II. Chạy signaling server:
-- Trên 1 máy trong mạng LAN, vào thư mục `/signaling-server` 
+# II. Chạy camera:
+- Trên camera
 - Chạy:
-  - `npm install`
-  - `npm start`
+  - `./mnt/.../cam cameraId wifi password`
 
 # III. Chạy chương trình Android:
 - Vào Android Studio, mở thư mục `/webrtc-android`
 - Cài đặt và chạy chương trình trên điện thoại. 
-- Nhập địa chỉ IP của máy đang chạy signaling server vào trong TextField hiện ra
 - Bấm vào `Start Signaling`
 - Bấm vào `Join Call`
 
