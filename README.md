@@ -17,6 +17,8 @@ cd WebRTC_Web_Android
 git submodule update --init --recursive
 ```
 
+Or just extract and use the given zip folder.
+
 ## Running on Camera
 
 ### Without MIPS Toolchain (Linux Demo)
