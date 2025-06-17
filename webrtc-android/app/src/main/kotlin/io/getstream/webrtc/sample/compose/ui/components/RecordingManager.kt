@@ -310,13 +310,6 @@ class RecordingManager (
   }
 
   private fun uploadToCloudinary(file: File, onUploadUpdate: (String?, Float, Boolean) -> Unit) {
-    val config = (context.applicationContext as WebRTCApp).getCloudinaryConfig()
-    if (config["cloud_name"].isNullOrEmpty()) {
-      onUploadUpdate(null, 0f, true)
-      Log.e("RecordingManager", "Cannot upload: MediaManager not initialized")
-      return
-    }
-
     val publicId = "${file.nameWithoutExtension}}"
     Log.d("Recording Manager", "Uploading file $cloudFolder/${file.nameWithoutExtension}" )
     MediaManager.get().upload(file.absolutePath)

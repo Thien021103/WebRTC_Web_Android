@@ -102,12 +102,15 @@ class VideoListViewModel(
             .build()
 
           val response = client.newCall(request).execute()
+          val responseBody = response.body?.string()
+          val json = JSONObject(responseBody ?: "{}")
+
           if (response.isSuccessful) {
             Log.d("VideoListViewModel", "Deleted ${video.id.substringAfterLast("/")}")
             fetchVideos()
             onDone()
           } else {
-            Log.e("VideoListViewModel", "Failed to delete ${video.displayName}: ${response.code}")
+            Log.e("VideoListViewModel", "Failed to delete ${json.optString("message", "Server error")}")
             onDone()
           }
         } catch (e: Exception) {

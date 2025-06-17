@@ -31,8 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.getstream.webrtc.sample.compose.ui.screens.users.RegisterUserScreen
 import io.getstream.webrtc.sample.compose.ui.screens.users.UserManagementScreen
@@ -50,37 +48,6 @@ import io.getstream.webrtc.sample.compose.ui.screens.users.UserListScreen
 import io.getstream.webrtc.sample.compose.ui.theme.WebrtcSampleComposeTheme
 import kotlinx.coroutines.tasks.await
 
-//sealed class Screen {
-//  object Login : Screen()
-//  object Register : Screen()
-//  object Main : Screen()
-//  object Videos : Screen()
-//  object Signalling : Screen()
-//  object RoleSelection : Screen()
-//  object RegisterUser : Screen()
-//  object UserManagement : Screen()
-//  object UserList : Screen()
-//  object Door : Screen()
-//  object DoorHistory : Screen()
-//}
-
-// Helper functions to serialize/deserialize Screen
-//private fun screenToString(screen: Screen): String = screen.javaClass.simpleName
-//private fun stringToScreen(name: String): Screen = when (name) {
-//  "Login" -> Screen.Login
-//  "Register" -> Screen.Register
-//  "Main" -> Screen.Main
-//  "Videos" -> Screen.Videos
-//  "Signalling" -> Screen.Signalling
-//  "RoleSelection" -> Screen.RoleSelection
-//  "RegisterUser" -> Screen.RegisterUser
-//  "UserManagement" -> Screen.UserManagement
-//  "UserList" -> Screen.UserList
-//  "Door" -> Screen.Door
-//  "DoorHistory" -> Screen.DoorHistory
-//  else -> Screen.RoleSelection // Fallback
-//}
-
 class MainActivity : ComponentActivity() {
   @RequiresApi(Build.VERSION_CODES.R)
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -92,34 +59,52 @@ class MainActivity : ComponentActivity() {
         var permissionsGranted by remember { mutableStateOf(false) }
 
         // Save and restore state
-        val viewModel: MainViewModel = viewModel()
-        var currentScreen by rememberSaveable {
-          mutableStateOf(viewModel.savedStateHandle.get<String>("currentScreen") ?: "RoleSelection")
-        }
-        var identifier by rememberSaveable {
-          mutableStateOf(viewModel.savedStateHandle.get<String>("identifier") ?: "")
-        }
-        var groupName by rememberSaveable {
-          mutableStateOf(viewModel.savedStateHandle.get<String>("groupName") ?: "")
-        }
-        var accessToken by rememberSaveable {
-          mutableStateOf(viewModel.savedStateHandle.get<String>("accessToken") ?: "")
-        }
-        var role by rememberSaveable {
-          mutableStateOf(viewModel.savedStateHandle.get<String>("role") ?: "")
-        }
-        var cloudFolder by rememberSaveable {
-          mutableStateOf(viewModel.savedStateHandle.get<String>("cloudFolder") ?: "")
-        }
+        var currentScreen by rememberSaveable { mutableStateOf("RoleSelection") }
+        var identifier by rememberSaveable { mutableStateOf("") }
+        var groupName by rememberSaveable { mutableStateOf("") }
+        var accessToken by rememberSaveable { mutableStateOf("") }
+        var role by rememberSaveable { mutableStateOf("") }
+        var cloudFolder by rememberSaveable { mutableStateOf("") }
 
-        // Update saved state
-        LaunchedEffect(currentScreen, identifier, groupName, accessToken, role, cloudFolder) {
-          viewModel.savedStateHandle["currentScreen"] = currentScreen
-          viewModel.savedStateHandle["identifier"] = identifier
-          viewModel.savedStateHandle["groupName"] = groupName
-          viewModel.savedStateHandle["accessToken"] = accessToken
-          viewModel.savedStateHandle["role"] = role
-          viewModel.savedStateHandle["cloudFolder"] = cloudFolder
+        // Save Cloudinary config components
+        var cloudName by rememberSaveable { mutableStateOf("") }
+        var apiKey by rememberSaveable { mutableStateOf("") }
+        var apiSecret by rememberSaveable { mutableStateOf("") }
+
+        // Restore Cloudinary config
+        LaunchedEffect(identifier, accessToken, cloudName, apiKey, apiSecret) {
+          if (identifier.isNotEmpty() && accessToken.isNotEmpty() &&
+            cloudName.isNotEmpty() && apiKey.isNotEmpty() && apiSecret.isNotEmpty()) {
+            val config = mapOf(
+              "cloud_name" to cloudName,
+              "api_key" to apiKey,
+              "api_secret" to apiSecret
+            )
+            try {
+              (applicationContext as WebRTCApp).initializeMediaManager(config)
+              Log.d("MainActivity", "Restored MediaManager config: $config")
+            } catch (e: Exception) {
+              Log.e("MainActivity", "Failed to initialize MediaManager: ${e.message}", e)
+              if (currentScreen !in listOf("RoleSelection", "Login", "Register")) {
+                Log.d("MainActivity", "Redirecting to RoleSelection due to initialization failure")
+                identifier = ""
+                accessToken = ""
+                groupName = ""
+                role = ""
+                currentScreen = "RoleSelection"
+              }
+            }
+          } else {
+            Log.w("MainActivity", "Cannot restore MediaManager")
+            if (currentScreen !in listOf("RoleSelection", "Login", "Register")) {
+              Log.d("MainActivity", "Redirecting to RoleSelection")
+              identifier = ""
+              accessToken = ""
+              groupName = ""
+              role = ""
+              currentScreen = "RoleSelection"
+            }
+          }
         }
 
         // Permissions
@@ -171,10 +156,10 @@ class MainActivity : ComponentActivity() {
 
         // Manage orientation based on screen
         LaunchedEffect(currentScreen) {
-          requestedOrientation = when (currentScreen) {
-//            Screen.Videos -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
-            "Videos" -> ActivityInfo.SCREEN_ORIENTATION_SENSOR
-            else -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+          requestedOrientation = if (currentScreen == "Videos") {
+            ActivityInfo.SCREEN_ORIENTATION_SENSOR
+          } else {
+            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
           }
         }
 
@@ -248,8 +233,12 @@ class MainActivity : ComponentActivity() {
                   groupName = group
                   accessToken = token
                   cloudFolder = folder
+                  cloudName = config["cloud_name"].toString()
+                  apiKey = config["api_key"].toString()
+                  apiSecret = config["api_secret"].toString()
+                  (applicationContext as WebRTCApp).initializeMediaManager(config)
                   currentScreen = "Main"
-                  (this.applicationContext as WebRTCApp).initializeMediaManager(config)
+                  Log.d("MainActivity", "Login success: identifier=$email")
                 },
                 onRegister = { currentScreen = "Register" },
                 onBack = { currentScreen = "RoleSelection" }
@@ -262,9 +251,13 @@ class MainActivity : ComponentActivity() {
                   groupName = group
                   accessToken = token
                   cloudFolder = folder
-                  currentScreen = "Main"
+                  cloudName = config["cloud_name"].toString()
+                  apiKey = config["api_key"].toString()
+                  apiSecret = config["api_secret"].toString()
+                  (applicationContext as WebRTCApp).initializeMediaManager(config)
                   role = "Owner"
-                  (this.applicationContext as WebRTCApp).initializeMediaManager(config)
+                  currentScreen = "Main"
+                  Log.d("MainActivity", "Register success: identifier=$email")
                 },
                 onLogin = { currentScreen = "Login" },
                 onBack = { currentScreen = "RoleSelection" }
@@ -284,6 +277,10 @@ class MainActivity : ComponentActivity() {
                   groupName = ""
                   accessToken = ""
                   role = ""
+//                  cloudFolder = ""
+//                  cloudName = ""
+//                  apiKey = ""
+//                  apiSecret = ""
                   currentScreen = "RoleSelection"
 //                  (this.applicationContext as WebRTCApp).clearConfig() // Clearing this make MediaManager lost its config
                 }
@@ -333,8 +330,7 @@ class MainActivity : ComponentActivity() {
               )
             }
           }
-        } else if (!showSettingsDialog) {
-          // Placeholder while requesting permissions
+        } else {
           Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -345,9 +341,4 @@ class MainActivity : ComponentActivity() {
       }
     }
   }
-}
-
-// ViewModel to hold saved state
-class MainViewModel : ViewModel() {
-  val savedStateHandle = SavedStateHandle()
 }
