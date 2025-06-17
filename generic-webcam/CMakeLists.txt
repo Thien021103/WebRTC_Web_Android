@@ -3,12 +3,12 @@ cmake_minimum_required(VERSION 3.1)
 # -------------------------------------------------------------------------------------
 
 # Config Toolchain
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_COMPILER    "/opt/mips-gcc472-glibc216-64bit/bin/mips-linux-uclibc-gnu-gcc")
-set(CMAKE_CXX_COMPILER  "/opt/mips-gcc472-glibc216-64bit/bin/mips-linux-uclibc-gnu-g++")
+# set(CMAKE_CXX_STANDARD 11)
+# set(CMAKE_C_STANDARD 99)
+# set(CMAKE_C_COMPILER    "/opt/mips-gcc472-glibc216-64bit/bin/mips-linux-uclibc-gnu-gcc")
+# set(CMAKE_CXX_COMPILER  "/opt/mips-gcc472-glibc216-64bit/bin/mips-linux-uclibc-gnu-g++")
 
-set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/toolchain.cmake)
+# set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/toolchain.cmake)
 
 # -------------------------------------------------------------------------------------
 
@@ -87,7 +87,7 @@ ExternalProject_Add(srtp2
 ExternalProject_Add(libwebsockets
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/libwebsockets
   CMAKE_ARGS
-    -DCMAKE_C_FLAGS="-fPIC -D_POSIX_C_SOURCE=200112L -D_REENTRANT -D_UCLIBC_ -D_XOPEN_SOURCE=700 -D_GNU_SOURCE -std=c99 -DIFA_FLAGS=8 -Wno-error=sign-conversion"
+    -DCMAKE_C_FLAGS="-fPIC"# -D_POSIX_C_SOURCE=200112L -D_REENTRANT -D_UCLIBC_ -D_XOPEN_SOURCE=700 -D_GNU_SOURCE -std=c99 -DIFA_FLAGS=8 -Wno-error=sign-conversion"
     -DCMAKE_INCLUDE_PATH=${CMAKE_BINARY_DIR}/dist/include
     -DLWS_MBEDTLS_INCLUDE_DIRS=${CMAKE_BINARY_DIR}/dist/include ${CMAKE_BINARY_DIR}/dist/include/mbedtls 
     -DBUILD_SHARED_LIBS=OFF # Ensure static
