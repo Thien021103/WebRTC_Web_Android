@@ -21,8 +21,8 @@ Or just extract and use the given zip folder.
 
 ## Running on Camera
 
-### Without MIPS Toolchain (Linux Demo)
-The camera requires a proprietary MIPS toolchain and libraries, which are not included due to licensing restrictions. A demo with similar functionality is available in `generic-webcam/examples/new_exam` and runs on a standard Linux computer.
+### Without Camera Hardware (Linux Demo)
+The camera requires a proprietary MIPS toolchain and libraries, which are not included due to licensing restrictions. A demo with similar functionality is available in `generic-webcam/examples/new_exam` and runs on a standard Linux computer. There are an executable for using with cam on the zip file.
 
 **Steps:**
 1. Clone the repository as described in [Cloning the Repository](#cloning-the-repository).
@@ -45,46 +45,12 @@ The camera requires a proprietary MIPS toolchain and libraries, which are not in
    ./build/examples/new_exam/newexam <cameraId>
    ```
 
-### With MIPS Toolchain (Camera Hardware)
-If you have the MIPS toolchain and required libraries, follow these steps to build and run on the camera hardware.
+### With Camera Hardware
+Follow these steps to run on the camera hardware.
 
 **Steps:**
-1. Edit `generic-webcam/CMakeLists.txt` to uncomment and configure the toolchain settings:
-   ```cmake
-   set(CMAKE_CXX_STANDARD 11)
-   set(CMAKE_C_STANDARD 99)
-   set(CMAKE_C_COMPILER "/opt/mips-gcc472-glibc216-64bit/bin/mips-linux-uclibc-gnu-gcc")
-   set(CMAKE_CXX_COMPILER "/opt/mips-gcc472-glibc216-64bit/bin/mips-linux-uclibc-gnu-g++")
-   set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/toolchain.cmake)
-   ```
-   > **Note**: Update the paths to match your toolchain installation.
-2. Edit `generic-webcam/examples/CMakeLists.txt` to enable the camera-specific example:
-   - Change:
-     ```cmake
-     add_subdirectory(new_exam)
-     # add_subdirectory(static_cam)
-     ```
-     to:
-     ```cmake
-     # add_subdirectory(new_exam)
-     add_subdirectory(static_cam)
-     ```
-3. Place your compiled libraries and headers in `generic-webcam/pps_dua`.
-4. Place the camera-specific code in `generic-webcam/examples/static_cam`.
-5. Navigate to `generic-webcam`:
-   ```bash
-   cd WebRTC_Web_Android/generic-webcam
-   ```
-6. Build the project:
-   ```bash
-   ./build.sh
-   ```
-   OR
-   ```bash
-   cmake -S . -B build && cmake --build build
-   ```
-7. Copy the built `cam` executable from `generic-webcam/build/examples/static_cam/` to the camera (e.g., via SD card).
-8. On the camera’s console, run:
+1. Copy the built `cam` executable from `generic-webcam/` to the camera (e.g., via SD card).
+2. On the camera’s console, run:
    ```bash
    ./cam <cameraId> <wifi> <password>
    ```
