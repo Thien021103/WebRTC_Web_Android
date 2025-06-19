@@ -5,7 +5,7 @@ async function handleLoginUser(req, res) {
     const { email, password, fcmToken } = req.body;
     let result;
     
-    if (email && fcmToken) {
+    if (email && password) {
       result = await loginUser({ email, password, fcmToken });
     } else {
       throw new Error('Missing required fields');
