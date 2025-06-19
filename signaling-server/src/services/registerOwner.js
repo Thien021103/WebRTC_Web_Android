@@ -10,7 +10,7 @@ const { verifyOTP } = require('../utils/otp');
 const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key';
 
 async function registerOwner({ email, password, groupId, groupName, otp, fcmToken }) {
-  if (!email || !password || !groupId || !groupName || !fcmToken || !otp) {
+  if (!email || !password || !groupId || !groupName || !otp) {
     throw new Error('Missing required fields');
   }
 
@@ -37,14 +37,24 @@ async function registerOwner({ email, password, groupId, groupName, otp, fcmToke
   const accessToken = jwt.sign({ email: email, groupId: groupId, isOwner: true }, SECRET_KEY, { expiresIn: '7d' });
   const cloudFolder = uuidv4(); // Generate UUID for cloudFolder
 
-  const dbOwner = new Owner({
-    email: email,
-    password: hashedPassword,
-    groupId: groupId,
-    accessToken: accessToken,
-    fcmToken: fcmToken,
-  });
-  await dbOwner.save();
+  if (fcmToken) {
+    const dbOwner = new Owner({
+      email: email,
+      password: hashedPassword,
+      groupId: groupId,
+      accessToken: accessToken,
+      fcmToken: fcmToken,
+    });
+    await dbOwner.save();
+  } else {
+    const dbOwner = new Owner({
+      email: email,
+      password: hashedPassword,
+      groupId: groupId,
+      accessToken: accessToken,
+    });
+    await dbOwner.save();
+  }
 
   await Group.updateOne(
     { id: groupId }, 
