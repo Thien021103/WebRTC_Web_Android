@@ -5,15 +5,13 @@ async function handleRegister(req, res) {
   try {
     const { userName, email, password, groupId, groupName, otp, fcmToken, ownerToken } = req.body;
 
-    if ( email && groupId && groupName && otp && fcmToken ) {
+    if ( email && groupId && groupName && otp && password && !ownerToken ) {
       const { accessToken, cloudFolder } = await registerOwner({ email, password, groupId, groupName, otp, fcmToken });
       res.status(201).json({ 
         status: "success", 
         message: accessToken,
         cloudFolder: cloudFolder,
         cloudName: process.env.CLOUDINARY_CLOUD_NAME,
-        cloudKey: process.env.CLOUDINARY_API_KEY,
-        cloudSec: process.env.CLOUDINARY_API_SECRET
       });
     } else if ( email && userName && ownerToken ) {
       await registerUser({ userName, email, password, ownerToken });

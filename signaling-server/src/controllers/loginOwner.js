@@ -16,9 +16,7 @@ async function handleLoginOwner(req, res) {
       status: "success", 
       message: accessToken, 
       cloudFolder: cloudFolder,
-      cloudName: process.env.CLOUDINARY_CLOUD_NAME,
-      cloudKey: process.env.CLOUDINARY_API_KEY,
-      cloudSec: process.env.CLOUDINARY_API_SECRET
+      cloudName: process.env.CLOUDINARY_CLOUD_NAME
     });
   } catch (error) {
     console.error(`Error in handleLoginOwner: ${error.message}`);
