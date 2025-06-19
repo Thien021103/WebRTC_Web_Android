@@ -21,6 +21,7 @@ async function deleteOwner({ email, groupId }) {
   if (!owner) {
     throw new Error('Owner not found or does not belong to the specified group');
   }
+  await Group.updateOne({ id: groupId }, { $unset: { name: '' } });
 
   return { email, groupId };
 }
