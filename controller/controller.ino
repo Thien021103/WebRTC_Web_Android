@@ -89,10 +89,10 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
             updateDisplay("Press the button to call");
           }
           if(WEBRTC_STATE == "Ready") {
-            updateDisplay("Starting connection...");
+            updateDisplay("Starting connection ...");
           }
           if(WEBRTC_STATE == "Creating") {
-            updateDisplay("Connecting...");
+            updateDisplay("Connecting ...");
           }
           if(WEBRTC_STATE == "Active") {
             updateDisplay("Connected, look at the camera!");
@@ -148,7 +148,7 @@ void setup() {
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0, 0);
-  display.println("Initializing...");
+  display.println("Initializing ...");
   display.display();
 
   webSocket.onEvent(webSocketEvent);
@@ -163,11 +163,15 @@ void loop() {
   // Check WiFi status
   if (WiFi.status() != WL_CONNECTED) {
     Serial.println("WiFi disconnected. Attempting to reconnect...");
-    wifiManager.setTimeout(180);
+    // wifiManager.setTimeout(180);
 
     wsConnected = false; // Reset WebSocket flag
-    
-    if (wifiManager.autoConnect("ESP32_DoorLock")) {
+
+    // Attempt to reconnect to WiFi
+    wifiManager.startConfigPortal("ESP32_DoorLock");
+    updateDisplay("Connecting to WiFi ...");
+    Serial.println("Connecting to WiFi ...");
+    if (WiFi.status() == WL_CONNECTED) {
       Serial.println("Reconnected to WiFi");
       Serial.print("IP Address: ");
       Serial.println(WiFi.localIP());
@@ -192,9 +196,11 @@ void loop() {
     Serial.println("Button pressed!");
     // Retry Websocket connection
     if (!wsConnected) {
-      Serial.println("Attempting WebSocket reconnection...");
-      updateDisplay("Connecting ...");
+
+      Serial.println("Attempting WebSocket reconnection ...");
+      updateDisplay("Websocket reconnecting ...");
       webSocket.beginSSL("thientranduc.id.vn", 444, "/");
+
       if(wsConnected && CONTROLLER_TOKEN.length() > 0) {
         webSocket.sendTXT("NOTIFY controller " + CONTROLLER_TOKEN);
         updateDisplay("Notifying");
