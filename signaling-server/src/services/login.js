@@ -45,7 +45,7 @@ async function loginOwner({ email, password, groupName, fcmToken }) {
 }
 
 async function loginUser({ email, password, fcmToken }) {
-  if (!email || !password || !fcmToken) {
+  if (!email || !password) {
     throw new Error('Missing required fields');
   }
 
@@ -66,10 +66,18 @@ async function loginUser({ email, password, fcmToken }) {
   }
 
   const accessToken = jwt.sign({ email: email, groupId: user.groupId, isOwner: false }, SECRET_KEY, { expiresIn: '7d' });
-  await User.updateOne(
-    { email }, 
-    { $set: { fcmToken: fcmToken, accessToken: accessToken } }
-  );
+  
+  if (fcmToken) {
+    await User.updateOne(
+      { email }, 
+      { $set: { fcmToken: fcmToken, accessToken: accessToken } }
+    );
+  } else {
+    await User.updateOne(
+      { email }, 
+      { $set: { accessToken: accessToken } }
+    );
+  }
 
   console.log(`User logged in: ${email}, group: ${user.groupId}`);
   return { accessToken, cloudFolder };
