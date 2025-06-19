@@ -5,7 +5,7 @@ async function handleLoginOwner(req, res) {
     const { email, password, groupName, fcmToken } = req.body;
     let result;
 
-    if (email && groupName && fcmToken) {
+    if (email && groupName) {
       result = await loginOwner({ email, password, groupName, fcmToken });
     } else {
       throw new Error('Missing required fields');

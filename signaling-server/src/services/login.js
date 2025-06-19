@@ -7,7 +7,7 @@ const Group = require('../schemas/group');
 const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key';
 
 async function loginOwner({ email, password, groupName, fcmToken }) {
-  if (!email || !password || !groupName || !fcmToken) {
+  if (!email || !password || !groupName) {
     throw new Error('Missing required fields');
   }
 
@@ -28,10 +28,17 @@ async function loginOwner({ email, password, groupName, fcmToken }) {
   }
 
   const accessToken = jwt.sign({ email: email, groupId: dbGroup.id, isOwner: true }, SECRET_KEY, { expiresIn: '7d' });
-  await Owner.updateOne(
-    { email: email, groupId: dbGroup.id }, 
-    { $set: { fcmToken: fcmToken, accessToken: accessToken } }
-  );
+  if (fcmToken) {
+    await Owner.updateOne(
+      { email: email, groupId: dbGroup.id }, 
+      { $set: { fcmToken: fcmToken, accessToken: accessToken } }
+    );
+  } else {
+    await Owner.updateOne(
+      { email: email, groupId: dbGroup.id }, 
+      { $set: { accessToken: accessToken } }
+    );
+  }
 
   console.log(`Owner logged in: ${email}, group: ${groupName}`);
   return { accessToken, cloudFolder };
