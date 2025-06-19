@@ -1,6 +1,5 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { v4: uuidv4 } = require('uuid');
 
 const Group = require('../schemas/group');
 const Owner = require('../schemas/owner');
@@ -35,7 +34,7 @@ async function registerOwner({ email, password, groupId, groupName, otp, fcmToke
 
   const hashedPassword = await bcrypt.hash(password, 10);
   const accessToken = jwt.sign({ email: email, groupId: groupId, isOwner: true }, SECRET_KEY, { expiresIn: '7d' });
-  const cloudFolder = uuidv4(); // Generate UUID for cloudFolder
+  const cloudFolder = dbGroup.cloudFolder;
 
   if (fcmToken) {
     const dbOwner = new Owner({
@@ -58,13 +57,7 @@ async function registerOwner({ email, password, groupId, groupName, otp, fcmToke
 
   await Group.updateOne(
     { id: groupId }, 
-    { 
-      $set: 
-        { 
-          cloudFolder: cloudFolder,
-          name: groupName
-        }
-    }
+    { $set: { name: groupName }}
   );
 
   console.log(`Owner registered: ${email}, group: ${groupName}`);

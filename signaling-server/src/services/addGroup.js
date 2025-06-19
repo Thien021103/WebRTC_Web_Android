@@ -8,13 +8,14 @@ async function addGroup({ ownerEmail }) {
   }
 
   // Generate unique IDs and secrets
-  let groupId, cameraId, controllerId;
+  let groupId, cameraId, controllerId, cloudFolder;
   let isUnique = false;
 
   while (!isUnique) {
     groupId = uuidv4();
     cameraId = uuidv4();
     controllerId = uuidv4();
+    cloudFolder = uuidv4(); // Generate UUID for cloudFolder
 
     // Check uniqueness
     const existingGroup = await Group.findOne({
@@ -31,7 +32,7 @@ async function addGroup({ ownerEmail }) {
     ownerEmail: ownerEmail,
     cameraId: cameraId,
     controllerId: controllerId,
-    cloudFolder: "",
+    cloudFolder: cloudFolder,
   });
   await dbGroup.save();
 
