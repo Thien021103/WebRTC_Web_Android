@@ -26,5 +26,7 @@ interface WebRtcSessionManager {
 
 //  fun enableCamera(enabled: Boolean)
 
+  fun changeDevice(device: String)
+
   fun disconnect()
 }

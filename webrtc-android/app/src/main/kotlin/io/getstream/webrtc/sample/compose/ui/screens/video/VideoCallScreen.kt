@@ -151,6 +151,7 @@ fun VideoCallScreen(
       accessToken = accessToken,
       modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter),
       callMediaState = callMediaState,
+      onChangeDevice = { device -> sessionManager.changeDevice(device) },
       onCallAction = {
         when (it) {
           is CallAction.ToggleMicroPhone -> {

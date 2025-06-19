@@ -1,6 +1,8 @@
 package io.getstream.webrtc.sample.compose.ui.screens.video
 
 import android.content.Context
+import android.media.AudioManager
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,6 +32,8 @@ import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Speaker
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
@@ -67,7 +71,8 @@ fun VideoCallControls(
   modifier: Modifier,
   callMediaState: CallMediaState,
   actions: List<VideoCallControlAction> = buildDefaultCallControlActions(callMediaState = callMediaState),
-  onCallAction: (CallAction) -> Unit
+  onCallAction: (CallAction) -> Unit,
+  onChangeDevice: (String) -> Unit
 ) {
   var isUnlocking by remember { mutableStateOf(false) }
   var showUnlockDialog by remember { mutableStateOf(false) }
@@ -76,8 +81,20 @@ fun VideoCallControls(
   var unlockMessage by remember { mutableStateOf("") }
   var isLightOn by remember { mutableStateOf(false) }
   var isTogglingLight by remember { mutableStateOf(false) }
+  var audioDevice by remember { mutableStateOf("Earpiece") } // Track current audio device
 
   val client = OkHttpClient.Builder().build()
+
+  fun toggleAudioDevice () {
+    if (audioDevice == "Earpiece") {
+      onChangeDevice("Speaker")
+      audioDevice = "Speaker"
+    }
+    else {
+      onChangeDevice("Earpiece")
+      audioDevice = "Earpiece"
+    }
+  }
 
   fun performToggleLight() {
     isLightOn = !isLightOn
@@ -201,6 +218,23 @@ fun VideoCallControls(
       Spacer(modifier = Modifier.width(8.dp))
     }
     item {
+      Box(
+        modifier = Modifier
+          .size(56.dp)
+          .clip(CircleShape)
+          .background(MaterialTheme.colors.surface.copy(alpha = 0.8f))
+          .clickable { toggleAudioDevice() }
+      ) {
+        Icon(
+          imageVector = if (audioDevice == "Speaker") Icons.Filled.Speaker else Icons.Filled.Phone,
+          contentDescription = "Toggle audio device",
+          tint = MaterialTheme.colors.onSurface,
+          modifier = Modifier.padding(10.dp).align(Alignment.Center)
+        )
+      }
+      Spacer(modifier = Modifier.width(8.dp))
+    }
+    item {
       Button(
         onClick = { showUnlockDialog = true },
         modifier = Modifier.fillMaxWidth().height(56.dp),
@@ -214,12 +248,7 @@ fun VideoCallControls(
         Icon(
           imageVector = Icons.Filled.LockOpen,
           contentDescription = "Unlock button",
-          modifier = Modifier.padding(end = 8.dp)
-        )
-        Text(
-          text = "Unlock door",
-          fontSize = 16.sp,
-          fontWeight = FontWeight.Bold
+          modifier = Modifier.size(16.dp)
         )
       }
     }

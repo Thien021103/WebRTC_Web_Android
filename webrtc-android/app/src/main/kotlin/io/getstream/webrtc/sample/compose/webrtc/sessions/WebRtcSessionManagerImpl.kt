@@ -212,6 +212,23 @@ class WebRtcSessionManagerImpl(
     localAudioTrack.setEnabled(enabled) // Control WebRTC AudioTrack
   }
 
+  override fun changeDevice(device: String) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+      val devices = audioManager?.availableCommunicationDevices ?: return
+      if(device == "Speaker") {
+        val deviceType = AudioDeviceInfo.TYPE_BUILTIN_SPEAKER
+        val device = devices.firstOrNull { it.type == deviceType } ?: return
+        val isCommunicationDeviceSet = audioManager?.setCommunicationDevice(device)
+        logger.d { "[changeDevice] #sfu; isCommunicationDeviceSet: $isCommunicationDeviceSet $device" }
+      } else if(device == "Earpiece") {
+        val deviceType = AudioDeviceInfo.TYPE_BUILTIN_EARPIECE
+        val device = devices.firstOrNull { it.type == deviceType } ?: return
+        val isCommunicationDeviceSet = audioManager?.setCommunicationDevice(device)
+        logger.d { "[changeDevice] #sfu; isCommunicationDeviceSet: $isCommunicationDeviceSet $device" }
+      }
+    }
+  }
+
 //  override fun enableCamera(enabled: Boolean) {
 //    if (enabled) {
 //      videoCapturer.startCapture(resolution.width, resolution.height, 30)
@@ -353,7 +370,7 @@ class WebRtcSessionManagerImpl(
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
       val devices = audioManager?.availableCommunicationDevices ?: return
-      val deviceType = AudioDeviceInfo.TYPE_BUILTIN_SPEAKER
+      val deviceType = AudioDeviceInfo.TYPE_BUILTIN_EARPIECE
 
       val device = devices.firstOrNull { it.type == deviceType } ?: return
 
