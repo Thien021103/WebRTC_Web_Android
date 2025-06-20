@@ -16,13 +16,13 @@ class WebRTCApp : Application() {
   fun initializeMediaManager(config: Map<String, String>) {
     synchronized(this) {
       if (!isMediaManagerInitialized) {
-        if (config["cloud_name"].isNullOrEmpty() || config["api_key"].isNullOrEmpty() || config["api_secret"].isNullOrEmpty()) {
+        if (config["cloud_name"].isNullOrEmpty()) {
           Log.e("WebRTCApp", "Invalid Cloudinary config")
           return
         }
         MediaManager.init(this, config)
         isMediaManagerInitialized = true
-        Log.d("WebRTCApp", "MediaManager initialized with cloud_name: ${config["cloud_name"]}")
+        Log.d("MainActivity", "MediaManager init with config: $config")
       } else {
         Log.w("WebRTCApp", "MediaManager already initialized, skipping")
       }

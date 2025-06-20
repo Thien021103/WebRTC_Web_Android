@@ -33,9 +33,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.PhoneInTalk
 import androidx.compose.material.icons.filled.Speaker
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.PhoneInTalk
+import androidx.compose.material.icons.outlined.Speaker
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -226,7 +229,7 @@ fun VideoCallControls(
           .clickable { toggleAudioDevice() }
       ) {
         Icon(
-          imageVector = if (audioDevice == "Speaker") Icons.Filled.Speaker else Icons.Filled.Phone,
+          imageVector = if (audioDevice == "Speaker") Icons.Outlined.PhoneInTalk else Icons.Filled.PhoneInTalk,
           contentDescription = "Toggle audio device",
           tint = MaterialTheme.colors.onSurface,
           modifier = Modifier.padding(10.dp).align(Alignment.Center)
@@ -248,7 +251,7 @@ fun VideoCallControls(
         Icon(
           imageVector = Icons.Filled.LockOpen,
           contentDescription = "Unlock button",
-          modifier = Modifier.size(16.dp)
+          modifier = Modifier.size(28.dp)
         )
       }
     }

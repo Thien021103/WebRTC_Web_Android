@@ -316,6 +316,7 @@ class RecordingManager (
       .option("resource_type", "video")
       .option("folder", cloudFolder) // Explicitly create folder
       .option("public_id", publicId)
+      .unsigned("thien_upload")
       .callback(object : UploadCallback {
         override fun onStart(requestId: String) {
           onUploadUpdate(null, 0f, false)

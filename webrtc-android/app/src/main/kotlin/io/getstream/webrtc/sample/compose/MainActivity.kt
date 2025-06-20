@@ -68,21 +68,13 @@ class MainActivity : ComponentActivity() {
 
         // Save Cloudinary config components
         var cloudName by rememberSaveable { mutableStateOf("") }
-        var apiKey by rememberSaveable { mutableStateOf("") }
-        var apiSecret by rememberSaveable { mutableStateOf("") }
 
         // Restore Cloudinary config
-        LaunchedEffect(identifier, accessToken, cloudName, apiKey, apiSecret) {
-          if (identifier.isNotEmpty() && accessToken.isNotEmpty() &&
-            cloudName.isNotEmpty() && apiKey.isNotEmpty() && apiSecret.isNotEmpty()) {
-            val config = mapOf(
-              "cloud_name" to cloudName,
-              "api_key" to apiKey,
-              "api_secret" to apiSecret
-            )
+        LaunchedEffect(identifier, accessToken, cloudName) {
+          if (identifier.isNotEmpty() && accessToken.isNotEmpty() && cloudName.isNotEmpty()){
+            val config = mapOf("cloud_name" to cloudName)
             try {
               (applicationContext as WebRTCApp).initializeMediaManager(config)
-              Log.d("MainActivity", "Restored MediaManager config: $config")
             } catch (e: Exception) {
               Log.e("MainActivity", "Failed to initialize MediaManager: ${e.message}", e)
               if (currentScreen !in listOf("RoleSelection", "Login", "Register")) {
@@ -234,8 +226,6 @@ class MainActivity : ComponentActivity() {
                   accessToken = token
                   cloudFolder = folder
                   cloudName = config["cloud_name"].toString()
-                  apiKey = config["api_key"].toString()
-                  apiSecret = config["api_secret"].toString()
                   (applicationContext as WebRTCApp).initializeMediaManager(config)
                   currentScreen = "Main"
                   Log.d("MainActivity", "Login success: identifier=$email")
@@ -252,8 +242,6 @@ class MainActivity : ComponentActivity() {
                   accessToken = token
                   cloudFolder = folder
                   cloudName = config["cloud_name"].toString()
-                  apiKey = config["api_key"].toString()
-                  apiSecret = config["api_secret"].toString()
                   (applicationContext as WebRTCApp).initializeMediaManager(config)
                   role = "Owner"
                   currentScreen = "Main"
@@ -279,8 +267,6 @@ class MainActivity : ComponentActivity() {
                   role = ""
 //                  cloudFolder = ""
 //                  cloudName = ""
-//                  apiKey = ""
-//                  apiSecret = ""
                   currentScreen = "RoleSelection"
 //                  (this.applicationContext as WebRTCApp).clearConfig() // Clearing this make MediaManager lost its config
                 }
@@ -288,7 +274,7 @@ class MainActivity : ComponentActivity() {
 
               "Videos" -> VideoListScreen(
                 role = role,
-                viewModel = viewModel(factory = VideoListViewModel.Factory(accessToken)),
+                viewModel = VideoListViewModel(accessToken),
                 onBack = { currentScreen = "Main" }
               )
 

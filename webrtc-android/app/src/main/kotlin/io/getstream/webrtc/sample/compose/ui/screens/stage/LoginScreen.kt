@@ -105,11 +105,7 @@ fun LoginScreen(
           if (status == "success") {
             val accessToken = json.optString("message", "")
             val cloudFolder = json.optString("cloudFolder", "")
-            val cloudinaryConfig = mapOf(
-              "cloud_name" to json.optString("cloudName", ""),
-              "api_key" to json.optString("cloudKey", ""),
-              "api_secret" to json.optString("cloudSec", "")
-            )
+            val cloudinaryConfig = mapOf("cloud_name" to json.optString("cloudName", ""))
             CoroutineScope(Dispatchers.Main).launch {
               onSuccess(email, groupName, accessToken, cloudFolder, cloudinaryConfig)
               isLoading = false
