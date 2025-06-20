@@ -12,12 +12,19 @@ import {
   CircularProgress,
   Snackbar,
   Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from '@mui/material';
 import axios from 'axios';
 
 function OwnerList({ owners, loading, error, onRefetch }) {
   const [buttonStates, setButtonStates] = useState({});
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedOwner, setSelectedOwner] = useState(null);
 
   if (loading) return <Typography variant="body1" align="center" sx={{ py: 2 }}>Loading owners...</Typography>;
   if (error) return <Typography variant="body1" color="error" align="center" sx={{ py: 2 }}>Error: {error}</Typography>;
@@ -29,16 +36,26 @@ function OwnerList({ owners, loading, error, onRefetch }) {
     return token.match(new RegExp(`.{1,${chunkSize}}`, 'g')).join('\n');
   };
 
+  const handleOpenDialog = (owner, index) => {
+    setSelectedOwner({ email: owner.email, groupId: owner.groupId, index });
+    setDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    setSelectedOwner(null);
+  };
+
   const handleDeleteOwner = async (email, groupId, index) => {
-    setButtonStates((prev) => ({ ...prev, [index]: { loading: true, error: null } }));
+    setButtonStates((prev) => ({ ...prev, [index]: { loading: true } }));
     try {
       const token = localStorage.getItem('token');
       await axios.delete(`https://thientranduc.id.vn:444/api/delete-owner`, {
         data: { email, groupId },
         headers: { Authorization: `Bearer ${token}` },
       });
-      setButtonStates((prev) => ({ ...prev, [index]: { loading: false, error: null } }));
-      setSnackbarOpen(true);
+      setButtonStates((prev) => ({ ...prev, [index]: { loading: false } }));
+      setSnackbar({ open: true, message: 'Owner deleted successfully!', severity: 'success' });
       onRefetch();
     } catch (err) {
       console.error('Delete owner error:', {
@@ -49,15 +66,15 @@ function OwnerList({ owners, loading, error, onRefetch }) {
         error: JSON.stringify(err, Object.getOwnPropertyNames(err), 2),
       });
       const errorMsg = err.response?.data?.message || err.message || 'Failed to delete owner';
-      setButtonStates((prev) => ({ ...prev, [index]: { loading: false, error: errorMsg } }));
-      setTimeout(() => {
-        setButtonStates((prev) => ({ ...prev, [index]: { loading: false, error: null } }));
-      }, 3000);
+      setButtonStates((prev) => ({ ...prev, [index]: { loading: false } }));
+      setSnackbar({ open: true, message: errorMsg, severity: 'error' });
+    } finally {
+      handleCloseDialog();
     }
   };
 
   const handleSnackbarClose = () => {
-    setSnackbarOpen(false);
+    setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
   return (
@@ -75,7 +92,7 @@ function OwnerList({ owners, loading, error, onRefetch }) {
           </TableHead>
           <TableBody>
             {owners.map((owner, index) => (
-              <TableRow key={owner.groupId} hover sx={{ bgcolor: index % 2 ? '#fafafa' : '#ffffff' }}>
+              <TableRow key={owner.email} hover sx={{ bgcolor: index % 2 ? '#fafafa' : '#ffffff' }}>
                 <TableCell>{owner.email}</TableCell>
                 <TableCell>{new Date(owner.createdAt).toLocaleString()}</TableCell>
                 <TableCell sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
@@ -87,26 +104,38 @@ function OwnerList({ owners, loading, error, onRefetch }) {
                     variant="contained"
                     color="error"
                     size="small"
-                    onClick={() => handleDeleteOwner(owner.email, owner.groupId, index)}
+                    onClick={() => handleOpenDialog(owner, index)}
                     disabled={buttonStates[index]?.loading}
                     startIcon={buttonStates[index]?.loading && <CircularProgress size={16} color="inherit" />}
                   >
                     Delete
                   </Button>
-                  {buttonStates[index]?.error && (
-                    <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
-                      {buttonStates[index].error}
-                    </Typography>
-                  )}
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
-      <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={handleSnackbarClose}>
-        <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: '100%' }}>
-          Owner deleted successfully!
+      <Dialog open={dialogOpen} onClose={handleCloseDialog}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete the owner with email "{selectedOwner?.email}"?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button
+            onClick={() => handleDeleteOwner(selectedOwner.email, selectedOwner.groupId, selectedOwner.index)}
+            color="error"
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={handleSnackbarClose}>
+        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
         </Alert>
       </Snackbar>
     </>
