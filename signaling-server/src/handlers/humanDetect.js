@@ -47,7 +47,7 @@ async function handleHumanDetect(message, client) {
     const owners = await Owner.find({ groupId, fcmToken: { $ne: '' } }, { fcmToken: 1 }).lean();
     const fcmTokens = [...users, ...owners].map(entity => entity.fcmToken);
     for (const fcmToken of fcmTokens) {
-      await sendFCMNotification(fcmToken);
+      await sendFCMNotification(fcmToken, 'human');
     }
     if (fcmTokens.length === 0) {
       console.log(`No FCM tokens found for group ${groupId}`);

@@ -6,14 +6,23 @@ const app = admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
-async function sendFCMNotification(token) {
+async function sendFCMNotification(token, type) {
   try {
-    const message = {
-      data: {
-        show_signalling: 'true',
-      },
-      token: token,
-    };
+    if(type == 'notify') {
+      const message = {
+        data: {
+          type: 'notify',
+        },
+        token: token,
+      };
+    } else if(type == 'human') {
+      const message = {
+        data: {
+          type: 'notify',
+        },
+        token: token,
+      };
+    }
     const response = await admin.messaging(app).send(message);
     console.log('FCM notification sent:', response);
   } catch (error) {
