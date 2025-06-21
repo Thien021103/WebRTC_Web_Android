@@ -6,6 +6,7 @@ const User = require('../schemas/user');
 const Group = require('../schemas/group');
 const Door = require('../schemas/door');
 const { groups } = require('../groups/groups');
+const { mailDoorLock } = require('../utils/doorLock');
 
 async function lock({ identifier, password, decoded }) {
   if (!identifier || !password || !decoded) {
@@ -78,6 +79,7 @@ async function lock({ identifier, password, decoded }) {
   });
 
   console.log(`User/Owner ${identifier} locked group: ${groupId}`);
+  mailDoorLock(dbGroup.ownerEmail, 'locked', identifier);
   return {};
 }
 
