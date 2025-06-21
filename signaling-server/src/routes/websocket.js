@@ -9,7 +9,8 @@ const { handleControllerLock } = require('../handlers/controllerlock');
 const { handleDisconnect } = require('../handlers/disconnect');
 const { handleControllerNotify } = require('../handlers/controllernotify');
 
-const { groups } = require('../groups/groups')
+const { groups } = require('../groups/groups');
+const { handleHumanDetect } = require('../handlers/humanDetect');
 
 // Heartbeat mechanism
 function startHeartbeat(wss) {
@@ -87,6 +88,8 @@ function websocketHandler(wss) {
         handleControllerLock(message, ws);
       } else if (message.startsWith('NOTIFY')) {
         handleControllerNotify(message, ws);
+      } else if (message.startsWith('HUMAN')) {
+        handleHumanDetect(message, ws);
       } else if (message.startsWith('PONG')) {
         ws._isAlive = true;
         ws._lastPong = Date.now(); // Update on PONG

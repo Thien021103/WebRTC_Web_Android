@@ -6,18 +6,18 @@ const Notification = require('../schemas/notification');
 const { sendFCMNotification } = require('../utils/fcm');
 const { wsCameraAuth } = require('../middleware/auth');
 
-async function handleControllerNotify(message, client) {
+async function handleHumanDetect(message, client) {
 
   const msg = message.toString().trim();
   const match = msg.match(/^HUMAN\s+(\w+)\s+(\S+)$/);
   if (!match) {
-    console.error('Invalid NOTIFY message format');
+    console.error('Invalid HUMAN message format');
     client.close();
     return;
   }
 
   const [_, senderType, token] = match;
-  console.log(`Handling notification from ${senderType}`);
+  console.log(`Handling human from ${senderType}`);
 
   // Validate sender is controller
   if (senderType !== 'camera') {
@@ -63,9 +63,9 @@ async function handleControllerNotify(message, client) {
     //   console.log(`Notification saved for group ${groupId}`);
     // }
   } catch (error) {
-    console.error(`Error in handleControllerNotify: ${error.message}`);
+    console.error(`Error in handleHumanDetect: ${error.message}`);
     client.close();
   }
 }
 
-module.exports = { handleControllerNotify };
+module.exports = { handleHumanDetect };
