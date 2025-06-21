@@ -19,7 +19,7 @@ async function sendFCMNotification(token, type) {
     } else if(type == 'human') {
       message = {
         data: {
-          type: 'notify',
+          type: 'human',
         },
         token: token,
       };
