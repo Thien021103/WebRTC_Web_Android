@@ -8,15 +8,16 @@ const app = admin.initializeApp({
 
 async function sendFCMNotification(token, type) {
   try {
+    let message;
     if(type == 'notify') {
-      const message = {
+      message = {
         data: {
           type: 'notify',
         },
         token: token,
       };
     } else if(type == 'human') {
-      const message = {
+      message = {
         data: {
           type: 'notify',
         },
