@@ -38,6 +38,8 @@ int peer_signaling_loop();
 
 void connect_to_ws_server();
 
+void people_detection();
+
 #endif  // DISABLE_PEER_SIGNALING
 
 #ifdef __cplusplus

@@ -40,6 +40,7 @@ enum MsgType {
     SDP_ANSWER = 4,
     REGISTER_WITH_SERVER = 6,
     PONG = 7,
+    HUMAN = 8,
 };
 
 // Signaling information
@@ -107,14 +108,14 @@ enum AppState {
 
 static enum AppState app_state = APP_STATE_UNKNOWN;
 
-#define JANUS_RX_BUFFER_BYTES (1024*100)
+#define BUFFER_BYTES (1024*100)
 
-static int callback_janus(struct lws* wsi, enum lws_callback_reasons reason, void* user, void* in, size_t len);
+static int callback_ws(struct lws* wsi, enum lws_callback_reasons reason, void* user, void* in, size_t len);
 
 static int lws_websocket_connection_send_text(struct lws* wsi_in, char* str, enum MsgType msgtype) {
     if (str == NULL || wsi_in == NULL)
         return -1;
-    unsigned char buf[LWS_SEND_BUFFER_PRE_PADDING + JANUS_RX_BUFFER_BYTES + LWS_SEND_BUFFER_POST_PADDING];
+    unsigned char buf[LWS_SEND_BUFFER_PRE_PADDING + BUFFER_BYTES + LWS_SEND_BUFFER_POST_PADDING];
     unsigned char* p = &buf[LWS_SEND_BUFFER_PRE_PADDING];
     size_t n;
 
@@ -134,6 +135,11 @@ static int lws_websocket_connection_send_text(struct lws* wsi_in, char* str, enu
     case ICE_CANDIDATE:
         break;
     case PONG:
+        n = sprintf((char*)p, "%s", str);
+        LOGI("Sent: %s", (char*)p);
+        lws_write(wsi_in, p, n, LWS_WRITE_TEXT);
+        break;
+    case HUMAN:
         n = sprintf((char*)p, "%s", str);
         LOGI("Sent: %s", (char*)p);
         lws_write(wsi_in, p, n, LWS_WRITE_TEXT);
@@ -221,22 +227,29 @@ static int websocket_write_back(struct lws* wsi_in, char* str, int str_size_in) 
     return 0;
 }
 
+void people_detection() {
+    // Handle people detection events
+    char message[512];
+    snprintf(message, sizeof(message), "HUMAN camera %s", g_ps.camera_token);
+    lws_websocket_connection_send_text(web_socket, message, HUMAN);
+}
+
 static struct lws_protocols protocols[] =
 {
     {
-        "janus-protocol",
-        callback_janus,
+        "protocol",
+        callback_ws,
         0,
-        JANUS_RX_BUFFER_BYTES,
+        BUFFER_BYTES,
     },
     { NULL, NULL, 0, 0 } /* terminator */
 };
 
-static int callback_janus(struct lws* wsi, enum lws_callback_reasons reason, void* user, void* in, size_t len)
+static int callback_ws(struct lws* wsi, enum lws_callback_reasons reason, void* user, void* in, size_t len)
 {
     struct lws_client_connect_info i;
 
-    LOGI("\tcallback_janus %d", reason);
+    LOGI("\tcallback_ws %d", reason);
     switch (reason)
     {
     case LWS_CALLBACK_CLIENT_ESTABLISHED:
