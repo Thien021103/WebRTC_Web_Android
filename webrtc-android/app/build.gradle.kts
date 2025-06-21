@@ -18,11 +18,11 @@ val localProperties = Properties()
 localProperties.load(FileInputStream(rootProject.file("local.properties")))
 
 android {
-  namespace = "io.getstream.webrtc.sample.compose"
+  namespace = "webrtc.sample.compose"
   compileSdk = Configurations.compileSdk
 
   defaultConfig {
-    applicationId = "io.getstream.webrtc.sample.compose"
+    applicationId = "webrtc.sample.compose"
     minSdk = Configurations.minSdk
     targetSdk = Configurations.targetSdk
     versionCode = Configurations.versionCode
