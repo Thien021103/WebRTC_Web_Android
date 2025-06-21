@@ -3,11 +3,27 @@ package webrtc.sample.compose.webrtc.audio
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
+import android.media.AudioAttributes
 import android.media.AudioDeviceInfo
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build
 import io.getstream.log.taggedLogger
+
+internal class AudioFocusRequestWrapper {
+  @SuppressLint("NewApi")
+  fun buildRequest(audioFocusChangeListener: AudioManager.OnAudioFocusChangeListener): AudioFocusRequest {
+    val playbackAttributes = AudioAttributes.Builder()
+      .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+      .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+      .build()
+    return AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+      .setAudioAttributes(playbackAttributes)
+      .setAcceptsDelayedFocusGain(true)
+      .setOnAudioFocusChangeListener(audioFocusChangeListener)
+      .build()
+  }
+}
 
 internal class AudioManagerAdapterImpl(
   private val context: Context,
@@ -63,12 +79,6 @@ internal class AudioManagerAdapterImpl(
       )
       logger.i { "[setAudioFocus] #old; completed: ${result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED}" }
     }
-    /*
-     * Start by setting MODE_IN_COMMUNICATION as default audio mode. It is
-     * required to be in this mode when playout and/or recording starts for
-     * best possible VoIP performance. Some devices have difficulties with speaker mode
-     * if this is not set.
-     */
     audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
   }
 

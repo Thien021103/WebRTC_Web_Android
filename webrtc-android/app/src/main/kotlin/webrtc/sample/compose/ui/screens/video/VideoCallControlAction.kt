@@ -22,6 +22,11 @@ data class VideoCallControlAction(
   val callAction: CallAction
 )
 
+data class CallMediaState(
+  val isMicrophoneEnabled: Boolean = true,
+  val isCameraEnabled: Boolean = true
+)
+
 @Composable
 fun buildDefaultCallControlActions(
   callMediaState: CallMediaState

@@ -207,14 +207,7 @@ class AudioSwitch internal constructor(
     preferredDeviceList.forEach { audioDevice ->
       logger.v { "[addAvailableAudioDevices] audioDevice: ${audioDevice.simpleName}" }
       when (audioDevice) {
-        BluetoothHeadset::class.java -> {
-          /*
-           * Since the there is a delay between receiving the ACTION_ACL_CONNECTED event and receiving
-           * the name of the connected device from querying the BluetoothHeadset proxy class, the
-           * headset name received from the ACTION_ACL_CONNECTED intent needs to be passed into this
-           * function.
-           */
-        }
+        BluetoothHeadset::class.java -> {}
         WiredHeadset::class.java -> {
           logger.v {
             "[addAvailableAudioDevices] #WiredHeadset; wiredHeadsetAvailable: $wiredHeadsetAvailable"

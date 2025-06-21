@@ -83,9 +83,6 @@ fun VideoCallScreen(
   val remoteVideoTrackState by sessionManager.remoteVideoTrackFlow.collectAsState(null)
   val remoteVideoTrack = remoteVideoTrackState
 
-//  val localVideoTrackState by sessionManager.localVideoTrackFlow.collectAsState(null)
-//  val localVideoTrack = localVideoTrackState
-
 //  val remoteAudioTrackState by sessionManager.remoteAudioTrackFlow.collectAsState(initial = null)
 //  val remoteAudioTrack = remoteAudioTrackState
 
@@ -114,34 +111,6 @@ fun VideoCallScreen(
           .onSizeChanged { parentSize = it }
       )
     }
-//    if(remoteAudioTrack != null) {
-//      AudioRecorder(
-//        audioTrack = remoteAudioTrack,
-//        recordingManager = recordingManager
-//      )
-//    }
-
-// Enhanced logging for local video condition
-//    if (localVideoTrack != null) {
-////      if (callMediaState.isCameraEnabled) {
-//        Log.d("VideoCallScreen", "Local video track available and camera enabled")
-//        FloatingVideoRenderer(
-//          modifier = Modifier
-//            .size(width = 150.dp, height = 210.dp)
-//            .clip(RoundedCornerShape(16.dp))
-//            .align(Alignment.TopEnd),
-//          videoTrack = localVideoTrack,
-//          parentBounds = parentSize,
-//          paddingValues = PaddingValues(0.dp)
-//        )
-////      } else {
-////        Log.d ( "VideoCallScreen", "Local video track exists but camera is disabled: isCameraEnabled=${callMediaState.isCameraEnabled}" )
-////      }
-//    } else {
-//      Log.d ( "VideoCallScreen", "Local video track null" )
-//    }
-
-//    val activity = (LocalContext.current as? Activity)
 
     VideoCallControls(
       context = context,
