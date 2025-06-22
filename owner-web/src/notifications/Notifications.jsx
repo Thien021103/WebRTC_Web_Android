@@ -60,13 +60,15 @@ function Notifications({ onRefetch }) {
         throw new Error(response.data.message || 'Failed to fetch notifications');
       }
     } catch (err) {
+      console.error('Error fetching notifications:', err.response?.data?.message);
       if (err.response?.data?.status === "false" && err.response?.data?.message === 'Invalid token') {
         // Optional: Clear invalid token
         localStorage.removeItem('token');
         localStorage.removeItem('email');
         navigate('/login'); // Navigate to /login
       } else {
-        setError(err.response?.data?.message || 'Failed to fetch notifications');
+        const errorMessage = err.response?.data?.message || 'Failed to fetch notifications';
+        setError(errorMessage);
         setSnackbar({ open: true, message: errorMessage, severity: 'error' });
       }
     } finally {

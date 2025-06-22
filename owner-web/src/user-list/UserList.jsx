@@ -24,6 +24,7 @@ import {
 import { Delete as DeleteIcon, Add as AddIcon, PeopleOutline as PeopleOutlineIcon } from '@mui/icons-material';
 import { useTheme } from '@mui/material';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 function UserList({ onRefetch }) {
   const [users, setUsers] = useState([]);
@@ -40,6 +41,7 @@ function UserList({ onRefetch }) {
   });
   const [formErrors, setFormErrors] = useState({});
   const theme = useTheme();
+  const navigate = useNavigate(); // Initialize navigate
 
   const fetchUsers = async () => {
     setLoading(true);
