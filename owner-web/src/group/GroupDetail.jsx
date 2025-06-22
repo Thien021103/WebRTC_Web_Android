@@ -11,13 +11,16 @@ import {
 } from '@mui/material';
 import { Fade } from '@mui/material';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 function GroupDetails({ onRefetch }) {
   const [group, setGroup] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [actionError, setActionError] = useState(null);
+
   const theme = useTheme();
+  const navigate = useNavigate(); // Initialize navigate
 
   const fetchGroup = async () => {
     setLoading(true);
@@ -29,7 +32,14 @@ function GroupDetails({ onRefetch }) {
       setGroup(response.data.group || null);
       setError(null);
     } catch (err) {
-      setError(err.message);
+      if (err.response?.data?.status === "false" && err.response?.data?.message === 'Invalid token') {
+        // Optional: Clear invalid token
+        localStorage.removeItem('token');
+        localStorage.removeItem('email');
+        navigate('/login'); // Navigate to /login
+      } else {
+        setError(err.message || 'Failed to fetch group');
+      }
     } finally {
       setLoading(false);
     }

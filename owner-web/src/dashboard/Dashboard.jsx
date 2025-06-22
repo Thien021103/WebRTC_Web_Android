@@ -41,6 +41,7 @@ function Dashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('email');
     navigate('/login');
   };
 
