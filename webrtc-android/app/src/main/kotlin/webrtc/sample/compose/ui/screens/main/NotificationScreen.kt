@@ -7,10 +7,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -157,35 +160,59 @@ fun NotificationScreen(
             Column(
               modifier = Modifier.fillMaxWidth().padding(16.dp)
             ) {
-              Text(
-                text = "Time: ${
-                  SimpleDateFormat(
-                    "HH:mm",
+              Surface(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                color = MaterialTheme.colors.secondary, // Blue for time
+                shape = RoundedCornerShape(8.dp)
+              ) {
+                Row(
+                  modifier = Modifier.padding(8.dp),
+                  verticalAlignment = Alignment.CenterVertically
+                ) {
+                  Icon(
+                    imageVector = Icons.Filled.AccessTime,
+                    contentDescription = "Time",
+                    modifier = Modifier.size(22.dp).padding(end = 6.dp),
+                    tint = Color.White
+                  )
+                  Text(
+                    text = SimpleDateFormat(
+                      "HH:mm",
+                      Locale.getDefault()
+                    ).format(
+                      SimpleDateFormat(
+                        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                        Locale.getDefault()
+                      ).parse(entry.timestamp) ?: entry.timestamp
+                    ),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                  )
+                }
+              }
+              Row(
+                modifier = Modifier.padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+              ) {
+                Icon(
+                  imageVector = Icons.Filled.CalendarToday,
+                  contentDescription = "Date",
+                  modifier = Modifier.size(22.dp).padding(end = 6.dp)
+                )
+                Text(
+                  text = SimpleDateFormat(
+                    "dd MMM, yyyy",
                     Locale.getDefault()
                   ).format(
                     SimpleDateFormat(
                       "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
                       Locale.getDefault()
                     ).parse(entry.timestamp) ?: entry.timestamp
-                  )
-                }",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-              )
-              Text(
-                text = "Date: ${
-                  SimpleDateFormat(
-                    "dd MMM, yyyy ",
-                    Locale.getDefault()
-                  ).format(
-                    SimpleDateFormat(
-                      "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
-                      Locale.getDefault()
-                    ).parse(entry.timestamp) ?: entry.timestamp
-                  )
-                }",
-                fontSize = 18.sp
-              )
+                  ),
+                  fontSize = 18.sp
+                )
+              }
             }
           }
         }
