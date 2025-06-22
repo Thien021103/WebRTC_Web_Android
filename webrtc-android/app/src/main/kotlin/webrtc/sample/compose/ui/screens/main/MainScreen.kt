@@ -1,5 +1,6 @@
 package webrtc.sample.compose.ui.screens.main
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.BottomNavigation
@@ -15,41 +16,32 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.sp
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+
 
 @Composable
 fun MainScreen(
-  role: String,
-  identifier: String,
-  groupName: String,
-  token: String,
-  onVideosClick: () -> Unit,
-  onSignallingClick: () -> Unit,
-  onDoorClick: () -> Unit,
-  onUserManagementClick: () -> Unit,
-  onLogout: () -> Unit
+  onNavigateToMain: () -> Unit,
+  onNavigateToGroup: () -> Unit,
+  onNavigateToNotifications: () -> Unit,
+  onNavigateToProfile: () -> Unit,
+  currentRoute: String,
+  contentScreen: @Composable () -> Unit
 ) {
-  val navController = rememberNavController()
-  var currentRoute by remember { mutableStateOf("main") }
 
   Scaffold(
     topBar = {
       TopAppBar(
         title = {
           Text(
-            text =
-              if (currentRoute == "main") {"Welcome!"}
-              else if (currentRoute == "group") {"Your Group"}
-              else if (currentRoute == "notifications") {"Notifications history"}
-              else {"Profile"},
+            text = when (currentRoute) {
+              "main/main" -> "Welcome!"
+              "main/group" -> "Your Group"
+              "main/notifications" -> "Notifications history"
+              "main/profile" -> "Profile"
+              else -> "Welcome!"
+            },
             fontSize = 20.sp
           )
         },
@@ -65,92 +57,40 @@ fun MainScreen(
         BottomNavigationItem(
           icon = { Icon(Icons.Filled.Home, contentDescription = "Main") },
           label = { Text("Main") },
-          selected = currentRoute == "main",
+          selected = currentRoute == "main/main",
           selectedContentColor = MaterialTheme.colors.primary,
           unselectedContentColor = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
-          onClick = {
-            if (currentRoute != "main") {
-              navController.navigate("main")
-              currentRoute = "main"
-            }
-          }
+          onClick = { onNavigateToMain() }
         )
         BottomNavigationItem(
           icon = { Icon(Icons.Filled.Group, contentDescription = "Group") },
           label = { Text("Group") },
-          selected = currentRoute == "group",
+          selected = currentRoute == "main/group",
           selectedContentColor = MaterialTheme.colors.primary,
           unselectedContentColor = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
-          onClick = {
-            if (currentRoute != "group") {
-              navController.navigate("group")
-              currentRoute = "group"
-            }
-          }
-        )
-        BottomNavigationItem(
-          icon = { Icon(Icons.Filled.Person, contentDescription = "Profile") },
-          label = { Text("Profile") },
-          selected = currentRoute == "profile",
-          selectedContentColor = MaterialTheme.colors.primary,
-          unselectedContentColor = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
-          onClick = {
-            if (currentRoute != "profile") {
-              navController.navigate("profile")
-              currentRoute = "profile"
-            }
-          }
+          onClick = { onNavigateToGroup() }
         )
         BottomNavigationItem(
           icon = { Icon(Icons.Filled.Notifications, contentDescription = "Notifications") },
           label = { Text("Notifications") },
-          selected = currentRoute == "notifications",
+          selected = currentRoute == "main/notifications",
           selectedContentColor = MaterialTheme.colors.primary,
           unselectedContentColor = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
-          onClick = {
-            if (currentRoute != "notifications") {
-              navController.navigate("notifications")
-              currentRoute = "notifications"
-            }
-          }
+          onClick = { onNavigateToNotifications() }
+        )
+        BottomNavigationItem(
+          icon = { Icon(Icons.Filled.Person, contentDescription = "Profile") },
+          label = { Text("Profile") },
+          selected = currentRoute == "main/profile",
+          selectedContentColor = MaterialTheme.colors.primary,
+          unselectedContentColor = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+          onClick = { onNavigateToProfile() }
         )
       }
     },
     content = { padding ->
-      NavHost(
-        navController = navController,
-        startDestination = "main",
-        modifier = Modifier.fillMaxSize().padding(padding)
-      ) {
-        composable("main") {
-          OptionScreen(
-            role = role,
-            identifier = identifier,
-            onVideosClick = onVideosClick,
-            onSignallingClick = onSignallingClick,
-            onDoorClick = onDoorClick,
-            onUserManagementClick = onUserManagementClick
-          )
-        }
-        composable("profile") {
-          UserDetailScreen(
-            role = role,
-            identifier = identifier,
-            groupName = groupName,
-            accessToken = token,
-            onLogout = { onLogout() }
-          )
-        }
-        composable("group") {
-          GroupDetailScreen(
-            accessToken = token,
-          )
-        }
-        composable("notifications") {
-          NotificationScreen (
-            accessToken = token,
-          )
-        }
+      Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+        contentScreen()
       }
     }
   )
