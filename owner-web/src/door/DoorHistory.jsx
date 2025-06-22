@@ -27,6 +27,7 @@ import {
 } from '@mui/material';
 import { Refresh as RefreshIcon, Lock as LockIcon, LockOpen as LockOpenIcon } from '@mui/icons-material';
 import { useTheme } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 function DoorHistory({ email, onRefetch }) {
@@ -49,6 +50,7 @@ function DoorHistory({ email, onRefetch }) {
   const [passwordError, setPasswordError] = useState('');
   const [toggleLoading, setToggleLoading] = useState(false);
   const theme = useTheme();
+  const navigate = useNavigate(); // Initialize navigate
 
   const fetchDoorStatus = async () => {
     try {

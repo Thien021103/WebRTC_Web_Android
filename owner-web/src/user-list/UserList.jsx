@@ -51,7 +51,15 @@ function UserList({ onRefetch }) {
       setUsers(response.data.users || []);
       setError(null);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to fetch users');
+      if (err.response?.data?.status === "false" && err.response?.data?.message === 'Invalid token') {
+        // Optional: Clear invalid token
+        localStorage.removeItem('token');
+        localStorage.removeItem('email');
+        navigate('/login'); // Navigate to /login
+      } else {
+        setError(err.response?.data?.message || 'Failed to fetch users');
+        setSnackbar({ open: true, message: errorMessage, severity: 'error' });
+      }
     } finally {
       setLoading(false);
     }
@@ -77,8 +85,15 @@ function UserList({ onRefetch }) {
       await fetchUsers();
       onRefetch();
     } catch (err) {
-      const errorMessage = err.response?.data?.message || 'Failed to delete user';
-      setSnackbar({ open: true, message: errorMessage, severity: 'error' });
+      if (err.response?.data?.status === "false" && err.response?.data?.message === 'Invalid token') {
+        // Optional: Clear invalid token
+        localStorage.removeItem('token');
+        localStorage.removeItem('email');
+        navigate('/login'); // Navigate to /login
+      } else {
+        const errorMessage = err.response?.data?.message || 'Failed to delete user';
+        setSnackbar({ open: true, message: errorMessage, severity: 'error' });
+      }
     } finally {
       setLoading(false);
       setDeleteDialog({ open: false, email: '' });
@@ -114,11 +129,18 @@ function UserList({ onRefetch }) {
       onRefetch();
       handleCloseAddDialog();
     } catch (err) {
-      setSnackbar({
-        open: true,
-        message: err.response?.data?.message || 'Failed to add user',
-        severity: 'error',
-      });
+      if (err.response?.data?.status === "false" && err.response?.data?.message === 'Invalid token') {
+        // Optional: Clear invalid token
+        localStorage.removeItem('token');
+        localStorage.removeItem('email');
+        navigate('/login'); // Navigate to /login
+      } else {
+        setSnackbar({
+          open: true,
+          message: err.response?.data?.message || 'Failed to add user',
+          severity: 'error',
+        });
+      }
     } finally {
       setLoading(false);
     }

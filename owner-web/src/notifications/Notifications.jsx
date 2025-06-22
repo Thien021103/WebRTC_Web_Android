@@ -20,6 +20,7 @@ import {
 } from '@mui/material';
 import { Refresh as RefreshIcon, Notifications as NotificationsIcon } from '@mui/icons-material';
 import { useTheme } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 function Notifications({ onRefetch }) {
@@ -36,6 +37,7 @@ function Notifications({ onRefetch }) {
   });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const theme = useTheme();
+  const navigate = useNavigate(); // Initialize navigate
 
   const fetchNotifications = async () => {
     setLoading(true);
@@ -58,9 +60,15 @@ function Notifications({ onRefetch }) {
         throw new Error(response.data.message || 'Failed to fetch notifications');
       }
     } catch (err) {
-      const errorMessage = err.message || 'Failed to fetch notifications';
-      setError(errorMessage);
-      setSnackbar({ open: true, message: errorMessage, severity: 'error' });
+      if (err.response?.data?.status === "false" && err.response?.data?.message === 'Invalid token') {
+        // Optional: Clear invalid token
+        localStorage.removeItem('token');
+        localStorage.removeItem('email');
+        navigate('/login'); // Navigate to /login
+      } else {
+        setError(err.response?.data?.message || 'Failed to fetch notifications');
+        setSnackbar({ open: true, message: errorMessage, severity: 'error' });
+      }
     } finally {
       setLoading(false);
     }
