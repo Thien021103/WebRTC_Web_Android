@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const Owner = require('../schemas/owner');
 const User = require('../schemas/user');
 const Group = require('../schemas/group');
+const Admin = require('../schemas/admin');
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key'; // Use env in production
 
@@ -96,7 +97,7 @@ const wsControllerAuth = async (token, client) => {
   }
 };
 
-function adminAuth(req, res, next) {
+const adminAuth = async (req, res, next) => {
   const token = req.header('Authorization')?.replace('Bearer ', '');
   if (!token) {
     return res.status(401).json({ status: 'false', message: 'No token provided' });
@@ -104,8 +105,15 @@ function adminAuth(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
-    if (!decoded.isAdmin || !decoded.email) {
-      return res.status(403).json({ status: 'false', message: 'Invalid token' });
+    let entity;
+    if (decoded.isAdmin) {
+      entity = await Admin.findOne({ email: decoded.email, accessToken: token });
+    } else {
+      return res.status(401).json({ status: 'false', message: 'Invalid token' });
+    }
+
+    if (!entity) {
+      return res.status(401).json({ status: 'false', message: 'Invalid token' });
     }
     req.user = decoded;
     next();
