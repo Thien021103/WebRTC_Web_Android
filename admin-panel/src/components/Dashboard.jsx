@@ -35,6 +35,11 @@ function Dashboard() {
   const [view, setView] = useState('groups');
   const navigate = useNavigate();
 
+  const handleInvalidToken = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
+
   const fetchGroups = async () => {
     setLoading(true);
     try {
@@ -45,7 +50,11 @@ function Dashboard() {
       setGroups(response.data.groups || []);
       setError(null);
     } catch (err) {
-      setError(err.message);
+      if (err.response?.data?.message === 'Invalid token') {
+        handleInvalidToken();
+      } else {
+        setError(err.response?.data?.message || err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -61,7 +70,11 @@ function Dashboard() {
       setOwners(response.data.owners || []);
       setError(null);
     } catch (err) {
-      setError(err.message);
+      if (err.response?.data?.message === 'Invalid token') {
+        handleInvalidToken();
+      } else {
+        setError(err.response?.data?.message || err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -121,9 +134,6 @@ function Dashboard() {
           <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
             Admin Panel
           </Typography>
-          {/* <IconButton color="inherit">
-            <img src="https://via.placeholder.com/40" alt="Profile" style={{ borderRadius: '50%' }} />
-          </IconButton> */}
         </Toolbar>
       </AppBar>
       <Box component="nav" sx={{ width: { sm: 240 }, flexShrink: { sm: 0 } }}>

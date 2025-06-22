@@ -16,9 +16,14 @@ import {
   TextField,
   Snackbar,
   Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
-import { Refresh as RefreshIcon, VideoLibrary as VideoLibraryIcon, PlayArrow as PlayArrowIcon } from '@mui/icons-material';
+import { Refresh as RefreshIcon, VideoLibrary as VideoLibraryIcon, PlayArrow as PlayArrowIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { useTheme } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 function Videos({ onRefetch }) {
@@ -31,14 +36,16 @@ function Videos({ onRefetch }) {
     endDate: '',
   });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, publicId: '' });
   const theme = useTheme();
   const playerRef = useRef(null);
+  const navigate = useNavigate();
 
   // Initialize Cloudinary Video Player
   useEffect(() => {
     if (typeof cloudinary !== 'undefined' && !playerRef.current) {
       playerRef.current = cloudinary.videoPlayer('video-player', {
-        cloud_name: 'dvarse6wk', // Replace with your Cloudinary cloud name
+        cloud_name: 'dvarse6wk',
         controls: true,
         fluid: true,
         sourceTypes: ['hls', 'mp4'],
@@ -60,11 +67,44 @@ function Videos({ onRefetch }) {
         throw new Error(response.data.message || 'Failed to fetch videos');
       }
     } catch (err) {
-      const errorMessage = err.message || 'Failed to fetch videos';
-      setError(errorMessage);
-      setSnackbar({ open: true, message: errorMessage, severity: 'error' });
+      if (err.response?.data?.status === false && err.response?.data?.message === 'Invalid token') {
+        localStorage.removeItem('token');
+        navigate('/login');
+      } else {
+        const errorMessage = err.message || 'Failed to fetch videos';
+        setError(errorMessage);
+        setSnackbar({ open: true, message: errorMessage, severity: 'error' });
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteVideo = async (publicId) => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.delete(`https://thientranduc.id.vn:444/api/delete-videos`, {
+        headers: { Authorization: `Bearer ${token}` },
+        data: { publicId },
+      });
+      if (response.data.status === 'success') {
+        setSnackbar({ open: true, message: 'Video deleted successfully', severity: 'success' });
+        fetchVideos();
+      } else {
+        throw new Error(response.data.message || 'Failed to delete video');
+      }
+    } catch (err) {
+      if (err.response?.data?.status === false && err.response?.data?.message === 'Invalid token') {
+        localStorage.removeItem('token');
+        navigate('/login');
+      } else {
+        const errorMessage = err.message || 'Failed to delete video';
+        setSnackbar({ open: true, message: errorMessage, severity: 'error' });
+      }
+    } finally {
+      setLoading(false);
+      setDeleteDialog({ open: false, publicId: '' });
     }
   };
 
@@ -101,6 +141,20 @@ function Videos({ onRefetch }) {
       playerRef.current.source(video.public_id, {
         sourceTypes: ['hls', 'mp4'],
       }).play();
+    }
+  };
+
+  const handleOpenDeleteDialog = (publicId) => {
+    setDeleteDialog({ open: true, publicId });
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialog({ open: false, publicId: '' });
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteDialog.publicId) {
+      deleteVideo(deleteDialog.publicId);
     }
   };
 
@@ -288,9 +342,22 @@ function Videos({ onRefetch }) {
                             color="primary"
                             startIcon={<PlayArrowIcon />}
                             onClick={() => handlePlayVideo(video)}
-                            sx={{ borderRadius: 2 }}
+                            sx={{ borderRadius: 2, mr: 1 }}
                           >
                             Play
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            color="error"
+                            startIcon={<DeleteIcon />}
+                            onClick={() => handleOpenDeleteDialog(video.public_id)}
+                            sx={{ 
+                              borderRadius: 2,
+                              '&:hover': { bgcolor: 'error.light', borderColor: 'error.dark' },
+                              transition: 'background-color 0.2s',
+                            }}
+                          >
+                            Delete
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -302,6 +369,32 @@ function Videos({ onRefetch }) {
           </CardContent>
         </Card>
       </Fade>
+
+      <Dialog
+        open={deleteDialog.open}
+        onClose={handleCloseDeleteDialog}
+        aria-labelledby="delete-dialog-title"
+      >
+        <DialogTitle id="delete-dialog-title">Confirm Delete</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            Are you sure you want to delete the video <strong>{deleteDialog.publicId}</strong>?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="secondary">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            color="error"
+            variant="contained"
+            autoFocus
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Snackbar
         open={snackbar.open}

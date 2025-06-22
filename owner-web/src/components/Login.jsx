@@ -70,7 +70,7 @@ function Login() {
         >
           <Box sx={{ textAlign: 'center', mb: 3 }}>
             <Typography variant="h5" sx={{ fontWeight: 600, color: '#1976d2' }}>
-              Admin Login
+              Owner Login
             </Typography>
           </Box>
           <form onSubmit={handleSubmit}>
