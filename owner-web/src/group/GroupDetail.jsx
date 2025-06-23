@@ -38,7 +38,7 @@ function GroupDetails({ onRefetch }) {
         localStorage.removeItem('email');
         navigate('/login'); // Navigate to /login
       } else {
-        setError(err.message || 'Failed to fetch group');
+        setError(err.response?.data?.message || 'Failed to fetch group');
       }
     } finally {
       setLoading(false);

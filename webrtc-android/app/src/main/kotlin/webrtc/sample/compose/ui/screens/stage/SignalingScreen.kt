@@ -95,10 +95,7 @@ fun SignallingScreen(
                 context = context,
                 signalingClient = SignalingClient(
                   accessToken = accessToken,
-                  onWsClose = {
-//                    onCallScreen = false
-//                    sessionManager = null
-                  }
+                  onWsClose = {}
                 ),
                 peerConnectionFactory = StreamPeerConnectionFactory(context)
               )

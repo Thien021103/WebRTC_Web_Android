@@ -23,6 +23,9 @@ import org.json.JSONObject
 import android.app.DatePickerDialog
 import android.util.Log
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.ui.graphics.Color
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -301,29 +304,55 @@ fun DoorHistoryScreen(
                 Column(
                   modifier = Modifier.fillMaxWidth().padding(16.dp)
                 ) {
-                  Text(
-                    text = "State: ${entry.state}",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                  )
-                  Text(
-                    text = "User: ${entry.user ?: "N/A"}",
-                    fontSize = 16.sp
-                  )
-                  Text(
-                    text = "Time: ${
-                      SimpleDateFormat(
-                        "HH:mm, dd MMM, yyyy ",
+                  Surface(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                    color = if (entry.state == "Locked") MaterialTheme.colors.primaryVariant else MaterialTheme.colors.error,
+                    shape = RoundedCornerShape(8.dp)
+                  ) {
+                    Text(
+                      text = "State: ${entry.state}",
+                      fontSize = 18.sp,
+                      fontWeight = FontWeight.Bold,
+                      color = Color.White,
+                      modifier = Modifier.padding(8.dp)
+                    )
+                  }
+                  Row(
+                    modifier = Modifier.padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                  ) {
+                    Icon(
+                      imageVector = Icons.Filled.Person,
+                      contentDescription = "User",
+                      modifier = Modifier.size(20.dp).padding(end = 4.dp)
+                    )
+                    Text(
+                      text = entry.user ?: "N/A",
+                      fontSize = 16.sp
+                    )
+                  }
+                  Row(
+                    modifier = Modifier.padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                  ) {
+                    Icon(
+                      imageVector = Icons.Filled.AccessTime,
+                      contentDescription = "Time",
+                      modifier = Modifier.size(20.dp).padding(end = 4.dp)
+                    )
+                    Text(
+                      text = SimpleDateFormat(
+                        "HH:mm, dd MMM, yyyy",
                         Locale.getDefault()
                       ).format(
                         SimpleDateFormat(
                           "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
                           Locale.getDefault()
                         ).parse(entry.timestamp) ?: entry.timestamp
-                      )
-                    }",
-                    fontSize = 14.sp
-                  )
+                      ),
+                      fontSize = 14.sp
+                    )
+                  }
                 }
               }
             }

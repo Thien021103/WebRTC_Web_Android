@@ -31,6 +31,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import webrtc.sample.compose.ui.screens.users.RegisterUserScreen
 import webrtc.sample.compose.ui.screens.users.UserManagementScreen
 import com.google.firebase.messaging.FirebaseMessaging
@@ -46,16 +49,20 @@ import webrtc.sample.compose.ui.screens.stage.SignallingScreen
 import webrtc.sample.compose.ui.screens.users.UserListScreen
 import webrtc.sample.compose.ui.theme.WebrtcSampleComposeTheme
 import kotlinx.coroutines.tasks.await
+import webrtc.sample.compose.ui.screens.main.GroupDetailScreen
+import webrtc.sample.compose.ui.screens.main.NotificationScreen
+import webrtc.sample.compose.ui.screens.main.OptionScreen
+import webrtc.sample.compose.ui.screens.main.UserDetailScreen
 
 class MainActivity : ComponentActivity() {
   @RequiresApi(Build.VERSION_CODES.R)
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
     setContent {
       WebrtcSampleComposeTheme {
-        var showSettingsDialog by remember { mutableStateOf(false) }
-        var permissionsGranted by remember { mutableStateOf(false) }
+        var showSettingsDialog by rememberSaveable { mutableStateOf(false) }
+        var permissionsGranted by rememberSaveable { mutableStateOf(false) }
+        val navController = rememberNavController()
 
         // Save and restore state
         var currentScreen by rememberSaveable { mutableStateOf("RoleSelection") }
@@ -70,30 +77,34 @@ class MainActivity : ComponentActivity() {
 
         // Restore Cloudinary config
         LaunchedEffect(identifier, accessToken, cloudName) {
-          if (identifier.isNotEmpty() && accessToken.isNotEmpty() && cloudName.isNotEmpty()){
+          if (identifier.isNotEmpty() && accessToken.isNotEmpty() && cloudName.isNotEmpty()) {
             val config = mapOf("cloud_name" to cloudName)
             try {
               (applicationContext as WebRTCApp).initializeMediaManager(config)
             } catch (e: Exception) {
               Log.e("MainActivity", "Failed to initialize MediaManager: ${e.message}", e)
-              if (currentScreen !in listOf("RoleSelection", "Login", "Register")) {
-                Log.d("MainActivity", "Redirecting to RoleSelection due to initialization failure")
+              if (navController.currentDestination?.route !in listOf("roleSelection", "login", "register")) {
                 identifier = ""
                 accessToken = ""
                 groupName = ""
                 role = ""
-                currentScreen = "RoleSelection"
+                try {
+                  navController.navigate("roleSelection")
+                } catch (err: Exception) {
+                  Log.e("MainActivity", "Error: ${err.message}", err)
+                }
               }
             }
-          } else {
+          } else if (navController.currentDestination?.route !in listOf("roleSelection", "login", "register")) {
             Log.w("MainActivity", "Cannot restore MediaManager")
-            if (currentScreen !in listOf("RoleSelection", "Login", "Register")) {
-              Log.d("MainActivity", "Redirecting to RoleSelection")
-              identifier = ""
-              accessToken = ""
-              groupName = ""
-              role = ""
-              currentScreen = "RoleSelection"
+            identifier = ""
+            accessToken = ""
+            groupName = ""
+            role = ""
+            try {
+              navController.navigate("roleSelection")
+            } catch (err: Exception) {
+              Log.e("MainActivity", "Error: ${err.message}", err)
             }
           }
         }
@@ -145,12 +156,13 @@ class MainActivity : ComponentActivity() {
           permissionLauncher.launch(requiredPermissions)
         }
 
-        // Manage orientation based on screen
-        LaunchedEffect(currentScreen) {
-          requestedOrientation = if (currentScreen == "Videos") {
-            ActivityInfo.SCREEN_ORIENTATION_SENSOR
-          } else {
-            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        LaunchedEffect(navController) {
+          navController.addOnDestinationChangedListener { _, destination, _ ->
+            requestedOrientation = if (destination.route == "videos") {
+              ActivityInfo.SCREEN_ORIENTATION_SENSOR
+            } else {
+              ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            }
           }
         }
 
@@ -168,13 +180,7 @@ class MainActivity : ComponentActivity() {
         if (showSettingsDialog) {
           AlertDialog(
             onDismissRequest = { /* Non-dismissable */ },
-            title = {
-              Text(
-                text = "Permissions Required",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-              )
-            },
+            title = { Text(text = "Permissions Required", fontSize = 20.sp, fontWeight = FontWeight.Bold) },
             text = {
               Text(
                 text = "This app requires the following permissions to function:\n" +
@@ -189,14 +195,9 @@ class MainActivity : ComponentActivity() {
                 fontSize = 16.sp
               )
             },
-            confirmButton = { },
+            confirmButton = {},
             dismissButton = {
-              TextButton(
-                onClick = {
-                  Log.d("MainActivity", "User chose to exit from settings dialog")
-                  finish()
-                }
-              ) {
+              TextButton(onClick = { finish() }) {
                 Text("Exit", fontSize = 14.sp)
               }
             },
@@ -208,111 +209,171 @@ class MainActivity : ComponentActivity() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colors.background
           ) {
-            when (currentScreen) {
-              "RoleSelection" -> RoleSelectionScreen(
-                onRoleSelected = { selectedRole ->
-                  role = selectedRole
-                  currentScreen = "Login"
+            NavHost(
+              navController = navController,
+              startDestination = "roleSelection",
+              modifier = Modifier.fillMaxSize()
+            ) {
+              composable("roleSelection") {
+                RoleSelectionScreen(
+                  onRoleSelected = { selectedRole ->
+                    role = selectedRole
+                    navController.navigate("login")
+                  }
+                )
+              }
+              composable("login") {
+                LoginScreen(
+                  fcmToken = fcmToken,
+                  role = role,
+                  onSuccess = { email, group, token, folder, config ->
+                    identifier = email
+                    groupName = group
+                    accessToken = token
+                    cloudFolder = folder
+                    cloudName = config["cloud_name"].toString()
+                    (applicationContext as WebRTCApp).initializeMediaManager(config)
+                    navController.navigate("main/main") { popUpTo("roleSelection") { inclusive = true } }
+                    Log.d("MainActivity", "Login success: identifier=$email")
+                  },
+                  onRegister = { navController.navigate("register") },
+                  onBack = { navController.popBackStack() }
+                )
+              }
+              composable("register") {
+                RegisterScreen(
+                  fcmToken = fcmToken,
+                  onSuccess = { email, group, token, folder, config ->
+                    identifier = email
+                    groupName = group
+                    accessToken = token
+                    cloudFolder = folder
+                    cloudName = config["cloud_name"].toString()
+                    (applicationContext as WebRTCApp).initializeMediaManager(config)
+                    role = "Owner"
+                    navController.navigate("main/main") { popUpTo("roleSelection") { inclusive = true } }
+                    Log.d("MainActivity", "Register success: identifier=$email")
+                  },
+                  onLogin = { navController.navigate("login") },
+                  onBack = { navController.popBackStack() }
+                )
+              }
+              composable("main/main") {
+                MainScreen(
+                  onNavigateToMain = { navController.navigate("main/main") },
+                  onNavigateToGroup = { navController.navigate("main/group") },
+                  onNavigateToNotifications = { navController.navigate("main/notifications") },
+                  onNavigateToProfile = { navController.navigate("main/profile") },
+                  currentRoute = "main/main",
+                  contentScreen = {
+                  OptionScreen(
+                    role = role,
+                    identifier = identifier,
+                    onVideosClick = { navController.navigate("videos") },
+                    onSignallingClick = { navController.navigate("signalling") { popUpTo("main/main") { inclusive = true } } },
+                    onDoorClick = { navController.navigate("door") },
+                    onUserManagementClick = { navController.navigate("user") },
+                  )
                 }
-              )
-
-              "Login" -> LoginScreen(
-                fcmToken = fcmToken,
-                role = role,
-                onSuccess = { email, group, token, folder, config ->
-                  identifier = email
-                  groupName = group
-                  accessToken = token
-                  cloudFolder = folder
-                  cloudName = config["cloud_name"].toString()
-                  (applicationContext as WebRTCApp).initializeMediaManager(config)
-                  currentScreen = "Main"
-                  Log.d("MainActivity", "Login success: identifier=$email")
-                },
-                onRegister = { currentScreen = "Register" },
-                onBack = { currentScreen = "RoleSelection" }
-              )
-
-              "Register" -> RegisterScreen(
-                fcmToken = fcmToken,
-                onSuccess = { email, group, token, folder, config ->
-                  identifier = email
-                  groupName = group
-                  accessToken = token
-                  cloudFolder = folder
-                  cloudName = config["cloud_name"].toString()
-                  (applicationContext as WebRTCApp).initializeMediaManager(config)
-                  role = "Owner"
-                  currentScreen = "Main"
-                  Log.d("MainActivity", "Register success: identifier=$email")
-                },
-                onLogin = { currentScreen = "Login" },
-                onBack = { currentScreen = "RoleSelection" }
-              )
-
-              "Main" -> MainScreen(
-                role = role,
-                identifier = identifier,
-                groupName = groupName,
-                token = accessToken,
-                onVideosClick = { currentScreen = "Videos" },
-                onSignallingClick = { currentScreen = "Signalling" },
-                onDoorClick = { currentScreen = "Door" },
-                onUserManagementClick = { currentScreen = "UserManagement" },
-                onLogout = {
-                  identifier = ""
-                  groupName = ""
-                  accessToken = ""
-                  role = ""
-//                  cloudFolder = ""
-//                  cloudName = ""
-                  currentScreen = "RoleSelection"
-//                  (this.applicationContext as WebRTCApp).clearConfig() // Clearing this make MediaManager lost its config
-                }
-              )
-
-              "Videos" -> VideoListScreen(
-                role = role,
-                viewModel = VideoListViewModel(accessToken),
-                onBack = { currentScreen = "Main" }
-              )
-
-              "Signalling" -> SignallingScreen(
-                role = role,
-                identifier = identifier,
-                accessToken = accessToken,
-                cloudFolder = cloudFolder,
-                onBack = { currentScreen = "Main" }
-              )
-
-              "UserManagement" -> UserManagementScreen(
-                onRegisterUserClick = { currentScreen = "RegisterUser" },
-                onUserListClick = { currentScreen = "UserList" },
-                onBack = { currentScreen = "Main" }
-              )
-
-              "RegisterUser" -> RegisterUserScreen(
-                accessToken = accessToken,
-                onBack = { currentScreen = "UserManagement" }
-              )
-
-              "UserList" -> UserListScreen(
-                accessToken = accessToken,
-                onBack = { currentScreen = "UserManagement" }
-              )
-
-              "Door" -> DoorScreen(
-                accessToken = accessToken,
-                identifier = identifier,
-                role = role,
-                onHistoryClick = { currentScreen = "DoorHistory" },
-                onBack = { currentScreen = "Main" }
-              )
-
-              "DoorHistory" -> DoorHistoryScreen(
-                accessToken = accessToken,
-                onBack = { currentScreen = "Door" }
-              )
+                )
+              }
+              composable("main/group") {
+                MainScreen(
+                  onNavigateToMain = { navController.navigate("main/main") },
+                  onNavigateToGroup = { navController.navigate("main/group") },
+                  onNavigateToNotifications = { navController.navigate("main/notifications") },
+                  onNavigateToProfile = { navController.navigate("main/profile") },
+                  currentRoute = "main/group",
+                  contentScreen = { GroupDetailScreen(accessToken = accessToken) }
+                )
+              }
+              composable("main/notifications") {
+                MainScreen(
+                  onNavigateToMain = { navController.navigate("main/main") },
+                  onNavigateToGroup = { navController.navigate("main/group") },
+                  onNavigateToNotifications = { navController.navigate("main/notifications") },
+                  onNavigateToProfile = { navController.navigate("main/profile") },
+                  currentRoute = "main/notifications",
+                  contentScreen = { NotificationScreen(accessToken = accessToken) }
+                )
+              }
+              composable("main/profile") {
+                MainScreen(
+                  onNavigateToMain = { navController.navigate("main/main") },
+                  onNavigateToGroup = { navController.navigate("main/group") },
+                  onNavigateToNotifications = { navController.navigate("main/notifications") },
+                  onNavigateToProfile = { navController.navigate("main/profile") },
+                  currentRoute = "main/profile",
+                  contentScreen = {
+                    UserDetailScreen(
+                      role = role,
+                      identifier = identifier,
+                      groupName = groupName,
+                      accessToken = accessToken,
+                      onLogout = {
+                        identifier = ""
+                        groupName = ""
+                        accessToken = ""
+                        role = ""
+//                        cloudFolder = ""
+//                        cloudName = ""
+//                        (applicationContext as WebRTCApp).clearConfig()
+                        navController.navigate("roleSelection") { popUpTo("roleSelection") { inclusive = true } }
+                      }
+                    )
+                  }
+                )
+              }
+              composable("videos") {
+                VideoListScreen(
+                  role = role,
+                  viewModel = VideoListViewModel(accessToken),
+                  onBack = { navController.popBackStack() }
+                )
+              }
+              composable("signalling") {
+                SignallingScreen(
+                  role = role,
+                  identifier = identifier,
+                  accessToken = accessToken,
+                  cloudFolder = cloudFolder,
+                  onBack = { navController.navigate("main/main") { popUpTo("signalling") { inclusive = true } } }
+                )
+              }
+              composable("user") {
+                UserManagementScreen(
+                  onRegisterUserClick = { navController.navigate("user/register") },
+                  onUserListClick = { navController.navigate("user/list") },
+                  onBack = { navController.popBackStack() }
+                )
+              }
+              composable("user/register") {
+                RegisterUserScreen(
+                  accessToken = accessToken,
+                  onBack = { navController.popBackStack() }
+                )
+              }
+              composable("user/list") {
+                UserListScreen(
+                  accessToken = accessToken,
+                  onBack = { navController.popBackStack() }
+                )
+              }
+              composable("door") {
+                DoorScreen(
+                  accessToken = accessToken,
+                  identifier = identifier,
+                  role = role,
+                  onHistoryClick = { navController.navigate("door/history") },
+                  onBack = { navController.popBackStack() }
+                )
+              }
+              composable("door/history") {
+                DoorHistoryScreen(
+                  accessToken = accessToken,
+                  onBack = { navController.popBackStack() }
+                )
+              }
             }
           }
         } else {

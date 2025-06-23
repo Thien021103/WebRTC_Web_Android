@@ -27,6 +27,7 @@ import {
 } from '@mui/material';
 import { Refresh as RefreshIcon, Lock as LockIcon, LockOpen as LockOpenIcon } from '@mui/icons-material';
 import { useTheme } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 function DoorHistory({ email, onRefetch }) {
@@ -49,6 +50,7 @@ function DoorHistory({ email, onRefetch }) {
   const [passwordError, setPasswordError] = useState('');
   const [toggleLoading, setToggleLoading] = useState(false);
   const theme = useTheme();
+  const navigate = useNavigate(); // Initialize navigate
 
   const fetchDoorStatus = async () => {
     try {
@@ -58,7 +60,14 @@ function DoorHistory({ email, onRefetch }) {
       });
       setDoor(response.data.door || null);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to fetch door status');
+      if (err.response?.data?.status === "false" && err.response?.data?.message === 'Invalid token') {
+        // Optional: Clear invalid token
+        localStorage.removeItem('token');
+        localStorage.removeItem('email');
+        navigate('/login'); // Navigate to /login
+      } else {
+        setError(err.response?.data?.message || 'Failed to fetch door status');
+      }
     }
   };
 
@@ -84,8 +93,15 @@ function DoorHistory({ email, onRefetch }) {
         throw new Error(response.data.message || 'Failed to fetch door history');
       }
     } catch (err) {
-      setError(err.message);
-      setSnackbar({ open: true, message: err.message, severity: 'error' });
+      if (err.response?.data?.status === "false" && err.response?.data?.message === 'Invalid token') {
+        // Optional: Clear invalid token
+        localStorage.removeItem('token');
+        localStorage.removeItem('email');
+        navigate('/login'); // Navigate to /login
+      } else {
+        setError(err.response?.data?.message || 'Failed to fetch door history');
+        setSnackbar({ open: true, message: err.message, severity: 'error' });
+      }
     } finally {
       setLoading(false);
     }
@@ -175,11 +191,18 @@ function DoorHistory({ email, onRefetch }) {
       onRefetch();
       handleCloseToggleDialog();
     } catch (err) {
-      setSnackbar({
-        open: true,
-        message: err.response?.data?.message || 'Failed to toggle door state',
-        severity: 'error',
-      });
+      if (err.response?.data?.status === "false" && err.response?.data?.message === 'Invalid token') {
+        // Optional: Clear invalid token
+        localStorage.removeItem('token');
+        localStorage.removeItem('email');
+        navigate('/login'); // Navigate to /login
+      } else {
+        setSnackbar({
+          open: true,
+          message: err.response?.data?.message || 'Failed to toggle door state',
+          severity: 'error',
+        });
+      }
     } finally {
       setToggleLoading(false);
     }

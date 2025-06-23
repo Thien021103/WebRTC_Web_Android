@@ -71,7 +71,7 @@ function Videos({ onRefetch }) {
         localStorage.removeItem('token');
         navigate('/login');
       } else {
-        const errorMessage = err.message || 'Failed to fetch videos';
+        const errorMessage = err.response?.data?.message || 'Failed to fetch videos';
         setError(errorMessage);
         setSnackbar({ open: true, message: errorMessage, severity: 'error' });
       }
@@ -99,7 +99,7 @@ function Videos({ onRefetch }) {
         localStorage.removeItem('token');
         navigate('/login');
       } else {
-        const errorMessage = err.message || 'Failed to delete video';
+        const errorMessage = err.response?.data?.message || 'Failed to delete video';
         setSnackbar({ open: true, message: errorMessage, severity: 'error' });
       }
     } finally {

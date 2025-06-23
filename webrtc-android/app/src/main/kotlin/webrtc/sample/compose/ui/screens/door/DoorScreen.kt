@@ -46,12 +46,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Surface
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Loop
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -257,29 +261,54 @@ fun DoorScreen(
             Column(
               modifier = Modifier.fillMaxWidth().padding(16.dp)
             ) {
-              Text(
-                text = "Lock Status: ${door!!.lock}",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
-              )
-              Text(
-                text = "User: ${door!!.user ?: "N/A"}",
-                fontSize = 18.sp
-              )
-              Text(
-                text = "Time:\n${
-                  if (door!!.time == "N/A") {"N/A"}
-                  else {
+              Surface(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                color = if (door!!.lock == "Locked") MaterialTheme.colors.primaryVariant else MaterialTheme.colors.error,
+                shape = RoundedCornerShape(8.dp)
+              ) {
+                Text(
+                  text = "Lock Status: ${door!!.lock}",
+                  fontSize = 24.sp,
+                  fontWeight = FontWeight.Bold,
+                  color = Color.White,
+                  modifier = Modifier.padding(8.dp)
+                )
+              }
+              Row(
+                modifier = Modifier.padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+              ) {
+                Icon(
+                  imageVector = Icons.Filled.Person,
+                  contentDescription = "User",
+                  modifier = Modifier.size(24.dp).padding(end = 4.dp)
+                )
+                Text(
+                  text = door!!.user ?: "N/A",
+                  fontSize = 18.sp
+                )
+              }
+              Row(
+                modifier = Modifier.padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+              ) {
+                Icon(
+                  imageVector = Icons.Filled.AccessTime,
+                  contentDescription = "Time",
+                  modifier = Modifier.size(24.dp).padding(end = 4.dp)
+                )
+                Text(
+                  text = if (door!!.time == "N/A") "N/A" else {
                     SimpleDateFormat("\tdd MMM, yyyy\n\tHH:mm", Locale.getDefault()).format(
                       SimpleDateFormat(
                         "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
                         Locale.getDefault()
                       ).parse(door!!.time) ?: door!!.time
                     )
-                  }
-                }",
-                fontSize = 18.sp
-              )
+                  },
+                  fontSize = 18.sp
+                )
+              }
             }
           }
           Spacer(modifier = Modifier.height(16.dp))

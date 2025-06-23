@@ -35,13 +35,22 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
 import android.util.Log
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
+import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Group
+import androidx.compose.ui.graphics.Color
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.text.SimpleDateFormat
@@ -227,17 +236,83 @@ fun UserListScreen(
           LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f)) {
             items(users) { user ->
               Card(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                modifier = Modifier
+                  .fillMaxWidth()
+                  .padding(vertical = 4.dp)
+                  .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(8.dp)),
                 elevation = 4.dp,
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(8.dp),
+                backgroundColor = MaterialTheme.colors.surface
               ) {
-                Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                  Text(text = "User name: ${user.name}", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                  Text(text = "User email: ${user.email}", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                  Text(text = "Group ID: ${user.groupId}", fontSize = 14.sp)
-                  Text(
-                    text = "Created: ${
-                      SimpleDateFormat(
+                Column(
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                  verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                  Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colors.secondary,
+                    shape = RoundedCornerShape(8.dp)
+                  ) {
+                    Row(
+                      modifier = Modifier.padding(8.dp),
+                      verticalAlignment = Alignment.CenterVertically
+                    ) {
+                      Icon(
+                        imageVector = Icons.Filled.Person,
+                        contentDescription = "User name",
+                        modifier = Modifier.size(22.dp).padding(end = 4.dp),
+                        tint = Color.White
+                      )
+                      Text(
+                        text = user.name,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                      )
+                    }
+                  }
+                  Row(
+                    modifier = Modifier.padding(vertical = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                  ) {
+                    Icon(
+                      imageVector = Icons.Filled.Email,
+                      contentDescription = "User email",
+                      modifier = Modifier.size(22.dp).padding(end = 4.dp)
+                    )
+                    Text(
+                      text = user.email,
+                      fontSize = 18.sp,
+                      fontWeight = FontWeight.Bold
+                    )
+                  }
+                  Row(
+                    modifier = Modifier.padding(vertical = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                  ) {
+                    Icon(
+                      imageVector = Icons.Filled.Group,
+                      contentDescription = "Group ID",
+                      modifier = Modifier.size(22.dp).padding(end = 4.dp)
+                    )
+                    Text(
+                      text = user.groupId,
+                      fontSize = 14.sp
+                    )
+                  }
+                  Row(
+                    modifier = Modifier.padding(vertical = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                  ) {
+                    Icon(
+                      imageVector = Icons.Filled.CalendarToday,
+                      contentDescription = "Created",
+                      modifier = Modifier.size(22.dp).padding(end = 4.dp)
+                    )
+                    Text(
+                      text = SimpleDateFormat(
                         "MMM dd, yyyy HH:mm",
                         Locale.getDefault()
                       ).format(
@@ -245,17 +320,18 @@ fun UserListScreen(
                           "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
                           Locale.getDefault()
                         ).parse(user.createdAt) ?: user.createdAt
-                      )
-                    }",
-                    fontSize = 14.sp
-                  )
+                      ),
+                      fontSize = 14.sp
+                    )
+                  }
                   TextButton(
                     onClick = {
                       deleteEmail = user.email
                       showDeleteDialog = true
-                    }
+                    },
+                    modifier = Modifier.align(Alignment.End)
                   ) {
-                    Text(text = "Delete", color = MaterialTheme.colors.error, fontSize = 14.sp)
+                    Text(text = "Delete", color = MaterialTheme.colors.error, fontSize = 18.sp)
                   }
                 }
               }
