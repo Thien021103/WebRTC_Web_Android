@@ -11,13 +11,13 @@ async function light(decoded) {
 
   const dbGroup = await Group.findOne({ id: groupId });
   if (!dbGroup) {
-    throw new Error('Group not found');
+    throw new Error('Camera not connected');
   }
 
   // Notify camera
   const group = groups.get(groupId);
   if (!group) {
-    throw new Error('Group not found');
+    throw new Error('Camera not connected');
   }
   const camera = group.clients.camera;
   if (!camera) {

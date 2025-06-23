@@ -172,109 +172,129 @@ fun DoorHistoryScreen(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
       ) {
-        // State dropdown
-        Box {
-          OutlinedTextField(
-            value = state.ifEmpty { "Select State" },
-            onValueChange = {},
-            label = { Text("State") },
-            modifier = Modifier.fillMaxWidth(),
-            readOnly = true,
-            trailingIcon = {
-              Icon(
-                Icons.Filled.ArrowDropDown,
-                contentDescription = "Dropdown",
-                modifier = Modifier.clickable { showStateDropdown = true }
-              )
-            }
-          )
-          DropdownMenu(
-            expanded = showStateDropdown,
-            onDismissRequest = { showStateDropdown = false },
-            modifier = Modifier.fillMaxWidth()
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+          // State dropdown and Fetch button column
+          Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
           ) {
-            DropdownMenuItem(onClick = {
-              state = ""
-              showStateDropdown = false
-            }) {
-              Text("All")
+            Box(
+              modifier = Modifier
+                .fillMaxWidth()
+                .clickable { showStateDropdown = true }
+            ) {
+              OutlinedTextField(
+                value = state.ifEmpty { "Select State" },
+                onValueChange = {},
+                label = { Text("State", fontSize = 14.sp) },
+                modifier = Modifier.fillMaxWidth(),
+                readOnly = true,
+                textStyle = MaterialTheme.typography.body2.copy(fontSize = 14.sp),
+                trailingIcon = {
+                  Icon(
+                    Icons.Filled.ArrowDropDown,
+                    contentDescription = "Dropdown",
+                    modifier = Modifier.clickable { showStateDropdown = true }
+                  )
+                }
+              )
+              DropdownMenu(
+                expanded = showStateDropdown,
+                onDismissRequest = { showStateDropdown = false },
+                modifier = Modifier.fillMaxWidth()
+              ) {
+                DropdownMenuItem(onClick = {
+                  state = ""
+                  showStateDropdown = false
+                }) {
+                  Text("All", fontSize = 14.sp)
+                }
+                DropdownMenuItem(onClick = {
+                  state = "Locked"
+                  showStateDropdown = false
+                }) {
+                  Text("Locked", fontSize = 14.sp)
+                }
+                DropdownMenuItem(onClick = {
+                  state = "Unlocked"
+                  showStateDropdown = false
+                }) {
+                  Text("Unlocked", fontSize = 14.sp)
+                }
+              }
             }
-            DropdownMenuItem(onClick = {
-              state = "Locked"
-              showStateDropdown = false
-            }) {
-              Text("Locked")
-            }
-            DropdownMenuItem(onClick = {
-              state = "Unlocked"
-              showStateDropdown = false
-            }) {
-              Text("Unlocked")
+            Spacer(modifier = Modifier.height(2.dp))
+            Button(
+              onClick = { performGetDoorHistory() },
+              modifier = Modifier.fillMaxWidth().height(56.dp),
+              shape = RoundedCornerShape(6.dp),
+              colors = ButtonDefaults.buttonColors(
+                backgroundColor = MaterialTheme.colors.secondary,
+                contentColor = MaterialTheme.colors.onSecondary
+              ),
+              enabled = !isLoading
+            ) {
+              if (isLoading) {
+                CircularProgressIndicator(
+                  modifier = Modifier.size(24.dp),
+                  color = MaterialTheme.colors.onSecondary,
+                  strokeWidth = 2.dp
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Fetching...", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+              } else {
+                Text("Fetch History", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+              }
             }
           }
-        }
-        Spacer(modifier = Modifier.height(8.dp))
 
-        // Date pickers
-        Box {
-          OutlinedTextField(
-            value = startDate,
-            onValueChange = {},
-            label = { Text("Start Date") },
-            modifier = Modifier.fillMaxWidth(),
-            readOnly = true
-          )
-          Box(
-            modifier = Modifier
-              .matchParentSize()
-              .clickable {
-                Log.d("DoorHistory", "Start date field clicked")
-                startDatePicker.show()
-              }
-          )
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Box {
-          OutlinedTextField(
-            value = endDate,
-            onValueChange = {},
-            label = { Text("End Date") },
-            modifier = Modifier.fillMaxWidth(),
-            readOnly = true
-          )
-          Box(
-            modifier = Modifier
-              .matchParentSize()
-              .clickable {
-                Log.d("DoorHistory", "End date field clicked")
-                endDatePicker.show()
-              }
-          )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
+          // Date pickers column
+          Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+          ) {
+            // Start Date picker
+            Box {
+              OutlinedTextField(
+                value = startDate,
+                onValueChange = {},
+                label = { Text("Start Date", fontSize = 14.sp) },
+                modifier = Modifier.fillMaxWidth(),
+                readOnly = true,
+                textStyle = MaterialTheme.typography.body2.copy(fontSize = 14.sp)
+              )
+              Box(
+                modifier = Modifier
+                  .matchParentSize()
+                  .clickable {
+                    Log.d("DoorHistory", "Start date field clicked")
+                    startDatePicker.show()
+                  }
+              )
+            }
 
-        // Fetch button
-        Button(
-          onClick = { performGetDoorHistory() },
-          modifier = Modifier.fillMaxWidth().height(56.dp),
-          shape = RoundedCornerShape(12.dp),
-          elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
-          colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.colors.secondary,
-            contentColor = MaterialTheme.colors.onSecondary
-          ),
-          enabled = !isLoading
-        ) {
-          if (isLoading) {
-            CircularProgressIndicator(
-              modifier = Modifier.size(24.dp),
-              color = MaterialTheme.colors.onSecondary,
-              strokeWidth = 2.dp
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Fetching...", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-          } else {
-            Text("Fetch Door History", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            // End Date picker
+            Box {
+              OutlinedTextField(
+                value = endDate,
+                onValueChange = {},
+                label = { Text("End Date", fontSize = 14.sp) },
+                modifier = Modifier.fillMaxWidth(),
+                readOnly = true,
+                textStyle = MaterialTheme.typography.body2.copy(fontSize = 14.sp)
+              )
+              Box(
+                modifier = Modifier
+                  .matchParentSize()
+                  .clickable {
+                    Log.d("DoorHistory", "End date field clicked")
+                    endDatePicker.show()
+                  }
+              )
+            }
           }
         }
         Spacer(modifier = Modifier.height(16.dp))
