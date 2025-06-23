@@ -134,7 +134,7 @@ function Notifications({ onRefetch }) {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 1000 }}>
       <Fade in timeout={700}>
         <Card
           sx={{
@@ -145,25 +145,9 @@ function Notifications({ onRefetch }) {
         >
           <CardContent>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main' }}>
+              <Typography variant="h5" sx={{ fontWeight: 600, color: 'primary.main' }}>
                 Notifications History
               </Typography>
-              <Button
-                variant="outlined"
-                color="secondary"
-                startIcon={<RefreshIcon />}
-                onClick={handleRefresh}
-                sx={{
-                  px: 3,
-                  py: 1,
-                  borderRadius: 2,
-                  fontWeight: 500,
-                  transition: 'all 0.2s',
-                  '&:hover': { borderColor: 'secondary.dark', color: 'secondary.dark' },
-                }}
-              >
-                Refresh
-              </Button>
             </Box>
 
             {/* Filters */}
@@ -176,7 +160,7 @@ function Notifications({ onRefetch }) {
                 onChange={handleFilterChange}
                 InputLabelProps={{ shrink: true }}
                 variant="outlined"
-                sx={{ maxWidth: 200 }}
+                sx={{ minWidth: 200 }}
               />
               <TextField
                 name="endDate"
@@ -186,7 +170,7 @@ function Notifications({ onRefetch }) {
                 onChange={handleFilterChange}
                 InputLabelProps={{ shrink: true }}
                 variant="outlined"
-                sx={{ maxWidth: 200 }}
+                sx={{ minWidth: 200 }}
               />
               <Button
                 variant="contained"
@@ -199,9 +183,27 @@ function Notifications({ onRefetch }) {
                   fontWeight: 500,
                   transition: 'background-color 0.2s',
                   '&:hover': { bgcolor: 'primary.dark' },
+                  minWidth: 150
                 }}
               >
                 Filter
+              </Button>
+              <Button
+                variant="outlined"
+                color="secondary"
+                startIcon={<RefreshIcon />}
+                onClick={handleRefresh}
+                sx={{
+                  px: 3,
+                  py: 1,
+                  borderRadius: 2,
+                  fontWeight: 500,
+                  transition: 'all 0.2s',
+                  '&:hover': { borderColor: 'secondary.dark', color: 'secondary.dark' },
+                  minWidth: 150
+                }}
+              >
+                Refresh
               </Button>
             </Box>
 
@@ -224,23 +226,23 @@ function Notifications({ onRefetch }) {
                 }}
               >
                 <NotificationsIcon sx={{ fontSize: 48, color: 'text.secondary' }} />
-                <Typography variant="h6" sx={{ color: 'text.secondary', textAlign: 'center' }}>
+                <Typography variant="h5" sx={{ color: 'text.secondary', textAlign: 'center' }}>
                   No notifications found
                 </Typography>
               </Card>
             ) : (
               <>
                 <TableContainer>
-                  <Table sx={{ minWidth: 500 }} aria-label="notifications table">
+                  <Table sx={{ minWidth: 500, ml: 2 }} aria-label="notifications table">
                     <TableHead>
                       <TableRow>
                         <TableCell>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          <Typography variant="body1" sx={{ fontWeight: 600 }}>
                             Date
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          <Typography variant="body1" sx={{ fontWeight: 600 }}>
                             Time
                           </Typography>
                         </TableCell>

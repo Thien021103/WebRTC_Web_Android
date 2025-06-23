@@ -198,12 +198,12 @@ function UserList({ onRefetch }) {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 1000 }}>
       <Fade in timeout={600}>
         <Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main' }}>
-              Group Users
+            <Typography variant="h5" sx={{ fontWeight: 600, color: 'primary.main' }}>
+              Users List
             </Typography>
             <Button
               variant="contained"
@@ -247,7 +247,7 @@ function UserList({ onRefetch }) {
               }}
             >
               <PeopleOutlineIcon sx={{ fontSize: 48, color: 'text.secondary' }} />
-              <Typography variant="h6" sx={{ color: 'text.secondary', textAlign: 'center' }}>
+              <Typography variant="h5" sx={{ color: 'text.secondary', textAlign: 'center' }}>
                 No users found in this group
               </Typography>
             </Card>
@@ -265,27 +265,27 @@ function UserList({ onRefetch }) {
                     <TableHead>
                       <TableRow>
                         <TableCell>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          <Typography variant="body1" sx={{ fontWeight: 600 }}>
                             Name
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          <Typography variant="body1" sx={{ fontWeight: 600 }}>
                             Email
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          <Typography variant="body1" sx={{ fontWeight: 600 }}>
                             Group ID
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          <Typography variant="body1" sx={{ fontWeight: 600 }}>
                             Created At
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          <Typography variant="body1" sx={{ fontWeight: 600 }}>
                             Actions
                           </Typography>
                         </TableCell>

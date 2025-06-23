@@ -194,7 +194,7 @@ function Videos({ onRefetch }) {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 1000, ml: 2, mr: 2, mt: 2 }}>
       <Fade in timeout={700}>
         <Card
           sx={{
@@ -205,7 +205,7 @@ function Videos({ onRefetch }) {
         >
           <CardContent>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main' }}>
+              <Typography variant="h5" sx={{ fontWeight: 600, color: 'primary.main' }}>
                 Videos
               </Typography>
               <Button
@@ -245,7 +245,7 @@ function Videos({ onRefetch }) {
                 onChange={handleFilterChange}
                 InputLabelProps={{ shrink: true }}
                 variant="outlined"
-                sx={{ maxWidth: 200 }}
+                sx={{ minWidth: 200 }}
               />
               <TextField
                 name="endDate"
@@ -255,7 +255,7 @@ function Videos({ onRefetch }) {
                 onChange={handleFilterChange}
                 InputLabelProps={{ shrink: true }}
                 variant="outlined"
-                sx={{ maxWidth: 200 }}
+                sx={{ minWidth: 200 }}
               />
               <Button
                 variant="contained"
@@ -268,6 +268,7 @@ function Videos({ onRefetch }) {
                   fontWeight: 500,
                   transition: 'background-color 0.2s',
                   '&:hover': { bgcolor: 'primary.dark' },
+                  minWidth: 150
                 }}
               >
                 Filter
@@ -293,7 +294,7 @@ function Videos({ onRefetch }) {
                 }}
               >
                 <VideoLibraryIcon sx={{ fontSize: 48, color: 'text.secondary' }} />
-                <Typography variant="h6" sx={{ color: 'text.secondary', textAlign: 'center' }}>
+                <Typography variant="h5" sx={{ color: 'text.secondary', textAlign: 'center' }}>
                   No videos found
                 </Typography>
               </Card>

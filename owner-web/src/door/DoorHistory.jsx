@@ -41,16 +41,16 @@ function DoorHistory({ email, onRefetch }) {
     endDate: '',
   });
   const [pagination, setPagination] = useState({
-    page: 0, // 0-based for MUI
+    page: 0,
     rowsPerPage: 10,
   });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-  const [toggleDialog, setToggleDialog] = useState({ open: false });
+  const [toggleDialog, setToggleDialog] = useState({ open: false, action: '' });
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [toggleLoading, setToggleLoading] = useState(false);
   const theme = useTheme();
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
 
   const fetchDoorStatus = async () => {
     try {
@@ -61,10 +61,9 @@ function DoorHistory({ email, onRefetch }) {
       setDoor(response.data.door || null);
     } catch (err) {
       if (err.response?.data?.status === "false" && err.response?.data?.message === 'Invalid token') {
-        // Optional: Clear invalid token
         localStorage.removeItem('token');
         localStorage.removeItem('email');
-        navigate('/login'); // Navigate to /login
+        navigate('/login');
       } else {
         setError(err.response?.data?.message || 'Failed to fetch door status');
       }
@@ -80,7 +79,7 @@ function DoorHistory({ email, onRefetch }) {
         startDate: filters.startDate || undefined,
         endDate: filters.endDate || undefined,
         limit: pagination.rowsPerPage,
-        page: pagination.page + 1, // Convert to 1-based for API
+        page: pagination.page + 1,
       };
       const response = await axios.get(`https://thientranduc.id.vn:444/api/door-history`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -94,10 +93,9 @@ function DoorHistory({ email, onRefetch }) {
       }
     } catch (err) {
       if (err.response?.data?.status === "false" && err.response?.data?.message === 'Invalid token') {
-        // Optional: Clear invalid token
         localStorage.removeItem('token');
         localStorage.removeItem('email');
-        navigate('/login'); // Navigate to /login
+        navigate('/login');
       } else {
         setError(err.response?.data?.message || 'Failed to fetch door history');
         setSnackbar({ open: true, message: err.message, severity: 'error' });
@@ -142,14 +140,14 @@ function DoorHistory({ email, onRefetch }) {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
-  const handleOpenToggleDialog = () => {
-    setToggleDialog({ open: true });
+  const handleOpenToggleDialog = (action) => {
+    setToggleDialog({ open: true, action });
     setPassword('');
     setPasswordError('');
   };
 
   const handleCloseToggleDialog = () => {
-    setToggleDialog({ open: false });
+    setToggleDialog({ open: false, action: '' });
     setPassword('');
     setPasswordError('');
   };
@@ -168,14 +166,9 @@ function DoorHistory({ email, onRefetch }) {
     setToggleLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const newState = door.lock === 'Locked' ? 'Unlocked' : 'Locked';
-      let url = "";
-      if (newState === 'Locked') {
-        url = "https://thientranduc.id.vn:444/api/lock";
-      } 
-      else {
-        url = "https://thientranduc.id.vn:444/api/unlock";
-      }
+      const url = toggleDialog.action === 'lock'
+        ? 'https://thientranduc.id.vn:444/api/lock'
+        : 'https://thientranduc.id.vn:444/api/unlock';
       const response = await axios.post(
         url,
         { password, email },
@@ -183,7 +176,7 @@ function DoorHistory({ email, onRefetch }) {
       );
       setSnackbar({
         open: true,
-        message: response.data.message || `Door ${newState.toLowerCase()} successfully`,
+        message: response.data.message || `Door ${toggleDialog.action === 'lock' ? 'locked' : 'unlocked'} successfully`,
         severity: 'success',
       });
       await fetchDoorStatus();
@@ -192,10 +185,9 @@ function DoorHistory({ email, onRefetch }) {
       handleCloseToggleDialog();
     } catch (err) {
       if (err.response?.data?.status === "false" && err.response?.data?.message === 'Invalid token') {
-        // Optional: Clear invalid token
         localStorage.removeItem('token');
         localStorage.removeItem('email');
-        navigate('/login'); // Navigate to /login
+        navigate('/login');
       } else {
         setSnackbar({
           open: true,
@@ -238,7 +230,7 @@ function DoorHistory({ email, onRefetch }) {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 1000 }}>
       {/* Current Door Status */}
       <Fade in timeout={600}>
         <Card
@@ -249,7 +241,7 @@ function DoorHistory({ email, onRefetch }) {
           }}
         >
           <CardContent>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'primary.main' }}>
+            <Typography variant="h5" sx={{ fontWeight: 600, mb: 2, color: 'primary.main' }}>
               Current Door Status
             </Typography>
             {door ? (
@@ -269,24 +261,42 @@ function DoorHistory({ email, onRefetch }) {
                 <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                   <strong>Time:</strong> {formatDate(door.time)}
                 </Typography>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  startIcon={door.lock === 'Locked' ? <LockOpenIcon /> : <LockIcon />}
-                  onClick={handleOpenToggleDialog}
-                  disabled={toggleLoading || !door}
-                  sx={{
-                    mt: 2,
-                    px: 3,
-                    py: 1,
-                    borderRadius: 2,
-                    fontWeight: 500,
-                    transition: 'background-color 0.2s',
-                    '&:hover': { bgcolor: 'primary.dark' },
-                  }}
-                >
-                  {door.lock === 'Locked' ? 'Unlock Door' : 'Lock Door'}
-                </Button>
+                <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<LockOpenIcon />}
+                    onClick={() => handleOpenToggleDialog('unlock')}
+                    disabled={toggleLoading || !door}
+                    sx={{
+                      px: 3,
+                      py: 1,
+                      borderRadius: 2,
+                      fontWeight: 500,
+                      transition: 'background-color 0.2s',
+                      '&:hover': { bgcolor: 'primary.dark' },
+                    }}
+                  >
+                    Unlock Door
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    startIcon={<LockIcon />}
+                    onClick={() => handleOpenToggleDialog('lock')}
+                    disabled={toggleLoading || !door}
+                    sx={{
+                      px: 3,
+                      py: 1,
+                      borderRadius: 2,
+                      fontWeight: 500,
+                      transition: 'background-color 0.2s',
+                      '&:hover': { bgcolor: 'error.dark' },
+                    }}
+                  >
+                    Lock Door
+                  </Button>
+                </Box>
               </Box>
             ) : (
               <Typography variant="body1" color="text.secondary">
@@ -308,25 +318,9 @@ function DoorHistory({ email, onRefetch }) {
         >
           <CardContent>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main' }}>
+              <Typography variant="h5" sx={{ fontWeight: 600, color: 'primary.main' }}>
                 Door History
               </Typography>
-              <Button
-                variant="outlined"
-                color="secondary"
-                startIcon={<RefreshIcon />}
-                onClick={handleRefresh}
-                sx={{
-                  px: 3,
-                  py: 1,
-                  borderRadius: 2,
-                  fontWeight: 500,
-                  transition: 'all 0.2s',
-                  '&:hover': { borderColor: 'secondary.dark', color: 'secondary.dark' },
-                }}
-              >
-                Refresh
-              </Button>
             </Box>
 
             {/* Filters */}
@@ -336,7 +330,7 @@ function DoorHistory({ email, onRefetch }) {
                 value={filters.state}
                 onChange={handleFilterChange}
                 displayEmpty
-                sx={{ minWidth: 120 }}
+                sx={{ minWidth: 200 }}
                 variant="outlined"
               >
                 <MenuItem value="">All States</MenuItem>
@@ -351,7 +345,7 @@ function DoorHistory({ email, onRefetch }) {
                 onChange={handleFilterChange}
                 InputLabelProps={{ shrink: true }}
                 variant="outlined"
-                sx={{ maxWidth: 200 }}
+                sx={{ minWidth: 200 }}
               />
               <TextField
                 name="endDate"
@@ -361,7 +355,7 @@ function DoorHistory({ email, onRefetch }) {
                 onChange={handleFilterChange}
                 InputLabelProps={{ shrink: true }}
                 variant="outlined"
-                sx={{ maxWidth: 200 }}
+                sx={{ minWidth: 200 }}
               />
               <Button
                 variant="contained"
@@ -374,9 +368,27 @@ function DoorHistory({ email, onRefetch }) {
                   fontWeight: 500,
                   transition: 'background-color 0.2s',
                   '&:hover': { bgcolor: 'primary.dark' },
+                  minWidth: 150
                 }}
               >
                 Filter
+              </Button>
+              <Button
+                variant="outlined"
+                color="secondary"
+                startIcon={<RefreshIcon />}
+                onClick={handleRefresh}
+                sx={{
+                  px: 3,
+                  py: 1,
+                  borderRadius: 2,
+                  fontWeight: 500,
+                  transition: 'all 0.2s',
+                  '&:hover': { borderColor: 'secondary.dark', color: 'secondary.dark' },
+                  minWidth: 150
+                }}
+              >
+                Refresh
               </Button>
             </Box>
 
@@ -396,17 +408,17 @@ function DoorHistory({ email, onRefetch }) {
                     <TableHead>
                       <TableRow>
                         <TableCell>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          <Typography variant="body1" sx={{ fontWeight: 600 }}>
                             State
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          <Typography variant="body1" sx={{ fontWeight: 600 }}>
                             User
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          <Typography variant="body1" sx={{ fontWeight: 600 }}>
                             Time
                           </Typography>
                         </TableCell>
@@ -460,7 +472,7 @@ function DoorHistory({ email, onRefetch }) {
         aria-labelledby="toggle-dialog-title"
       >
         <DialogTitle id="toggle-dialog-title">
-          {door?.lock === 'Locked' ? 'Unlock Door' : 'Lock Door'}
+          {toggleDialog.action === 'lock' ? 'Lock Door' : 'Unlock Door'}
         </DialogTitle>
         <DialogContent>
           <TextField

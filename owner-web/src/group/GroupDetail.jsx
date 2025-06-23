@@ -20,7 +20,7 @@ function GroupDetails({ onRefetch }) {
   const [actionError, setActionError] = useState(null);
 
   const theme = useTheme();
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
 
   const fetchGroup = async () => {
     setLoading(true);
@@ -33,10 +33,9 @@ function GroupDetails({ onRefetch }) {
       setError(null);
     } catch (err) {
       if (err.response?.data?.status === "false" && err.response?.data?.message === 'Invalid token') {
-        // Optional: Clear invalid token
         localStorage.removeItem('token');
         localStorage.removeItem('email');
-        navigate('/login'); // Navigate to /login
+        navigate('/login');
       } else {
         setError(err.response?.data?.message || 'Failed to fetch group');
       }
@@ -104,7 +103,7 @@ function GroupDetails({ onRefetch }) {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, width: '90%', minWidth: 500, ml: 2, mr: 2, mt: 2 }}>
       <Fade in timeout={600}>
         <Card
           sx={{
@@ -123,7 +122,7 @@ function GroupDetails({ onRefetch }) {
             <Typography variant="body1" sx={{ mb: 1 }}>
               <strong>Owner:</strong> {group.owner}
             </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Typography variant="body1" sx={{ fontWeight: 500 }}>
                 <strong>State:</strong>
               </Typography>
@@ -143,45 +142,59 @@ function GroupDetails({ onRefetch }) {
         <Card
           sx={{
             borderRadius: 2,
-            transition: 'transform 0.2s',
+            transition: 'transform 0.2s, box-shadow 0.2s',
             '&:hover': { transform: 'translateY(-4px)' },
           }}
         >
           <CardContent>
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'primary.main' }}>
-              Device Status
+              Camera Status
             </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                  <strong>Camera:</strong>
-                </Typography>
-                <Chip
-                  label={group.camera}
-                  sx={{
-                    ...getDeviceStatusStyles(group.camera),
-                    px: 1,
-                  }}
-                />
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                  <strong>Controller:</strong>
-                </Typography>
-                <Chip
-                  label={group.controller}
-                  sx={{
-                    ...getDeviceStatusStyles(group.controller),
-                    px: 1,
-                  }}
-                />
-              </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                <strong>Status:</strong>
+              </Typography>
+              <Chip
+                label={group.camera}
+                sx={{
+                  ...getDeviceStatusStyles(group.camera),
+                  px: 1,
+                }}
+              />
             </Box>
           </CardContent>
         </Card>
       </Fade>
 
       <Fade in timeout={800}>
+        <Card
+          sx={{
+            borderRadius: 2,
+            transition: 'transform 0.2s, box-shadow 0.2s',
+            '&:hover': { transform: 'translateY(-4px)' },
+          }}
+        >
+          <CardContent>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'primary.main' }}>
+              Controller Status
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                <strong>Status:</strong>
+              </Typography>
+              <Chip
+                label={group.controller}
+                sx={{
+                  ...getDeviceStatusStyles(group.controller),
+                  px: 1,
+                }}
+              />
+            </Box>
+          </CardContent>
+        </Card>
+      </Fade>
+
+      <Fade in timeout={900}>
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
           <Button
             variant="outlined"

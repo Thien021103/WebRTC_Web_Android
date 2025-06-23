@@ -22,12 +22,14 @@ import {
   Logout as LogoutIcon,
   Notifications as NotificationsIcon,
   VideoLibrary as VideoLibraryIcon,
+  Videocam as VideocamIcon,
 } from '@mui/icons-material';
 import GroupDetails from '../group/GroupDetail';
 import UserList from '../user-list/UserList';
 import DoorHistory from '../door/DoorHistory';
 import Notifications from '../notifications/Notifications';
 import Videos from '../videos/Videos';
+import Camera from '../camera/Camera';
 
 function Dashboard() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -86,6 +88,13 @@ function Dashboard() {
         <ListItemIcon><VideoLibraryIcon /></ListItemIcon>
         <ListItemText primary="Videos" />
       </ListItem>
+      <ListItem 
+        onClick={() => setView('camera')} 
+        selected={view === 'camera'}
+      >
+        <ListItemIcon><VideocamIcon /></ListItemIcon>
+        <ListItemText primary="Camera" />
+      </ListItem>
       <ListItem onClick={handleLogout}>
         <ListItemIcon><LogoutIcon /></ListItemIcon>
         <ListItemText primary="Logout" />
@@ -105,7 +114,7 @@ function Dashboard() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
+          <Typography variant="h5" noWrap sx={{ flexGrow: 1 }}>
             Owner Portal
           </Typography>
         </Toolbar>
@@ -153,13 +162,14 @@ function Dashboard() {
                 },
               }}
             >
-              {view === 'group' ? 'Doorbell System' : view === 'users' ? 'Group Users' : view === 'history' ? 'Door History' : view === 'notifications' ? 'Notifications' : 'Videos'}
+              {view === 'group' ? 'Doorbell System' : view === 'users' ? 'Group Users' : view === 'history' ? 'Door History' : view === 'notifications' ? 'Notifications' : view === 'videos' ? 'Videos' : 'Live Camera'}
             </Typography>
             {view === 'group' && <GroupDetails onRefetch={handleRefetch} />}
             {view === 'users' && <UserList onRefetch={handleRefetch} />}
             {view === 'history' && <DoorHistory email={localStorage.getItem('email')} onRefetch={handleRefetch} />}
             {view === 'notifications' && <Notifications onRefetch={handleRefetch} />}
             {view === 'videos' && <Videos onRefetch={handleRefetch} />}
+            {view === 'camera' && <Camera />}
           </Paper>
         </Fade>
       </Box>
