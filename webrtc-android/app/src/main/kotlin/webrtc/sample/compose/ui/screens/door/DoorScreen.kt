@@ -2,25 +2,40 @@ package webrtc.sample.compose.ui.screens.door
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarHostState
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.Loop
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,41 +44,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.json.JSONObject
-import android.util.Log
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.IconButton
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Surface
-import androidx.compose.material.TextButton
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.LockOpen
-import androidx.compose.material.icons.filled.Loop
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
-import webrtc.sample.compose.R
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
+import webrtc.sample.compose.R
 import java.text.SimpleDateFormat
 import java.util.Locale
+import android.util.Log
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material.icons.filled.Lock
 
 data class DoorStatus(
   val lock: String,
@@ -83,7 +84,7 @@ fun DoorScreen(
   var door by remember { mutableStateOf<DoorStatus?>(null) }
 
   var showDialog by remember { mutableStateOf(false) }
-
+  var dialogAction by remember { mutableStateOf("") } // "unlock" or "lock"
   var isLoading by remember { mutableStateOf(false) }
   var isUnlocking by remember { mutableStateOf(false) }
 
@@ -93,6 +94,8 @@ fun DoorScreen(
   var unlockMessage by remember { mutableStateOf("") }
 
   var errorMessage by remember { mutableStateOf("") }
+  var snackbarTrigger by remember { mutableStateOf(0) } // Add counter
+
   val client = OkHttpClient.Builder().build()
 
   fun performGetDoorStatus() {
@@ -129,30 +132,29 @@ fun DoorScreen(
           } else {
             CoroutineScope(Dispatchers.Main).launch {
               errorMessage = json.optString("message", "Failed to fetch door status")
+              snackbarTrigger++ // Increment trigger
               isLoading = false
             }
           }
         } else {
           CoroutineScope(Dispatchers.Main).launch {
             errorMessage = json.optString("message", "Server error")
+            snackbarTrigger++ // Increment trigger
             isLoading = false
           }
         }
       } catch (e: Exception) {
         CoroutineScope(Dispatchers.Main).launch {
           errorMessage = "Network error: ${e.message}"
+          snackbarTrigger++ // Increment trigger
           isLoading = false
         }
       }
     }
   }
 
-  fun performUnlock() {
-    val url = if (door!!.lock == "Locked") {
-      "https://thientranduc.id.vn:444/api/unlock"
-    } else {
-      "https://thientranduc.id.vn:444/api/lock"
-    }
+  fun performUnlock(action: String) {
+    val url = "https://thientranduc.id.vn:444/api/$action"
     isUnlocking = true
     unlockMessage = "Working ..."
 
@@ -179,12 +181,14 @@ fun DoorScreen(
               isUnlocking = false
               showDialog = false
               errorMessage = "Door $unlockMessage"
+              snackbarTrigger++ // Increment trigger
             }
           } else {
             CoroutineScope(Dispatchers.Main).launch {
               isUnlocking = false
               showDialog = false
               errorMessage = unlockMessage
+              snackbarTrigger++ // Increment trigger
             }
           }
         } else {
@@ -193,6 +197,7 @@ fun DoorScreen(
             showDialog = false
             unlockMessage = "Server error: ${json.optString("message", "Unknown error")}"
             errorMessage = unlockMessage
+            snackbarTrigger++ // Increment trigger
           }
         }
       } catch (e: Exception) {
@@ -201,6 +206,7 @@ fun DoorScreen(
           showDialog = false
           unlockMessage = "Network error: ${e.message}"
           errorMessage = unlockMessage
+          snackbarTrigger++ // Increment trigger
         }
       }
     }
@@ -312,30 +318,58 @@ fun DoorScreen(
             }
           }
           Spacer(modifier = Modifier.height(16.dp))
-          Button(
-            onClick = {  showDialog = true },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(12.dp),
-            elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
-            colors = ButtonDefaults.buttonColors(
-              backgroundColor = MaterialTheme.colors.secondary,
-              contentColor = MaterialTheme.colors.onSecondary
-            )
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
           ) {
-            Icon(
-              imageVector = Icons.Filled.LockOpen,
-              contentDescription = "Door modify",
-              modifier = Modifier.padding(end = 8.dp)
-            )
-            Text(
-              text = if (door!!.lock == "Locked") {
-                "Unlock door"
-              } else {
-                "Lock door?"
+            Button(
+              onClick = {
+                dialogAction = "unlock"
+                showDialog = true
               },
-              fontSize = 18.sp,
-              fontWeight = FontWeight.Bold
-            )
+              modifier = Modifier.weight(1f).height(56.dp).padding(end = 8.dp),
+              shape = RoundedCornerShape(12.dp),
+              elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
+              colors = ButtonDefaults.buttonColors(
+                backgroundColor = MaterialTheme.colors.secondary,
+                contentColor = MaterialTheme.colors.onSecondary
+              )
+            ) {
+              Icon(
+                imageVector = Icons.Filled.LockOpen,
+                contentDescription = "Unlock Door",
+                modifier = Modifier.padding(end = 8.dp)
+              )
+              Text(
+                text = "Unlock Door",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+              )
+            }
+            Button(
+              onClick = {
+                dialogAction = "lock"
+                showDialog = true
+              },
+              modifier = Modifier.weight(1f).height(56.dp).padding(start = 8.dp),
+              shape = RoundedCornerShape(12.dp),
+              elevation = ButtonDefaults.elevation(defaultElevation = 4.dp),
+              colors = ButtonDefaults.buttonColors(
+                backgroundColor = MaterialTheme.colors.secondary,
+                contentColor = MaterialTheme.colors.onSecondary
+              )
+            ) {
+              Icon(
+                imageVector = Icons.Filled.Lock,
+                contentDescription = "Lock Door",
+                modifier = Modifier.padding(end = 8.dp)
+              )
+              Text(
+                text = "Lock Door",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+              )
+            }
           }
           Spacer(modifier = Modifier.height(16.dp))
           Button(
@@ -385,8 +419,8 @@ fun DoorScreen(
     }
   )
 
-  if (errorMessage.isNotEmpty()) {
-    LaunchedEffect(errorMessage) {
+  LaunchedEffect(snackbarTrigger) {
+    if (errorMessage.isNotEmpty()) {
       snackbarHostState.showSnackbar(errorMessage)
     }
   }
@@ -398,8 +432,11 @@ fun DoorScreen(
         password = ""
       },
       title = {
-        if (door!!.lock == "Locked") { Text(text = "Unlock door?", fontSize = 20.sp, fontWeight = FontWeight.Bold) }
-        else { Text(text = "Lock door?", fontSize = 20.sp, fontWeight = FontWeight.Bold) }
+        Text(
+          text = if (dialogAction == "unlock") "Unlock Door?" else "Lock Door?",
+          fontSize = 20.sp,
+          fontWeight = FontWeight.Bold
+        )
       },
       text = {
         Column {
@@ -437,7 +474,7 @@ fun DoorScreen(
       confirmButton = {
         Button(
           onClick = {
-            performUnlock()
+            performUnlock(dialogAction)
             performGetDoorStatus()
           },
           shape = RoundedCornerShape(8.dp),
@@ -460,7 +497,7 @@ fun DoorScreen(
               )
               Spacer(modifier = Modifier.width(8.dp))
               Text(
-                text = "Unlocking...",
+                text = if (dialogAction == "unlock") "Unlocking..." else "Locking...",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold
               )
