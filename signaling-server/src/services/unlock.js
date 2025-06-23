@@ -34,7 +34,7 @@ async function unlock({ identifier, password, decoded }) {
 
   const dbGroup = await Group.findOne({ id: groupId });
   if (!dbGroup) {
-    throw new Error('Group not found');
+    throw new Error('Controller not connected');
   }
 
   // if (dbGroup.door?.lock === 'Unlocked') {
@@ -44,7 +44,7 @@ async function unlock({ identifier, password, decoded }) {
   // Notify controller
   const group = groups.get(groupId);
   if (!group) {
-    throw new Error('Group not found');
+    throw new Error('Controller not connected');
   }
   const controller = group.clients.controller;
   if (!controller) {
