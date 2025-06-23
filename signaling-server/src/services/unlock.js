@@ -37,9 +37,9 @@ async function unlock({ identifier, password, decoded }) {
     throw new Error('Group not found');
   }
 
-  if (dbGroup.door?.lock === 'Unlocked') {
-    throw new Error('Already unlocked');
-  }
+  // if (dbGroup.door?.lock === 'Unlocked') {
+  //   throw new Error('Already unlocked');
+  // }
 
   // Notify controller
   const group = groups.get(groupId);
