@@ -58,7 +58,7 @@ router.delete('/delete-videos', authMiddleware, handleDeleteVideo);
 router.get('/get-owners', adminAuth, handleGetOwners);
 router.delete('/delete-owner', adminAuth, handleDeleteOwner);
 
-router.get('/admin-get-group', adminAuth, handleAdminGetGroup);
+router.post('/admin-get-group', adminAuth, handleAdminGetGroup);
 router.get('/get-groups', adminAuth, handleGetGroups);
 router.post('/add-group', adminAuth, handleAddGroup);
 router.post('/send-group-id', adminAuth, handleSendGroupId);
