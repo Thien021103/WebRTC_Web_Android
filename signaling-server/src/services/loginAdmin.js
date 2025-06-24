@@ -9,7 +9,9 @@ async function loginAdmin({ email, password }) {
     throw new Error('Missing required fields');
   }
 
-  const admin = await Admin.findOne({ email: email });
+  const undercaseEmail = email.toLowerCase().trim();
+
+  const admin = await Admin.findOne({ email: undercaseEmail });
   if (!admin) {
     throw new Error('Invalid info');
   }
@@ -19,13 +21,13 @@ async function loginAdmin({ email, password }) {
     throw new Error('Invalid password');
   }
 
-  const accessToken = jwt.sign({ email: email, isAdmin: true }, SECRET_KEY, { expiresIn: '7d' });
+  const accessToken = jwt.sign({ email: undercaseEmail, isAdmin: true }, SECRET_KEY, { expiresIn: '7d' });
   await Admin.updateOne(
-    { email }, 
+    { email: undercaseEmail }, 
     { $set: { accessToken: accessToken } }
   );
 
-  console.log(`Admin logged in: ${email}`);
+  console.log(`Admin logged in: ${undercaseEmail}`);
   return { accessToken };
 }
 

@@ -11,13 +11,15 @@ async function loginOwner({ email, password, groupName, fcmToken }) {
     throw new Error('Missing required fields');
   }
 
-  const dbGroup = await Group.findOne({ name: groupName, ownerEmail: email });
+  const undercaseEmail = email.toLowerCase().trim();
+
+  const dbGroup = await Group.findOne({ name: groupName, ownerEmail: undercaseEmail });
   if (!dbGroup) {
     throw new Error('Invalid groupName or email not authorized');
   }
   const cloudFolder = dbGroup.cloudFolder;
 
-  const owner = await Owner.findOne({ email: email, groupId: dbGroup.id });
+  const owner = await Owner.findOne({ email: undercaseEmail, groupId: dbGroup.id });
   if (!owner) {
     throw new Error('Invalid info');
   }
@@ -27,20 +29,20 @@ async function loginOwner({ email, password, groupName, fcmToken }) {
     throw new Error('Invalid password');
   }
 
-  const accessToken = jwt.sign({ email: email, groupId: dbGroup.id, isOwner: true }, SECRET_KEY, { expiresIn: '7d' });
+  const accessToken = jwt.sign({ email: undercaseEmail, groupId: dbGroup.id, isOwner: true }, SECRET_KEY, { expiresIn: '7d' });
   if (fcmToken) {
     await Owner.updateOne(
-      { email: email, groupId: dbGroup.id }, 
+      { email: undercaseEmail, groupId: dbGroup.id }, 
       { $set: { fcmToken: fcmToken, accessToken: accessToken } }
     );
   } else {
     await Owner.updateOne(
-      { email: email, groupId: dbGroup.id }, 
+      { email: undercaseEmail, groupId: dbGroup.id }, 
       { $set: { accessToken: accessToken } }
     );
   }
 
-  console.log(`Owner logged in: ${email}, group: ${groupName}`);
+  console.log(`Owner logged in: ${undercaseEmail}, group: ${groupName}`);
   return { accessToken, cloudFolder };
 }
 
@@ -49,7 +51,9 @@ async function loginUser({ email, password, fcmToken }) {
     throw new Error('Missing required fields');
   }
 
-  const user = await User.findOne({ email });
+  const undercaseEmail = email.toLowerCase().trim();
+
+  const user = await User.findOne({ email: undercaseEmail });
   if (!user) {
     throw new Error('Invalid info');
   }
@@ -65,21 +69,21 @@ async function loginUser({ email, password, fcmToken }) {
     throw new Error('Invalid password');
   }
 
-  const accessToken = jwt.sign({ email: email, groupId: user.groupId, isOwner: false }, SECRET_KEY, { expiresIn: '7d' });
+  const accessToken = jwt.sign({ email: undercaseEmail, groupId: user.groupId, isOwner: false }, SECRET_KEY, { expiresIn: '7d' });
   
   if (fcmToken) {
     await User.updateOne(
-      { email }, 
+      { email: undercaseEmail }, 
       { $set: { fcmToken: fcmToken, accessToken: accessToken } }
     );
   } else {
     await User.updateOne(
-      { email }, 
+      { email: undercaseEmail }, 
       { $set: { accessToken: accessToken } }
     );
   }
 
-  console.log(`User logged in: ${email}, group: ${user.groupId}`);
+  console.log(`User logged in: ${undercaseEmail}, group: ${user.groupId}`);
   return { accessToken, cloudFolder };
 }
 

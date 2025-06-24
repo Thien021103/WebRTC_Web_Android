@@ -7,6 +7,8 @@ async function deleteOwner({ email, groupId }) {
     throw new Error('Missing required fields');
   }
 
+  const undercaseEmail = email.toLowerCase().trim();
+
   // Validate groupId
   const group = await Group.findOne({ id: groupId });
   if (!group) {
@@ -17,13 +19,13 @@ async function deleteOwner({ email, groupId }) {
   await User.deleteMany({ groupId });
 
   // Find and delete owner
-  const owner = await Owner.findOneAndDelete({ email, groupId });
+  const owner = await Owner.findOneAndDelete({ undercaseEmail, groupId });
   if (!owner) {
     throw new Error('Owner not found or does not belong to the specified group');
   }
   await Group.updateOne({ id: groupId }, { $unset: { name: '' } });
 
-  return { email, groupId };
+  return { undercaseEmail, groupId };
 }
 
 module.exports = { deleteOwner };

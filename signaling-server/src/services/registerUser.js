@@ -13,6 +13,12 @@ async function registerUser({ userName, email, password, ownerToken }) {
     throw new Error('Missing required fields');
   }
 
+  const undercaseEmail = email.toLowerCase().trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(undercaseEmail)) {
+    throw new Error('Invalid email format');
+  }
+
   // Verify JWT
   let decoded;
   try {
@@ -30,7 +36,7 @@ async function registerUser({ userName, email, password, ownerToken }) {
     throw new Error('Unauthorized');
   }
   
-  const existingUser = await User.findOne({ email: email });
+  const existingUser = await User.findOne({ email: undercaseEmail });
   if (existingUser) {
     throw new Error('Email already registered');
   }
@@ -42,15 +48,15 @@ async function registerUser({ userName, email, password, ownerToken }) {
 
   const hashedPassword = await bcrypt.hash(password, 10);
   const user = new User({
-    email: email,
+    email: undercaseEmail,
     name: userName,
     password: hashedPassword,
     groupId: decoded.groupId,
   });
   await user.save();
 
-  await mailNewUser(email, userName, decoded.email);
-  console.log(`User registered: ${email}, group: ${decoded.groupId}`);
+  await mailNewUser(undercaseEmail, userName, decoded.email);
+  console.log(`User registered: ${undercaseEmail}, group: ${decoded.groupId}`);
 }
 
 module.exports = { registerUser };

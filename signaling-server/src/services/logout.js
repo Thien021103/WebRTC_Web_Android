@@ -6,23 +6,26 @@ async function logoutOwner({ email, groupName }) {
   if ( !email || !groupName ) {
     throw new Error('Missing required fields');
   }
-  const dbGroup = await Group.findOne({ name: groupName, ownerEmail: email });
+
+  const undercaseEmail = email.toLowerCase().trim();
+
+  const dbGroup = await Group.findOne({ name: groupName, ownerEmail: undercaseEmail });
   if (!dbGroup) {
     throw new Error('Invalid groupName or email not authorized');
   }
 
-  const owner = await Owner.findOne({ email: email, groupId: dbGroup.id });
+  const owner = await Owner.findOne({ email: undercaseEmail, groupId: dbGroup.id });
   if (!owner) {
-    throw new Error(`Invalid info ${email}, group: ${groupName}`);
+    throw new Error(`Invalid info ${undercaseEmail}, group: ${groupName}`);
   }
   await Owner.updateOne(
-    { email: email, groupId: dbGroup.id }, 
+    { email: undercaseEmail, groupId: dbGroup.id }, 
     { $unset: 
       { accessToken: '' } 
     }
   );
 
-  console.log(`Owner logged out: ${email}, group: ${groupName}`);
+  console.log(`Owner logged out: ${undercaseEmail}, group: ${groupName}`);
   return {};
 }
 
@@ -30,15 +33,17 @@ async function logoutUser({ email }) {
   if ( !email ) {
     throw new Error('Missing required fields');
   }
+
+  const undercaseEmail = email.toLowerCase().trim();
   
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email: undercaseEmail });
   if (!user) {
     throw new Error('Invalid info');
   }
 
-  await User.updateOne({ email }, { $unset: { accessToken: '' } });
+  await User.updateOne({ email: undercaseEmail }, { $unset: { accessToken: '' } });
 
-  console.log(`User logged out: ${email}`);
+  console.log(`User logged out: ${undercaseEmail}`);
   return {};
 }
 

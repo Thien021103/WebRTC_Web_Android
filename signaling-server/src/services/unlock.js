@@ -12,6 +12,8 @@ async function unlock({ identifier, password, decoded }) {
     throw new Error('Missing required fields');
   }
 
+  const undercaseEmail = identifier.toLowerCase().trim();
+
   console.log(decoded);
   const groupId = decoded.groupId;
   const isOwner = decoded.isOwner;
@@ -19,9 +21,9 @@ async function unlock({ identifier, password, decoded }) {
   // Validate user/owner
   let entity;
   if (isOwner) {
-    entity = await Owner.findOne({ email: identifier, groupId: groupId });
+    entity = await Owner.findOne({ email: undercaseEmail, groupId: groupId });
   } else {
-    entity = await User.findOne({ email: identifier, groupId: groupId });
+    entity = await User.findOne({ email: undercaseEmail, groupId: groupId });
   }
   if (!entity) {
     throw new Error('Invalid info');
@@ -53,7 +55,7 @@ async function unlock({ identifier, password, decoded }) {
     controller.send(`UNLOCK ${dbGroup.controllerId}`);
   }
 
-  const userIdentifier = isOwner ? `Owner ${identifier}` : `User ${identifier}`;
+  const userIdentifier = isOwner ? `Owner ${undercaseEmail}` : `User ${undercaseEmail}`;
 
   // Update group state
   await Group.updateOne(
@@ -77,8 +79,8 @@ async function unlock({ identifier, password, decoded }) {
     time: new Date(Date.now() + 7 * 60 * 60 * 1000)
   });
 
-  console.log(`User/Owner ${identifier} unlocked group: ${groupId}`);
-  mailDoorLock(dbGroup.ownerEmail, 'unlocked', identifier)
+  console.log(`User/Owner ${undercaseEmail} unlocked group: ${groupId}`);
+  mailDoorLock(dbGroup.ownerEmail, 'unlocked', undercaseEmail)
   return {};
 }
 

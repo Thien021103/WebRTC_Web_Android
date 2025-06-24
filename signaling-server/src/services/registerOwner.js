@@ -13,16 +13,18 @@ async function registerOwner({ email, password, groupId, groupName, otp, fcmToke
     throw new Error('Missing required fields');
   }
 
-  if (!verifyOTP(email, otp)) {
+  const undercaseEmail = email.toLowerCase().trim();
+
+  if (!verifyOTP(undercaseEmail, otp)) {
     throw new Error('Invalid or expired OTP');
   }
 
-  const dbGroup = await Group.findOne({ id: groupId, ownerEmail: email });
+  const dbGroup = await Group.findOne({ id: groupId, ownerEmail: undercaseEmail });
   if (!dbGroup) {
     throw new Error('Invalid groupId or email not authorized');
   }
 
-  const existingGroup = await Group.findOne({ name: groupName, ownerEmail: email });
+  const existingGroup = await Group.findOne({ name: groupName, ownerEmail: undercaseEmail });
   if (existingGroup) {
     throw new Error('Group name already registered');
   }
@@ -33,12 +35,12 @@ async function registerOwner({ email, password, groupId, groupName, otp, fcmToke
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const accessToken = jwt.sign({ email: email, groupId: groupId, isOwner: true }, SECRET_KEY, { expiresIn: '7d' });
+  const accessToken = jwt.sign({ email: undercaseEmail, groupId: groupId, isOwner: true }, SECRET_KEY, { expiresIn: '7d' });
   const cloudFolder = dbGroup.cloudFolder;
 
   if (fcmToken) {
     const dbOwner = new Owner({
-      email: email,
+      email: undercaseEmail,
       password: hashedPassword,
       groupId: groupId,
       accessToken: accessToken,
@@ -47,7 +49,7 @@ async function registerOwner({ email, password, groupId, groupName, otp, fcmToke
     await dbOwner.save();
   } else {
     const dbOwner = new Owner({
-      email: email,
+      email: undercaseEmail,
       password: hashedPassword,
       groupId: groupId,
       accessToken: accessToken,
@@ -60,7 +62,7 @@ async function registerOwner({ email, password, groupId, groupName, otp, fcmToke
     { $set: { name: groupName }}
   );
 
-  console.log(`Owner registered: ${email}, group: ${groupName}`);
+  console.log(`Owner registered: ${undercaseEmail}, group: ${groupName}`);
   return { accessToken, cloudFolder };
 }
 

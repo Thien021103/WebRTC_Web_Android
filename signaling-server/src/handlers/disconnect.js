@@ -20,7 +20,7 @@ async function handleDisconnect(client) {
   }
 
   const { camera, user, controller } = group.clients;
-  if (!camera || !user || !controller) {
+  if (!camera || !user /*|| !controller */) {
     group.state = 'Impossible';
     try {
       await Group.updateOne({ id: groupId }, { $set: { state: 'Impossible' } });

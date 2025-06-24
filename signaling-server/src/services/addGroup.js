@@ -7,6 +7,12 @@ async function addGroup({ ownerEmail }) {
     throw new Error('Missing required fields');
   }
 
+  const undercaseEmail = ownerEmail.toLowerCase().trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(undercaseEmail)) {
+    throw new Error('Invalid email format');
+  }
+
   // Generate unique IDs and secrets
   let groupId, cameraId, controllerId, cloudFolder;
   let isUnique = false;
@@ -29,7 +35,7 @@ async function addGroup({ ownerEmail }) {
   // Create group
   const dbGroup = new Group({
     id: groupId,
-    ownerEmail: ownerEmail,
+    ownerEmail: undercaseEmail,
     cameraId: cameraId,
     controllerId: controllerId,
     cloudFolder: cloudFolder,

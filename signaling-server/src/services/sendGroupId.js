@@ -9,7 +9,9 @@ async function sendGroupId(email, groupId) {
     throw new Error('Missing required fields');
   }
 
-  const dbGroup = await Group.findOne({ id: groupId, ownerEmail: email });
+  const undercaseEmail = email.toLowerCase().trim();
+
+  const dbGroup = await Group.findOne({ id: groupId, ownerEmail: undercaseEmail });
   if (!dbGroup) {
     throw new Error('Invalid groupId or email not authorized');
   }
@@ -18,7 +20,7 @@ async function sendGroupId(email, groupId) {
   if (existingOwner) {
     throw new Error('Unauthorized');
   }
-  await mailGroupId(email, groupId);
+  await mailGroupId(undercaseEmail, groupId);
 }
 
 module.exports = { sendGroupId };
