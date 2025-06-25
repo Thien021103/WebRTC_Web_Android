@@ -184,7 +184,7 @@ class MainActivity : ComponentActivity() {
 
         // Check token validity
         suspend fun checkToken() {
-        val client = OkHttpClient()
+          val client = OkHttpClient()
           try {
             val request = Request.Builder()
               .url("https://thientranduc.id.vn:444/api/check-token")

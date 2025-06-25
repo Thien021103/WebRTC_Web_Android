@@ -125,9 +125,28 @@ class RecordingManager (
                 setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1)
               }
 
-          videoMediaCodec = MediaCodec.createEncoderByType("video/avc").apply {
-            configure(videoFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
-            start()
+          try {
+            videoMediaCodec = MediaCodec.createEncoderByType("video/avc").apply {
+              configure(videoFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
+              start()
+            }
+          } catch (e: Exception) {
+            Log.d("VideoCodec", "Video codec error ${e.message}")
+            val videoFormat2 =
+              MediaFormat.createVideoFormat("video/avc", rotatedFrameWidth, rotatedFrameHeight)
+                .apply {
+                  setInteger(
+                    MediaFormat.KEY_COLOR_FORMAT,
+                    MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible
+                  )
+                  setInteger(MediaFormat.KEY_BIT_RATE, 1_000_000)
+                  setInteger(MediaFormat.KEY_FRAME_RATE, 30)
+                  setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1)
+                }
+            videoMediaCodec = MediaCodec.createEncoderByType("video/avc").apply {
+              configure(videoFormat2, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
+              start()
+            }
           }
           isVideoRecording = true
           offsetTimestampUs = videoFrame.timestampNs/1000 - currentTimestampUs
