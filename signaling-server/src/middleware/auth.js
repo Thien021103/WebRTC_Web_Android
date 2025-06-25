@@ -9,7 +9,7 @@ const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key'; // Use env in pr
 const authMiddleware = async (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ status: "false", message: 'No token provided' });
+    return res.status(401).json({ status: "false", message: 'Invalid token' });
   }
 
   const token = authHeader.split(' ')[1];
@@ -100,7 +100,7 @@ const wsControllerAuth = async (token, client) => {
 const adminAuth = async (req, res, next) => {
   const token = req.header('Authorization')?.replace('Bearer ', '');
   if (!token) {
-    return res.status(401).json({ status: 'false', message: 'No token provided' });
+    return res.status(401).json({ status: 'false', message: 'Invalid token' });
   }
 
   try {

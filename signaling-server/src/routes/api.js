@@ -33,8 +33,8 @@ router.post('/login-owner', handleLoginOwner);
 router.post('/register', handleRegister);
 router.post('/logout', authMiddleware, handleLogout);
 
-router.get('check-token', authMiddleware, (req, res) => {
-  res.json({ status: "success", message: "Token is valid" });
+router.get('/check-token', authMiddleware, (req, res) => {
+  res.json({ status: "success", message: "Valid" });
 });
 
 router.post('/change-password', authMiddleware, handleChangePassword);
