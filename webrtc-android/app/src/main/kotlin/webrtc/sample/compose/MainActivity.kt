@@ -37,6 +37,7 @@ import androidx.navigation.compose.rememberNavController
 import webrtc.sample.compose.ui.screens.users.RegisterUserScreen
 import webrtc.sample.compose.ui.screens.users.UserManagementScreen
 import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.Dispatchers
 import webrtc.sample.compose.ui.screens.door.DoorHistoryScreen
 import webrtc.sample.compose.ui.screens.door.DoorScreen
 import webrtc.sample.compose.ui.screens.list.VideoListScreen
@@ -49,6 +50,10 @@ import webrtc.sample.compose.ui.screens.stage.SignallingScreen
 import webrtc.sample.compose.ui.screens.users.UserListScreen
 import webrtc.sample.compose.ui.theme.WebrtcSampleComposeTheme
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.json.JSONObject
 import webrtc.sample.compose.ui.screens.main.GroupDetailScreen
 import webrtc.sample.compose.ui.screens.main.NotificationScreen
 import webrtc.sample.compose.ui.screens.main.OptionScreen
@@ -71,6 +76,7 @@ class MainActivity : ComponentActivity() {
         var accessToken by rememberSaveable { mutableStateOf("") }
         var role by rememberSaveable { mutableStateOf("") }
         var cloudFolder by rememberSaveable { mutableStateOf("") }
+        var fcmToken by rememberSaveable { mutableStateOf("") }
 
         // Save Cloudinary config components
         var cloudName by rememberSaveable { mutableStateOf("") }
@@ -167,14 +173,48 @@ class MainActivity : ComponentActivity() {
         }
 
         // FCM Token
-        var fcmToken by remember { mutableStateOf("") }
-        LaunchedEffect(Unit) {
+        LaunchedEffect(fcmToken) {
           try {
             fcmToken = FirebaseMessaging.getInstance().token.await()
             Log.d("FCM Token", fcmToken)
           } catch (e: Exception) {
             Log.e("MainActivity", "Failed to get FCM token: $e")
           }
+        }
+
+        // Check token validity
+        suspend fun checkToken() {
+        val client = OkHttpClient()
+          try {
+            val request = Request.Builder()
+              .url("https://thientranduc.id.vn:444/api/check-token")
+              .addHeader("Authorization", "Bearer $accessToken")
+              .get()
+              .build()
+            withContext(Dispatchers.IO) {
+              val response = client.newCall(request).execute()
+              val responseBody = response.body?.string() ?: "{}"
+              val json = JSONObject(responseBody)
+              Log.d("Check Token", "Checked token: ${json.optString("message")}")
+              if (json.optString("message", "").contains("Invalid token", ignoreCase = true)) {
+                withContext(Dispatchers.Main) {
+                  identifier = ""
+                  groupName = ""
+                  accessToken = ""
+                  role = ""
+                  navController.navigate("roleSelection") { popUpTo("roleSelection") { inclusive = true } }
+                  Log.d("Check Token" , "Invalid token, navigating to roleSelection ${json.optString("message")}")
+                }
+              }
+            }
+          } catch (e: Exception) {
+            Log.e("MainActivity", "Token check failed: ${e.message}")
+          }
+        }
+
+        // Trigger token check on startup
+        LaunchedEffect(Unit) {
+          checkToken()
         }
 
         if (showSettingsDialog) {
@@ -325,6 +365,9 @@ class MainActivity : ComponentActivity() {
                 )
               }
               composable("videos") {
+                LaunchedEffect(Unit) {
+                  checkToken()
+                }
                 VideoListScreen(
                   role = role,
                   viewModel = VideoListViewModel(accessToken),
@@ -332,6 +375,9 @@ class MainActivity : ComponentActivity() {
                 )
               }
               composable("signalling") {
+                LaunchedEffect(Unit) {
+                  checkToken()
+                }
                 SignallingScreen(
                   role = role,
                   identifier = identifier,
@@ -341,6 +387,9 @@ class MainActivity : ComponentActivity() {
                 )
               }
               composable("user") {
+                LaunchedEffect(Unit) {
+                  checkToken()
+                }
                 UserManagementScreen(
                   onRegisterUserClick = { navController.navigate("user/register") },
                   onUserListClick = { navController.navigate("user/list") },
@@ -348,18 +397,27 @@ class MainActivity : ComponentActivity() {
                 )
               }
               composable("user/register") {
+                LaunchedEffect(Unit) {
+                  checkToken()
+                }
                 RegisterUserScreen(
                   accessToken = accessToken,
                   onBack = { navController.popBackStack() }
                 )
               }
               composable("user/list") {
+                LaunchedEffect(Unit) {
+                  checkToken()
+                }
                 UserListScreen(
                   accessToken = accessToken,
                   onBack = { navController.popBackStack() }
                 )
               }
               composable("door") {
+                LaunchedEffect(Unit) {
+                  checkToken()
+                }
                 DoorScreen(
                   accessToken = accessToken,
                   identifier = identifier,
@@ -369,6 +427,9 @@ class MainActivity : ComponentActivity() {
                 )
               }
               composable("door/history") {
+                LaunchedEffect(Unit) {
+                  checkToken()
+                }
                 DoorHistoryScreen(
                   accessToken = accessToken,
                   onBack = { navController.popBackStack() }
