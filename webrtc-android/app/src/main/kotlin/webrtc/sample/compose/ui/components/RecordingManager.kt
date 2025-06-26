@@ -32,6 +32,7 @@ class RecordingManager (
   private var rotatedFrameWidth = 0
   private var rotatedFrameHeight = 0
   private var offsetTimestampUs = 0L
+  private var isUsingFlexibleFormat = false
 
   // Audio recording components
   private var isAudioRecording = false
@@ -130,6 +131,9 @@ class RecordingManager (
               configure(videoFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
               start()
             }
+            Log.d("CodecInfo", "Codec: ${videoMediaCodec?.name}")
+            Log.d("InputFormat", videoMediaCodec?.inputFormat.toString())
+            isUsingFlexibleFormat = false
           } catch (e: Exception) {
             Log.d("VideoCodec", "Video codec error ${e.message}")
             val videoFormat2 =
@@ -147,6 +151,7 @@ class RecordingManager (
               configure(videoFormat2, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
               start()
             }
+            isUsingFlexibleFormat = true
           }
           isVideoRecording = true
           offsetTimestampUs = videoFrame.timestampNs/1000 - currentTimestampUs
@@ -175,14 +180,19 @@ class RecordingManager (
       val ySize = buffer.width * buffer.height
       val uvSize = (buffer.width / 2) * (buffer.height / 2)
       val totalSize = ySize + uvSize + uvSize // width * height * 3/2
-      val yuvData = ByteBuffer.allocateDirect(totalSize)
 
-//      Log.d("VideoRecordingManager", "Video frame: ${buffer.width}x${buffer.height}, TotalSize=$totalSize")
-
-      copyPlane(buffer.dataY, buffer.strideY, buffer.width, buffer.height, yuvData)
-      copyPlane(buffer.dataU, buffer.strideU, buffer.width / 2, buffer.height / 2, yuvData)
-      copyPlane(buffer.dataV, buffer.strideV, buffer.width / 2, buffer.height / 2, yuvData)
-      yuvData.flip()
+      val yuvData =
+        if (isUsingFlexibleFormat) {
+        convertI420ToNV12(buffer)
+      } else {
+        // I420 planar
+        val data = ByteBuffer.allocateDirect(totalSize)
+        copyPlane(buffer.dataY, buffer.strideY, buffer.width, buffer.height, data)
+        copyPlane(buffer.dataU, buffer.strideU, buffer.width / 2, buffer.height / 2, data)
+        copyPlane(buffer.dataV, buffer.strideV, buffer.width / 2, buffer.height / 2, data)
+        data.flip()
+        data
+      }
 
       val inputBufferIndex = videoMediaCodec?.dequeueInputBuffer(10000) ?: return
       if (inputBufferIndex >= 0) {
@@ -239,6 +249,40 @@ class RecordingManager (
         break
       }
     }
+  }
+
+  private fun convertI420ToNV12(i420: VideoFrame.I420Buffer): ByteBuffer {
+    val width = i420.width
+    val height = i420.height
+    val strideY = i420.strideY
+    val strideU = i420.strideU
+    val strideV = i420.strideV
+
+    val ySize = width * height
+    val uvSize = ySize / 2
+    val output = ByteBuffer.allocateDirect(ySize + uvSize)
+
+    // 1. Copy Y plane
+    copyPlane(i420.dataY, strideY, width, height, output)
+
+    // 2. Interleave U + V into UV plane (NV12)
+    val halfHeight = height / 2
+    val halfWidth = width / 2
+
+    for (y in 0 until halfHeight) {
+      val srcUPos = y * strideU
+      val srcVPos = y * strideV
+      for (x in 0 until halfWidth) {
+        val u = i420.dataU.get(srcUPos + x)
+        val v = i420.dataV.get(srcVPos + x)
+        output.put(u) // U
+        output.put(v) // V
+      }
+    }
+    output.flip()
+    Log.d("Convert", output.capacity().toString())
+
+    return output
   }
 
   private fun recordAudioData(
