@@ -1,6 +1,7 @@
 package webrtc.sample.compose
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
@@ -54,6 +55,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
+import webrtc.sample.compose.ui.fcm.MyFirebaseMessagingService
 import webrtc.sample.compose.ui.screens.main.GroupDetailScreen
 import webrtc.sample.compose.ui.screens.main.NotificationScreen
 import webrtc.sample.compose.ui.screens.main.OptionScreen
@@ -156,10 +158,17 @@ class MainActivity : ComponentActivity() {
           }
         }
 
+        fun stopRinging() {
+          MyFirebaseMessagingService.stopRingingSound(this)
+        }
         // Launch permission request on start
         LaunchedEffect(Unit) {
           Log.d("MainActivity", "Requesting permissions: ${requiredPermissions.joinToString()}")
           permissionLauncher.launch(requiredPermissions)
+          if (intent.getBooleanExtra("IS_CALL_NOTIFICATION", false)) {
+            Log.d("MainActivity", "Stop ringing on IS_CALL_NOTIFICATION")
+            stopRinging()
+          }
         }
 
         LaunchedEffect(navController) {
@@ -376,6 +385,7 @@ class MainActivity : ComponentActivity() {
               }
               composable("signalling") {
                 LaunchedEffect(Unit) {
+                  stopRinging()
                   checkToken()
                 }
                 SignallingScreen(
