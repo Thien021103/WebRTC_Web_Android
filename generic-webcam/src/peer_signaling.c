@@ -136,7 +136,7 @@ static int lws_websocket_connection_send_text(struct lws* wsi_in, char* str, enu
         break;
     case PONG:
         n = sprintf((char*)p, "%s", str);
-        LOGI("Sent: %s", (char*)p);
+        LOGD("Sent: %s", (char*)p);
         lws_write(wsi_in, p, n, LWS_WRITE_TEXT);
         break;
     case HUMAN:
