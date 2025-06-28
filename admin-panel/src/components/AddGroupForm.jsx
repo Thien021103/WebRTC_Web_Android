@@ -10,11 +10,19 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 function AddGroupForm({ onGroupAdded }) {
   const [ownerEmail, setOwnerEmail] = useState('');
   const [error, setError] = useState(null);
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  
+
+  const handleInvalidToken = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -47,7 +55,11 @@ function AddGroupForm({ onGroupAdded }) {
       onGroupAdded();
       handleClose();
     } catch (err) {
-      setError(err.message);
+      if (err.response?.data?.message === 'Invalid token') {
+        handleInvalidToken();
+      } else {
+        setError(err.response?.data?.message || err.message);
+      }
     }
   };
 

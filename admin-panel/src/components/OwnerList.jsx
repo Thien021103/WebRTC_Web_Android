@@ -92,7 +92,7 @@ function OwnerList({ owners, loading, error, onRefetch }) {
           </TableHead>
           <TableBody>
             {owners.map((owner, index) => (
-              <TableRow key={owner.email} hover sx={{ bgcolor: index % 2 ? '#fafafa' : '#ffffff' }}>
+              <TableRow key={owner.groupId} hover sx={{ bgcolor: index % 2 ? '#fafafa' : '#ffffff' }}>
                 <TableCell>{owner.email}</TableCell>
                 <TableCell>{new Date(owner.createdAt).toLocaleString()}</TableCell>
                 <TableCell sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
