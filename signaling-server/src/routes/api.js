@@ -14,7 +14,8 @@ const { handleDeleteUser } = require('../controllers/deleteUser');
 const { handleGetDoorHistory } = require('../controllers/getDoorHistory');
 const { handleGetVideos, handleDeleteVideo } = require('../controllers/cloudVideo');
 const { handleGetDoor } = require('../controllers/door');
-const { handleSendOTP } = require('../controllers/otp');
+const { handleRegisterOTP } = require('../controllers/registerOTP');
+const { handleForgetOTP } = require('../controllers/forgetOTP');
 const { handleAddGroup } = require('../controllers/addGroup');
 const { handleAdminLogin } = require('../controllers/loginAdmin');
 const { handleGetGroups } = require('../controllers/getGroups');
@@ -26,6 +27,7 @@ const { handleChangePassword } = require('../controllers/changePassword');
 const { handleDeleteOwner } = require('../controllers/deleteOwner');
 const { handleLight } = require('../controllers/light');
 const { handleAdminGetGroup } = require('../controllers/adminGetGroup');
+const { handleResetPassword } = require('../controllers/resetPassword');
 
 router.post('/login-user', handleLoginUser);
 router.post('/login-owner', handleLoginOwner);
@@ -38,8 +40,10 @@ router.get('/check-token', authMiddleware, (req, res) => {
 });
 
 router.post('/change-password', authMiddleware, handleChangePassword);
+router.post('/reset-password', handleResetPassword);
 
-router.post('/otp', handleSendOTP);
+router.post('/forget-otp', handleForgetOTP);
+router.post('/register-otp', handleRegisterOTP);
 
 router.get('/light', authMiddleware, handleLight);
 

@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const Group = require('../schemas/group');
 const Owner = require('../schemas/owner');
 
-const { verifyOTP } = require('../utils/otp');
+const { verifyRegisterOTP } = require('../utils/otp');
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -15,7 +15,7 @@ async function registerOwner({ email, password, groupId, groupName, otp, fcmToke
 
   const undercaseEmail = email.toLowerCase().trim();
 
-  if (!verifyOTP(undercaseEmail, otp)) {
+  if (!verifyRegisterOTP(undercaseEmail, otp)) {
     throw new Error('Invalid or expired OTP');
   }
 
