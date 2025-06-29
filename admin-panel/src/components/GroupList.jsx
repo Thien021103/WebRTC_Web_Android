@@ -222,33 +222,46 @@ function GroupList({ groups, loading, error, onRefetch }) {
         <DialogContent>
           {groupData && (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Typography component="div"><strong>Owner:</strong> {groupData.owner}</Typography>
               <Typography component="div">
-                <strong>State:</strong>{' '}
+                <strong sx>ID:</strong> 
+                <Chip
+                  label={selectedGroupId}
+                  sx={{ fontWeight: 500, ml: 21, fontSize: '0.9rem' }}
+                />
+              </Typography>
+              <Typography component="div">
+                <strong>Owner:</strong>
+                <Chip
+                  label={groupData.owner}
+                  sx={{ fontWeight: 500, ml: 16.5, fontSize: '0.9rem' }}
+                />
+              </Typography>
+              <Typography component="div">
+                <strong>Session state:</strong>{' '}
                 <Chip
                   label={groupData.state}
-                  sx={{ ...getStateColor(groupData.state), fontWeight: 500 }}
+                  sx={{ ...getStateColor(groupData.state), fontWeight: 500, ml: 9.5, fontSize: '0.9rem' }}
                 />
               </Typography>
               <Typography component="div">
                 <strong>Owner registered:</strong>{' '}
                 <Chip
                   label={groupData.registered}
-                  sx={{ ...getStateColor(groupData.registered), fontWeight: 500 }}
+                  sx={{ ...getStateColor(groupData.registered), fontWeight: 500, ml: 6, fontSize: '0.9rem' }}
                 />
               </Typography>
               <Typography component="div">
-                <strong>Camera:</strong>{' '}
+                <strong>Camera state:</strong>{' '}
                 <Chip
                   label={groupData.camera}
-                  sx={{ ...getStateColor(groupData.camera), fontWeight: 500 }}
+                  sx={{ ...getStateColor(groupData.camera), fontWeight: 500, ml: 10, fontSize: '0.9rem' }}
                 />
               </Typography>
               <Typography component="div">
-                <strong>Controller:</strong>{' '}
+                <strong>Controller state:</strong>{' '}
                 <Chip
                   label={groupData.controller}
-                  sx={{ ...getStateColor(groupData.controller), fontWeight: 500 }}
+                  sx={{ ...getStateColor(groupData.controller), fontWeight: 500, ml: 7.7, fontSize: '0.9rem' }}
                 />
               </Typography>
             </Box>
