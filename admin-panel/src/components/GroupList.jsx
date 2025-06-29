@@ -23,7 +23,7 @@ import {
 import RefreshIcon from '@mui/icons-material/Refresh';
 import axios from 'axios';
 
-function GroupList({ groups, loading, error }) {
+function GroupList({ groups, loading, error, onRefetch }) {
   const [actionState, setActionState] = useState('');
   const [currentIndex, setCurrentIndex] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
@@ -32,7 +32,7 @@ function GroupList({ groups, loading, error }) {
   const [selectedGroupId, setSelectedGroupId] = useState(null);
   const navigate = useNavigate();
 
-  if (loading) return <Typography variant="body1" align="center" sx={{ py: 2 }}>Loading groups...</Typography>;
+  if (loading && !groups.length) return <Typography variant="body1" align="center" sx={{ py: 2 }}>Loading groups...</Typography>;
   if (error) return <Typography variant="body1" color="error" align="center" sx={{ py: 2 }}>Error: {error}</Typography>;
   if (!Array.isArray(groups) || groups.length === 0) return <Typography variant="body1" align="center" sx={{ py: 2 }}>No groups found.</Typography>;
 
@@ -131,7 +131,18 @@ function GroupList({ groups, loading, error }) {
 
   return (
     <>
-      <TableContainer component={Paper} sx={{ maxWidth: '100%', mt: 2, boxShadow: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <RefreshIcon />}
+          onClick={onRefetch}
+          disabled={loading}
+        >
+          Refresh
+        </Button>
+      </Box>
+      <TableContainer component={Paper} sx={{ maxWidth: '100%', boxShadow: 3 }}>
         <Table stickyHeader>
           <TableHead>
             <TableRow>
@@ -154,7 +165,7 @@ function GroupList({ groups, loading, error }) {
                 <TableCell sx={{ display: 'flex', gap: 1 }}>
                   <Button
                     variant="contained"
-                    color="primary"
+                    color="secondary"
                     size="small"
                     onClick={() => handleSendGroupId(group.ownerEmail, group.id, index)}
                     disabled={actionState === 'sending' && currentIndex === index}
@@ -227,7 +238,7 @@ function GroupList({ groups, loading, error }) {
             onClick={handleRefresh}
             disabled={actionState === 'fetching'}
           >
-            Refresh
+            Refresh Details
           </Button>
           <Button onClick={handleModalClose}>Close</Button>
         </DialogActions>
