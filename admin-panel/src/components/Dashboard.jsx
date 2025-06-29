@@ -185,7 +185,7 @@ function Dashboard() {
             {view === 'groups' && (
               <>
                 <AddGroupForm onGroupAdded={fetchGroups} />
-                <GroupList groups={groups} loading={loading} error={error} />
+                <GroupList groups={groups} loading={loading} error={error} onRefetch={fetchGroups} />
               </>
             )}
             {view === 'owners' && (

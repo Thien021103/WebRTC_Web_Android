@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Table,
   TableBody,
@@ -17,18 +18,27 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  Box,
 } from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import axios from 'axios';
 
 function OwnerList({ owners, loading, error, onRefetch }) {
-  const [buttonStates, setButtonStates] = useState({});
+  const [actionState, setActionState] = useState('');
+  const [currentIndex, setCurrentIndex] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedOwner, setSelectedOwner] = useState(null);
+  const navigate = useNavigate();
 
-  if (loading) return <Typography variant="body1" align="center" sx={{ py: 2 }}>Loading owners...</Typography>;
+  if (loading && !owners.length) return <Typography variant="body1" align="center" sx={{ py: 2 }}>Loading owners...</Typography>;
   if (error) return <Typography variant="body1" color="error" align="center" sx={{ py: 2 }}>Error: {error}</Typography>;
   if (!Array.isArray(owners) || owners.length === 0) return <Typography variant="body1" align="center" sx={{ py: 2 }}>No owners found.</Typography>;
+
+  const handleInvalidToken = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
 
   const formatFcmToken = (token) => {
     if (!token) return '-';
@@ -47,28 +57,26 @@ function OwnerList({ owners, loading, error, onRefetch }) {
   };
 
   const handleDeleteOwner = async (email, groupId, index) => {
-    setButtonStates((prev) => ({ ...prev, [index]: { loading: true } }));
+    setActionState('deleting');
+    setCurrentIndex(index);
     try {
       const token = localStorage.getItem('token');
       await axios.delete(`https://thientranduc.id.vn:444/api/delete-owner`, {
         data: { email, groupId },
         headers: { Authorization: `Bearer ${token}` },
       });
-      setButtonStates((prev) => ({ ...prev, [index]: { loading: false } }));
       setSnackbar({ open: true, message: 'Owner deleted successfully!', severity: 'success' });
       onRefetch();
     } catch (err) {
-      console.error('Delete owner error:', {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status,
-        headers: err.response?.headers,
-        error: JSON.stringify(err, Object.getOwnPropertyNames(err), 2),
-      });
-      const errorMsg = err.response?.data?.message || err.message || 'Failed to delete owner';
-      setButtonStates((prev) => ({ ...prev, [index]: { loading: false } }));
-      setSnackbar({ open: true, message: errorMsg, severity: 'error' });
+      if (err.response?.data?.message === 'Invalid token') {
+        handleInvalidToken();
+      } else {
+        const errorMsg = err.response?.data?.message || 'Failed to delete owner';
+        setSnackbar({ open: true, message: errorMsg, severity: 'error' });
+      }
     } finally {
+      setActionState('');
+      setCurrentIndex(null);
       handleCloseDialog();
     }
   };
@@ -79,7 +87,18 @@ function OwnerList({ owners, loading, error, onRefetch }) {
 
   return (
     <>
-      <TableContainer component={Paper} sx={{ maxWidth: '100%', mt: 2, boxShadow: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <RefreshIcon />}
+          onClick={onRefetch}
+          disabled={loading}
+        >
+          Refresh
+        </Button>
+      </Box>
+      <TableContainer component={Paper} sx={{ maxWidth: '100%', boxShadow: 3 }}>
         <Table stickyHeader>
           <TableHead>
             <TableRow>
@@ -92,7 +111,7 @@ function OwnerList({ owners, loading, error, onRefetch }) {
           </TableHead>
           <TableBody>
             {owners.map((owner, index) => (
-              <TableRow key={owner.email} hover sx={{ bgcolor: index % 2 ? '#fafafa' : '#ffffff' }}>
+              <TableRow key={owner.groupId} hover sx={{ bgcolor: index % 2 ? '#fafafa' : '#ffffff' }}>
                 <TableCell>{owner.email}</TableCell>
                 <TableCell>{new Date(owner.createdAt).toLocaleString()}</TableCell>
                 <TableCell sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
@@ -105,8 +124,8 @@ function OwnerList({ owners, loading, error, onRefetch }) {
                     color="error"
                     size="small"
                     onClick={() => handleOpenDialog(owner, index)}
-                    disabled={buttonStates[index]?.loading}
-                    startIcon={buttonStates[index]?.loading && <CircularProgress size={16} color="inherit" />}
+                    disabled={actionState === 'deleting' && currentIndex === index}
+                    startIcon={actionState === 'deleting' && currentIndex === index && <CircularProgress size={16} color="inherit" />}
                   >
                     Delete
                   </Button>

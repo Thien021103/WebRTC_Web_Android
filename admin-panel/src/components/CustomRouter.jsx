@@ -13,9 +13,7 @@ function CustomRouter() {
       <Routes>
         <Route 
           path = "/login"
-          element = {
-            <Login />
-          } 
+          element = { <Login />} 
         />
         <Route
           path = "/"

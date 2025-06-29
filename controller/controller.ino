@@ -13,7 +13,7 @@
 #define SCREEN_HEIGHT 64
 #define OLED_RESET -1
 #define OLED_ADDRESS 0x3C
-#define REED_PIN 13
+#define REED_PIN 32
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 WebSocketsClient webSocket;
@@ -61,7 +61,7 @@ void attemptLock() {
 
   // Door can not be locked
   } else {
-    Serial.println("Door open, waiting to lock ...");
+    // Serial.println("Door open, waiting to lock ...");
     updateDisplay("Waiting to lock ...");
     needLockCheck = true;
   }
@@ -90,19 +90,21 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
         DOOR_STATE = "Unlocked";
         doorServo.write(90); // Unlock position
         delay(2000);        // Simulate unlock duration
-        doorServo.write(0);  // Back to locked position
-        Serial.println("Door locked again");
-        DOOR_STATE = "Locked";
-        updateDisplay("Door locked");
-        webSocket.sendTXT("LOCK controller " + CONTROLLER_TOKEN);
-        // attemptLock();
+        // doorServo.write(0);  // Back to locked position
+        // Serial.println("Door locked again");
+        // DOOR_STATE = "Locked";
+        // updateDisplay("Door locked");
+        // webSocket.sendTXT("LOCK controller " + CONTROLLER_TOKEN);
+        Serial.println("Start locking door...");
+        attemptLock();
       }
       else if (message == "LOCK " + String(CONTROLLER_ID)) {
-        Serial.println("Locking door...");
-        doorServo.write(0);  // Back to locked position
-        updateDisplay("Door locked");
-        DOOR_STATE = "Locked";
-        // attemptLock();
+        // Serial.println("Locking door...");
+        // doorServo.write(0);  // Back to locked position
+        // updateDisplay("Door locked");
+        // DOOR_STATE = "Locked";
+        Serial.println("Start locking door...");
+        attemptLock();
       }
       else if (message.startsWith("STATE ")) {
         int index = message.indexOf(' ');
@@ -154,7 +156,7 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN), handleButtonPress, FALLING);
   
   // Reed switch
-  // pinMode(REED_PIN, INPUT_PULLUP);
+  pinMode(REED_PIN, INPUT_PULLUP);
 
   // Initial locked position  
   doorServo.attach(SERVO_PIN);
@@ -218,9 +220,9 @@ void loop() {
   webSocket.loop();
 
   // Check reed switch if needed
-  // if (needLockCheck) {
-  //   attemptLock();
-  // }
+  if (needLockCheck) {
+    attemptLock();
+  }
 
   if (buttonPressed) {
     buttonPressed = false;
