@@ -15,14 +15,15 @@ async function deleteOwner({ email, groupId }) {
     throw new Error('Group not found');
   }
 
-  // Delete all users in the group
-  await User.deleteMany({ groupId });
-
   // Find and delete owner
-  const owner = await Owner.findOneAndDelete({ undercaseEmail, groupId });
+  const owner = await Owner.findOneAndDelete({ email: undercaseEmail, groupId: groupId });
   if (!owner) {
     throw new Error('Owner not found or does not belong to the specified group');
   }
+  
+  // Delete all users in the group
+  await User.deleteMany({ groupId });
+
   await Group.updateOne({ id: groupId }, { $unset: { name: '' } });
 
   return { undercaseEmail, groupId };

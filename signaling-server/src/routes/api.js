@@ -26,6 +26,7 @@ const { handleChangePassword } = require('../controllers/changePassword');
 const { handleDeleteOwner } = require('../controllers/deleteOwner');
 const { handleLight } = require('../controllers/light');
 const { handleAdminGetGroup } = require('../controllers/adminGetGroup');
+const { handleDeleteGroup } = require('../controllers/deleteGroup');
 
 router.post('/login-user', handleLoginUser);
 router.post('/login-owner', handleLoginOwner);
@@ -65,6 +66,8 @@ router.delete('/delete-owner', adminAuth, handleDeleteOwner);
 router.post('/admin-get-group', adminAuth, handleAdminGetGroup);
 router.get('/get-groups', adminAuth, handleGetGroups);
 router.post('/add-group', adminAuth, handleAddGroup);
+router.delete('/delete-group', adminAuth, handleDeleteGroup);
+
 router.post('/send-group-id', adminAuth, handleSendGroupId);
 router.post('/login-admin', handleAdminLogin);
 
