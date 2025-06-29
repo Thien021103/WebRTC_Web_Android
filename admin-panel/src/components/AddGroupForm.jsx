@@ -9,6 +9,8 @@ import {
   DialogActions,
   TextField,
   Typography,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,9 +18,9 @@ function AddGroupForm({ onGroupAdded }) {
   const [ownerEmail, setOwnerEmail] = useState('');
   const [error, setError] = useState(null);
   const [open, setOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const navigate = useNavigate();
   
-
   const handleInvalidToken = () => {
     localStorage.removeItem('token');
     navigate('/login');
@@ -29,6 +31,10 @@ function AddGroupForm({ onGroupAdded }) {
     setOpen(false);
     setOwnerEmail('');
     setError(null);
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
   const handleSubmit = async (e) => {
@@ -51,13 +57,16 @@ function AddGroupForm({ onGroupAdded }) {
       }
 
       setOwnerEmail('');
+      setSnackbar({ open: true, message: 'Group added successfully!', severity: 'success' });
       setError(null);
       onGroupAdded();
-      handleClose();
+      // handleClose();
     } catch (err) {
       if (err.response?.data?.message === 'Invalid token') {
+        setSnackbar({ open: true, message: err.response?.data?.message, severity: 'error' });
         handleInvalidToken();
       } else {
+        setSnackbar({ open: true, message: err.response?.data?.message, severity: 'error' });
         setError(err.response?.data?.message || err.message);
       }
     }
@@ -65,10 +74,10 @@ function AddGroupForm({ onGroupAdded }) {
 
   return (
     <>
-      <Button variant="contained" color="primary" onClick={handleOpen} sx={{ mb: 2 }}>
+      <Button variant="contained" color="secondary" onClick={handleOpen} sx={{ mb: 2 }}>
         Add New Group
       </Button>
-      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth sx={{ '& .MuiDialog-paper': { p: 2 } }}>
         <DialogTitle>Add New Group</DialogTitle>
         <DialogContent>
           <TextField
@@ -97,6 +106,11 @@ function AddGroupForm({ onGroupAdded }) {
             Add Group
           </Button>
         </DialogActions>
+        <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={handleSnackbarClose}>
+          <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </Dialog>
     </>
   );

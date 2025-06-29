@@ -22,12 +22,14 @@ import {
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import axios from 'axios';
+import DeleteGroupForm from './DeleteGroupForm';
 
 function GroupList({ groups, loading, error, onRefetch }) {
   const [actionState, setActionState] = useState('');
   const [currentIndex, setCurrentIndex] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [modalOpen, setModalOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [groupData, setGroupData] = useState(null);
   const [selectedGroupId, setSelectedGroupId] = useState(null);
   const navigate = useNavigate();
@@ -112,6 +114,18 @@ function GroupList({ groups, loading, error, onRefetch }) {
     fetchGroupDetails(id, index);
   };
 
+  const handleDeleteClick = (id, index) => {
+    setSelectedGroupId(id);
+    setCurrentIndex(index);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteDialogClose = () => {
+    setDeleteDialogOpen(false);
+    setSelectedGroupId(null);
+    setCurrentIndex(null);
+  };
+
   const handleRefresh = () => {
     if (selectedGroupId) {
       const index = groups.findIndex((group) => group.id === selectedGroupId);
@@ -183,6 +197,16 @@ function GroupList({ groups, loading, error, onRefetch }) {
                   >
                     View Details
                   </Button>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    size="small"
+                    onClick={() => handleDeleteClick(group.id, index)}
+                    disabled={actionState === 'deleting' && currentIndex === index}
+                    startIcon={actionState === 'deleting' && currentIndex === index && <CircularProgress size={16} color="inherit" />}
+                  >
+                    Delete
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
@@ -242,6 +266,19 @@ function GroupList({ groups, loading, error, onRefetch }) {
           </Button>
           <Button onClick={handleModalClose}>Close</Button>
         </DialogActions>
+      </Dialog>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteDialogClose}
+        sx={{ '& .MuiDialog-paper': { width: '500px', maxWidth: '90vw', p: 2 } }}
+      >
+        <DeleteGroupForm
+          groupId={selectedGroupId}
+          onRefetch={onRefetch}
+          onClose={handleDeleteDialogClose}
+          setActionState={setActionState}
+          currentIndex={currentIndex}
+        />
       </Dialog>
       <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={handleSnackbarClose}>
         <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
