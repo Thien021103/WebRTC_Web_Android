@@ -24,9 +24,9 @@ async function deleteGroup({ groupId, password, decoded }) {
   }
 
   // Verify password
-  const dbAdmin = await Admin.findOne({ email: decoded.email, groupId });
+  const dbAdmin = await Admin.findOne({ email: decoded.email });
   if (!dbAdmin) {
-    throw new Error('Admin not found for this group');
+    throw new Error('Admin not found');
   }
   const isPasswordValid = await bcrypt.compare(password, dbAdmin.password);
   if (!isPasswordValid) {

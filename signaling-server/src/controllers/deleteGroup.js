@@ -10,7 +10,7 @@ async function handleDeleteGroup(req, res) {
     console.error(`Error in handleDeleteGroup: ${error.message}`);
     if (
       error.message === 'Missing required fields' || error.message === 'Group not found' || 
-      error.message === 'Invalid admin password' || error.message === 'Admin not found for this group') {
+      error.message === 'Invalid admin password' || error.message === 'Admin not found') {
       res.status(400).json({ status: 'false', message: error.message });
     } else {
       res.status(500).json({ status: 'false', message: error.message });
