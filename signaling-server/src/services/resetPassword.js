@@ -3,6 +3,7 @@ const Group = require('../schemas/group');
 const Owner = require('../schemas/owner');
 const User = require('../schemas/user');
 const { verifyForgetOTP } = require('../utils/otp');
+const { mailNewPassword } = require('../utils/changePassword');
 
 async function resetUserPassword({ email, password, otp }) {
   if (!email || !password || !otp) {
@@ -23,6 +24,8 @@ async function resetUserPassword({ email, password, otp }) {
   const hashedPassword = await bcrypt.hash(password, 10);
   await User.updateOne({ email: lowercaseEmail }, { $set: { password: hashedPassword } });
 
+  // Send new password via email
+  await mailNewPassword(lowercaseEmail);
   console.log(`User password updated: ${lowercaseEmail}`);
 }
 
@@ -50,6 +53,8 @@ async function resetOwnerPassword({ email, groupId, password, otp }) {
   const hashedPassword = await bcrypt.hash(password, 10);
   await Owner.updateOne({ email: lowercaseEmail, groupId: groupId }, { $set: { password: hashedPassword } });
 
+  // Send new password via email
+  await mailNewPassword(lowercaseEmail);
   console.log(`Owner password updated: ${lowercaseEmail}, group: ${groupId}`);
 }
 
