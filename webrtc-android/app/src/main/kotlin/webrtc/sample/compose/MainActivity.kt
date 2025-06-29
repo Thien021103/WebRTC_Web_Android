@@ -60,6 +60,7 @@ import webrtc.sample.compose.ui.screens.main.GroupDetailScreen
 import webrtc.sample.compose.ui.screens.main.NotificationScreen
 import webrtc.sample.compose.ui.screens.main.OptionScreen
 import webrtc.sample.compose.ui.screens.main.UserDetailScreen
+import webrtc.sample.compose.ui.screens.stage.ForgetPasswordScreen
 
 class MainActivity : ComponentActivity() {
   @RequiresApi(Build.VERSION_CODES.R)
@@ -103,7 +104,7 @@ class MainActivity : ComponentActivity() {
                 }
               }
             }
-          } else if (navController.currentDestination?.route !in listOf("roleSelection", "login", "register")) {
+          } else if (navController.currentDestination?.route !in listOf("roleSelection", "login", "register", "forgetPassword")) {
             Log.w("MainActivity", "Cannot restore MediaManager")
             identifier = ""
             accessToken = ""
@@ -211,7 +212,7 @@ class MainActivity : ComponentActivity() {
                   groupName = ""
                   accessToken = ""
                   role = ""
-                  navController.navigate("roleSelection") { popUpTo("roleSelection") { inclusive = true } }
+                  navController.navigate("roleSelection") { popUpTo("first") { inclusive = true } }
                   Log.d("Check Token" , "Invalid token, navigating to roleSelection ${json.optString("message")}")
                 }
               }
@@ -261,6 +262,7 @@ class MainActivity : ComponentActivity() {
             NavHost(
               navController = navController,
               startDestination = "roleSelection",
+              route = "first",
               modifier = Modifier.fillMaxSize()
             ) {
               composable("roleSelection") {
@@ -286,6 +288,7 @@ class MainActivity : ComponentActivity() {
                     Log.d("MainActivity", "Login success: identifier=$email")
                   },
                   onRegister = { navController.navigate("register") },
+                  onForgetPassword = { navController.navigate("forgetPassword") },
                   onBack = { navController.popBackStack() }
                 )
               }
@@ -307,6 +310,13 @@ class MainActivity : ComponentActivity() {
                   onBack = { navController.popBackStack() }
                 )
               }
+              composable("forgetPassword") {
+                ForgetPasswordScreen(
+                  role = role,
+                  onSuccess = { navController.navigate("login") { popUpTo("forgetPassword") { inclusive = true } } },
+                  onBack = { navController.popBackStack() }
+                )
+              }
               composable("main/main") {
                 MainScreen(
                   onNavigateToMain = { navController.navigate("main/main") },
@@ -319,7 +329,7 @@ class MainActivity : ComponentActivity() {
                     role = role,
                     identifier = identifier,
                     onVideosClick = { navController.navigate("videos") },
-                    onSignallingClick = { navController.navigate("signalling") { popUpTo("main/main") { inclusive = true } } },
+                    onSignallingClick = { navController.navigate("signalling") { popUpTo("first") { inclusive = true } } },
                     onDoorClick = { navController.navigate("door") },
                     onUserManagementClick = { navController.navigate("user") },
                   )
@@ -367,7 +377,7 @@ class MainActivity : ComponentActivity() {
 //                        cloudFolder = ""
 //                        cloudName = ""
 //                        (applicationContext as WebRTCApp).clearConfig()
-                        navController.navigate("roleSelection") { popUpTo("roleSelection") { inclusive = true } }
+                        navController.navigate("roleSelection") { popUpTo("first") { inclusive = true } }
                       }
                     )
                   }

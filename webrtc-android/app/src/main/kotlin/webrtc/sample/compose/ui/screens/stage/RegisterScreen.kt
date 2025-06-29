@@ -58,7 +58,7 @@ fun RegisterScreen(
 ) {
 
   val registerUrl = "https://thientranduc.id.vn:444/api/register"
-  val otpUrl = "https://thientranduc.id.vn:444/api/otp"
+  val otpUrl = "https://thientranduc.id.vn:444/api/register-otp"
 
   var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }

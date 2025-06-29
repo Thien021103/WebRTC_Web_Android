@@ -57,7 +57,8 @@ fun LoginScreen(
   role: String,
   onSuccess: (String, String, String, String, Map<String, String>) -> Unit,
   onRegister: () -> Unit,
-  onBack: () -> Unit
+  onBack: () -> Unit,
+  onForgetPassword: () -> Unit
 ) {
   val loginUserUrl = "https://thientranduc.id.vn:444/api/login-user"
   val loginOwnerUrl = "https://thientranduc.id.vn:444/api/login-owner"
@@ -206,7 +207,7 @@ fun LoginScreen(
           ),
           enabled = email.isNotBlank()
             && password.isNotBlank()
-            && (if (role == "Owner") groupName  .isNotBlank() else true)
+            && (if (role == "Owner") groupName.isNotBlank() else true)
             && fcmToken.isNotBlank() && !isLoading
         ) {
           if (isLoading) {
@@ -257,7 +258,7 @@ fun LoginScreen(
           )
         }
         if (role == "Owner") {
-          Spacer(modifier = Modifier.height(8.dp))
+          Spacer(modifier = Modifier.height(16.dp))
           TextButton(
             onClick = onRegister,
             modifier = Modifier.fillMaxWidth(),
@@ -265,6 +266,13 @@ fun LoginScreen(
           ) {
             Text("Need registration?", fontSize = 16.sp)
           }
+        }
+        TextButton(
+          onClick = onForgetPassword,
+          modifier = Modifier.fillMaxWidth(),
+          enabled = !isLoading
+        ) {
+          Text("Forgot Password?", fontSize = 16.sp)
         }
       }
     }
