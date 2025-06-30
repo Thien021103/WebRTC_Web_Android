@@ -159,7 +159,7 @@ fun VideoItem(
     AlertDialog(
       onDismissRequest = { showDeleteDialog = false },
       title = { Text("Confirm Delete") },
-      text = { Text("Are you sure you want to delete this user?") },
+      text = { Text("Are you sure you want to delete video:\n${video.displayName}") },
       confirmButton = {
         TextButton(
           onClick = {
