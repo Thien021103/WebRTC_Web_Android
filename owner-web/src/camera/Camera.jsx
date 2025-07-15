@@ -61,8 +61,9 @@ function Camera() {
       } else if (message.startsWith('OFFER\n')) {
         try {
           const sdp = message.substring(6);
-          await handleOfferSDP(sdp);
+          await handleOfferSDP(sdp + '\n');
         } catch (err) {
+          console.log(err);
           setError('Failed to process video stream');
           setSnackbar({ open: true, message: 'Failed to process video stream', severity: 'error' });
           handleDisconnect();
@@ -134,6 +135,20 @@ function Camera() {
     }
   };
 
+async function waitGatheringComplete() {
+  return new Promise((resolve) => {
+    if (pcRef.current.iceGatheringState === 'complete') {
+      resolve();
+    } else {
+      pcRef.current.addEventListener('icegatheringstatechange', () => {
+        if (pcRef.current.iceGatheringState === 'complete') {
+          resolve();
+        }
+      });
+    }
+  });
+}
+
   const handleOfferSDP = async (sdp) => {
     pcRef.current = new RTCPeerConnection({
       iceServers: [
@@ -154,12 +169,16 @@ function Camera() {
           setError('Failed to play video stream');
           setSnackbar({ open: true, message: 'Failed to play video stream', severity: 'error' });
         });
+      } else {
+        console.warn(`videoRef.current: \n${videoRef.current}`);
       }
     };
 
     await pcRef.current.setRemoteDescription(new RTCSessionDescription({ type: 'offer', sdp }));
-    const answer = await pcRef.current.createAnswer();
-    await pcRef.current.setLocalDescription(answer);
+    await pcRef.current.setLocalDescription(await pcRef.current.createAnswer());
+
+    await waitGatheringComplete();
+    const answer = pcRef.current.localDescription;
 
     const token = localStorage.getItem('token');
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
@@ -170,6 +189,7 @@ function Camera() {
   };
 
   const handleDisconnect = () => {
+    console.log('Handling disconnection');
     if (pcRef.current) {
       pcRef.current.close();
       pcRef.current = null;
@@ -250,33 +270,8 @@ function Camera() {
                 <Typography variant="body1" color="error" align="center" sx={{ py: 4 }}>
                   Error: {error}
                 </Typography>
-              ) : videoRef.current?.srcObject ? (
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  style={{ width: '100%', borderRadius: 8 }}
-                ></video>
-              ) : (
-                <Card
-                  sx={{
-                    borderRadius: 2,
-                    p: 4,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: 3,
-                    minHeight: 200,
-                    justifyContent: 'center',
-                  }}
-                >
-                  <VideocamIcon sx={{ fontSize: 48, color: 'text.secondary' }} />
-                  <Typography variant="h6" sx={{ color: 'text.secondary', textAlign: 'center' }}>
-                    No camera stream
-                  </Typography>
-                </Card>
-              )}
+              ) : (<></>)}
+              <video ref={videoRef} autoPlay playsInline muted style={{ width: '100%', borderRadius: 8 }}></video>
             </Box>
           </CardContent>
         </Card>
