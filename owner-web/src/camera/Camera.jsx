@@ -104,8 +104,8 @@ function Camera() {
     switch (state) {
       case 'Impossible':
         setLoading(false);
-        setError('No camera available');
-        setSnackbar({ open: true, message: 'No camera available', severity: 'warning' });
+        setError('Awaiting camera access');
+        setSnackbar({ open: true, message: 'Awaiting camera access', severity: 'warning' });
         break;
       case 'Ready':
         setLoading(false);
@@ -136,7 +136,15 @@ function Camera() {
 
   const handleOfferSDP = async (sdp) => {
     pcRef.current = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+      iceServers: [
+        // { urls: 'stun:stun.l.google.com:19302' },
+        {
+          urls: "turn:103.149.28.136:3478",
+          username: "camera1",
+          credential: "password1",
+        }
+      ],
+
     });
 
     pcRef.current.ontrack = (event) => {
