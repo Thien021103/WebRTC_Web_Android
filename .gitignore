@@ -6,5 +6,5 @@
 **/node_modules/
 firebase-admin-sdk.json
 **/firebase-admin-sdk.json
-**/.env
+*.env
 .env
